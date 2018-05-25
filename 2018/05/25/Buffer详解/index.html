@@ -79,23 +79,23 @@
 
 
 
-<meta name="description" content="Buffer是什么和它的名字一样，Buffer是一个缓冲区，本质上是一块可以写入数据。可以读取数据的内存。在NIO中，Buffer用于和NIO中的各种channel交互。数据可以从channel中读入Buffer，然后从Buffer中写入另一个channel。 Buffer中几个重要的概念 capacity：容量，指定之后不可变动 limit：限制，第一个不应该读取或写入数据的索引，初始时和cap">
+<meta name="description" content="Buffer是什么和它的名字一样，Buffer是一个缓冲区，本质上是一块可以写入数据。可以读取数据的内存。在NIO中，Buffer用于和NIO中的各种channel交互。数据可以从channel中读入Buffer，然后从Buffer中写入另一个channel。 Buffer中几个重要的概念 capacity：容量，指定之后不可变动  limit：限制，第一个不应该读取或写入数据的索引，初始时和ca">
 <meta name="keywords" content="java,NIO">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Java NIO入门到放弃系列之Buffer">
 <meta property="og:url" content="http://yoursite.com/2018/05/25/Buffer详解/index.html">
 <meta property="og:site_name" content="IkanのBolg">
-<meta property="og:description" content="Buffer是什么和它的名字一样，Buffer是一个缓冲区，本质上是一块可以写入数据。可以读取数据的内存。在NIO中，Buffer用于和NIO中的各种channel交互。数据可以从channel中读入Buffer，然后从Buffer中写入另一个channel。 Buffer中几个重要的概念 capacity：容量，指定之后不可变动 limit：限制，第一个不应该读取或写入数据的索引，初始时和cap">
+<meta property="og:description" content="Buffer是什么和它的名字一样，Buffer是一个缓冲区，本质上是一块可以写入数据。可以读取数据的内存。在NIO中，Buffer用于和NIO中的各种channel交互。数据可以从channel中读入Buffer，然后从Buffer中写入另一个channel。 Buffer中几个重要的概念 capacity：容量，指定之后不可变动  limit：限制，第一个不应该读取或写入数据的索引，初始时和ca">
 <meta property="og:locale" content="default">
 <meta property="og:image" content="http://yoursite.com/images/buffer1.png">
 <meta property="og:image" content="http://yoursite.com/images/buffer2.png">
 <meta property="og:image" content="http://yoursite.com/images/buffer3.png">
 <meta property="og:image" content="http://yoursite.com/images/buffer4.png">
 <meta property="og:image" content="http://yoursite.com/images/buffer5.png">
-<meta property="og:updated_time" content="2018-05-25T15:18:20.074Z">
+<meta property="og:updated_time" content="2018-05-25T15:24:36.879Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Java NIO入门到放弃系列之Buffer">
-<meta name="twitter:description" content="Buffer是什么和它的名字一样，Buffer是一个缓冲区，本质上是一块可以写入数据。可以读取数据的内存。在NIO中，Buffer用于和NIO中的各种channel交互。数据可以从channel中读入Buffer，然后从Buffer中写入另一个channel。 Buffer中几个重要的概念 capacity：容量，指定之后不可变动 limit：限制，第一个不应该读取或写入数据的索引，初始时和cap">
+<meta name="twitter:description" content="Buffer是什么和它的名字一样，Buffer是一个缓冲区，本质上是一块可以写入数据。可以读取数据的内存。在NIO中，Buffer用于和NIO中的各种channel交互。数据可以从channel中读入Buffer，然后从Buffer中写入另一个channel。 Buffer中几个重要的概念 capacity：容量，指定之后不可变动  limit：限制，第一个不应该读取或写入数据的索引，初始时和ca">
 <meta name="twitter:image" content="http://yoursite.com/images/buffer1.png">
 
 
@@ -328,9 +328,13 @@
       
         <h4 id="Buffer是什么"><a href="#Buffer是什么" class="headerlink" title="Buffer是什么"></a>Buffer是什么</h4><p>和它的名字一样，Buffer是一个缓冲区，本质上是一块可以写入数据。可以读取数据的内存。在NIO中，Buffer用于和NIO中的各种channel交互。数据可以从channel中读入Buffer，然后从Buffer中写入另一个channel。</p>
 <h4 id="Buffer中几个重要的概念"><a href="#Buffer中几个重要的概念" class="headerlink" title="Buffer中几个重要的概念"></a>Buffer中几个重要的概念</h4><ul>
-<li>capacity：容量，指定之后不可变动</li>
-<li>limit：限制，第一个不应该读取或写入数据的索引，初始时和capacity在一个位置。</li>
-<li>position：位置，下一个可读取或写入的位置，初始为0，不能为负，且不能大于limit</li>
+<li><p>capacity：容量，指定之后不可变动</p>
+</li>
+<li><p>limit：限制，第一个不应该读取或写入数据的索引，初始时和capacity在一个位置。</p>
+</li>
+<li><p>position：位置，下一个可读取或写入的位置，初始为0，不能为负，且不能大于limit</p>
+<a id="more"></a>
+</li>
 </ul>
 <h4 id="举几个例子来说明Buffer运作方式"><a href="#举几个例子来说明Buffer运作方式" class="headerlink" title="举几个例子来说明Buffer运作方式"></a>举几个例子来说明Buffer运作方式</h4><ol>
 <li><p>初始时，即刚分配</p>
