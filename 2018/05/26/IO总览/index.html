@@ -68,7 +68,7 @@
 
 
 
-  <meta name="keywords" content="Hexo, NexT" />
+  <meta name="keywords" content="Java,IO," />
 
 
 
@@ -79,13 +79,23 @@
 
 
 
-<meta property="og:type" content="website">
-<meta property="og:title" content="IkanのBolg">
-<meta property="og:url" content="http://yoursite.com/index.html">
+<meta name="description" content="背景IO在一般业务开发中不常用到，因此也是很久没有对这部分进行一次系统性的总结，最近有时间也是总结一下。 Java IO总览Java IO这里指的传统IO，NIO会放到其他文章中介绍。在分类之前先了解一些概念。 字节流字节流和它的名字一样，是以字节的方式来操作文件的，这里的文件包括图片、视频、文本等，它的使用范围比字符流广泛，并且后面我们会介绍某些字符流如FilerReader也是建立在字节流上操">
+<meta name="keywords" content="Java,IO">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Java 基础之IO总览">
+<meta property="og:url" content="http://yoursite.com/2018/05/26/IO总览/index.html">
 <meta property="og:site_name" content="IkanのBolg">
+<meta property="og:description" content="背景IO在一般业务开发中不常用到，因此也是很久没有对这部分进行一次系统性的总结，最近有时间也是总结一下。 Java IO总览Java IO这里指的传统IO，NIO会放到其他文章中介绍。在分类之前先了解一些概念。 字节流字节流和它的名字一样，是以字节的方式来操作文件的，这里的文件包括图片、视频、文本等，它的使用范围比字符流广泛，并且后面我们会介绍某些字符流如FilerReader也是建立在字节流上操">
 <meta property="og:locale" content="default">
+<meta property="og:image" content="http://yoursite.com/images/stream_uml.png">
+<meta property="og:image" content="http://yoursite.com/images/ReaderWriter.png">
+<meta property="og:image" content="http://yoursite.com/images/iostream.png">
+<meta property="og:image" content="http://yoursite.com/images/stream2.png">
+<meta property="og:updated_time" content="2018-05-26T09:19:12.536Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="IkanのBolg">
+<meta name="twitter:title" content="Java 基础之IO总览">
+<meta name="twitter:description" content="背景IO在一般业务开发中不常用到，因此也是很久没有对这部分进行一次系统性的总结，最近有时间也是总结一下。 Java IO总览Java IO这里指的传统IO，NIO会放到其他文章中介绍。在分类之前先了解一些概念。 字节流字节流和它的名字一样，是以字节的方式来操作文件的，这里的文件包括图片、视频、文本等，它的使用范围比字符流广泛，并且后面我们会介绍某些字符流如FilerReader也是建立在字节流上操">
+<meta name="twitter:image" content="http://yoursite.com/images/stream_uml.png">
 
 
 
@@ -115,13 +125,13 @@
 
 
 
-  <link rel="canonical" href="http://yoursite.com/"/>
+  <link rel="canonical" href="http://yoursite.com/2018/05/26/IO总览/"/>
 
 
 
 
 
-  <title>IkanのBolg</title>
+  <title>Java 基础之IO总览 | IkanのBolg</title>
   
 
 
@@ -140,8 +150,7 @@
     
   
 
-  <div class="container sidebar-position-left 
-  page-home">
+  <div class="container sidebar-position-left page-post-detail">
     <div class="headband"></div>
 
     <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
@@ -234,9 +243,9 @@
         <div class="content-wrap">
           <div id="content" class="content">
             
-  <section id="posts" class="posts-expand">
+
+  <div id="posts" class="posts-expand">
     
-      
 
   
 
@@ -266,9 +275,7 @@
 
         
         
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2018/05/26/IO总览/" itemprop="url">Java 基础之IO总览</a></h1>
+          <h1 class="post-title" itemprop="name headline">Java 基础之IO总览</h1>
         
 
         <div class="post-meta">
@@ -340,18 +347,51 @@
       
 
       
-        
-          <h4 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h4><p>IO在一般业务开发中不常用到，因此也是很久没有对这部分进行一次系统性的总结，最近有时间也是总结一下。</p>
+        <h4 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h4><p>IO在一般业务开发中不常用到，因此也是很久没有对这部分进行一次系统性的总结，最近有时间也是总结一下。</p>
 <h4 id="Java-IO总览"><a href="#Java-IO总览" class="headerlink" title="Java IO总览"></a>Java IO总览</h4><p>Java IO这里指的传统IO，NIO会放到其他文章中介绍。在分类之前先了解一些概念。</p>
 <h4 id="字节流"><a href="#字节流" class="headerlink" title="字节流"></a>字节流</h4><p>字节流和它的名字一样，是以字节的方式来操作文件的，这里的文件包括图片、视频、文本等，它的使用范围比字符流广泛，并且后面我们会介绍某些字符流如FilerReader也是建立在字节流上操作的，利用StreamDecoder按照编码方式将字节转换成字符，后面会详细介绍。字节流操作的byte。</p>
-          <!--noindex-->
-          <div class="post-button text-center">
-            <a class="btn" href="/2018/05/26/IO总览/#more" rel="contents">
-              Read more &raquo;
-            </a>
-          </div>
-          <!--/noindex-->
-        
+<a id="more"></a>
+<p>字节流IO包中类继承关系如下</p>
+<p><img src="/images/stream_uml.png" alt="ALt"></p>
+<h4 id="字符流"><a href="#字符流" class="headerlink" title="字符流"></a>字符流</h4><p>字符流操作的char</p>
+<p>字符流IO包中类继承关系如下</p>
+<p><img src="/images/ReaderWriter.png" alt="Alt"></p>
+<h4 id="输入流和输出流"><a href="#输入流和输出流" class="headerlink" title="输入流和输出流"></a>输入流和输出流</h4><ul>
+<li>输入流：从文件读取到内存，只能进行读操作。</li>
+<li>输出流：从内存写入文件中，只能进行写操作。</li>
+</ul>
+<h4 id="节点流和处理流"><a href="#节点流和处理流" class="headerlink" title="节点流和处理流"></a>节点流和处理流</h4><ul>
+<li>节点流：可以从或向一个特定的地方（节点）读写数据，说的有点抽象，把特定的地方理解为磁盘，内存或者其他设备就可以了。如FileReader</li>
+<li>处理流：可以对已存在的流进行连接和封装，如BufferedReader提供了一个缓冲区来操作已存在的输入字符流。</li>
+</ul>
+<h4 id="IO流的分类"><a href="#IO流的分类" class="headerlink" title="IO流的分类"></a>IO流的分类</h4><p>从前文中两个流继承关系可以看到IO包中的继承关系非常复杂，要想靠这个继承关系搞清楚很难。我们要通过前文介绍的几个概念来对IO流作一个分类。</p>
+<ul>
+<li><p>按照操作方式分类，如图</p>
+<p><img src="/images/iostream.png" alt="Alt"></p>
+<p>各个流的简要说明：</p>
+<ul>
+<li>FileInputStream：文件字节输入流，以字节方式读取</li>
+<li>FileReader：文件字符输入流，以字符方式读取</li>
+<li>FileOutputStream：文件字节输出流，以字节方式输出</li>
+<li>FileWriter：文件字符输出流，以字符放松输出</li>
+<li>CharArrayReader、StringReader：两种介质流，分别从char[]数组、String中读取数据</li>
+<li>PipedReader、PipedWriter：分别代表管道字符输入流、输出流</li>
+<li>BufferedReader、BufferedWriter：分别代表缓冲字符输入流、输出流</li>
+<li>CharArrayWriter、StringWriter：写入char[]数组、写入String</li>
+<li>BufferedInputStream、BufferedOutputStream：分别代表缓冲字节输入流、输出流</li>
+<li>PipedInputStream、PipedOutputStream：分别代表管道字节输入流、输出流</li>
+<li>ObjectInputStream、ObjectOutputStream：对象序列化输入流、输出流，属于处理流</li>
+<li>DataInputStream、DataOutputStream：提供基础数据类型读取和写入操作</li>
+<li>PrintStream、PrintWriter：打印流，是一种输出流</li>
+</ul>
+<p>通过上面的图可以看出，在很多操作都是成对出现的，比如File，就有FileReader、FileWriter、FileInputStream、FileOutPutStream。还有如Pipe、Array、Buffer。所以可以根据流的操作对象分类。</p>
+</li>
+<li><p>按照流操作对象分类，如图</p>
+<p><img src="/images/stream2.png" alt="Alt"></p>
+</li>
+</ul>
+<p>这么多流看的眼花缭乱，可想java io的设计者花费的心血。在后续章节中将详细介绍各种流的使用。</p>
+
       
     </div>
     
@@ -366,166 +406,38 @@
 
     <footer class="post-footer">
       
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2018/05/25/Buffer详解/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="ikan">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="IkanのBolg">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2018/05/25/Buffer详解/" itemprop="url">Java NIO入门到放弃系列之Buffer</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">Posted on</span>
-              
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-05-25T21:28:29+08:00">
-                2018-05-25
-              </time>
-            
-
-            
-
-            
-          </span>
-
+        <div class="post-tags">
           
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">In</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/Java学习笔记/" itemprop="url" rel="index">
-                    <span itemprop="name">Java学习笔记</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
+            <a href="/tags/Java/" rel="tag"># Java</a>
           
-
+            <a href="/tags/IO/" rel="tag"># IO</a>
           
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
         </div>
-      </header>
-    
+      
 
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
+      
       
       
 
       
-        
-          <h4 id="Buffer是什么"><a href="#Buffer是什么" class="headerlink" title="Buffer是什么"></a>Buffer是什么</h4><p>和它的名字一样，Buffer是一个缓冲区，本质上是一块可以写入数据。可以读取数据的内存。在NIO中，Buffer用于和NIO中的各种channel交互。数据可以从channel中读入Buffer，然后从Buffer中写入另一个channel。</p>
-<h4 id="Buffer中几个重要的概念"><a href="#Buffer中几个重要的概念" class="headerlink" title="Buffer中几个重要的概念"></a>Buffer中几个重要的概念</h4><ul>
-<li><p>capacity：容量，指定之后不可变动</p>
-</li>
-<li><p>limit：限制，第一个不应该读取或写入数据的索引，初始时和capacity在一个位置。</p>
-</li>
-<li><p>position：位置，下一个可读取或写入的位置，初始为0，不能为负，且不能大于limit</p>
-          <!--noindex-->
-          <div class="post-button text-center">
-            <a class="btn" href="/2018/05/25/Buffer详解/#more" rel="contents">
-              Read more &raquo;
-            </a>
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2018/05/25/Buffer详解/" rel="next" title="Java NIO入门到放弃系列之Buffer">
+                <i class="fa fa-chevron-left"></i> Java NIO入门到放弃系列之Buffer
+              </a>
+            
           </div>
-          <!--/noindex-->
-        
-      
-    </div>
-    
-    
-    
 
-    
+          <span class="post-nav-divider"></span>
 
-    
-
-    
-
-    <footer class="post-footer">
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
       
 
       
-
-      
-
-      
-      
-        <div class="post-eof"></div>
       
     </footer>
   </div>
@@ -535,10 +447,11 @@
   </article>
 
 
-    
-  </section>
 
-  
+    <div class="post-spread">
+      
+    </div>
+  </div>
 
 
           </div>
@@ -546,6 +459,10 @@
 
 
           
+
+  
+
+
 
         </div>
         
@@ -566,8 +483,17 @@
       
 
       
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Overview
+          </li>
+        </ul>
+      
 
-      <section class="site-overview-wrap sidebar-panel sidebar-panel-active">
+      <section class="site-overview-wrap sidebar-panel">
         <div class="site-overview">
           <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
             
@@ -627,6 +553,22 @@
         </div>
       </section>
 
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-4"><a class="nav-link" href="#背景"><span class="nav-number">1.</span> <span class="nav-text">背景</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Java-IO总览"><span class="nav-number">2.</span> <span class="nav-text">Java IO总览</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#字节流"><span class="nav-number">3.</span> <span class="nav-text">字节流</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#字符流"><span class="nav-number">4.</span> <span class="nav-text">字符流</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#输入流和输出流"><span class="nav-number">5.</span> <span class="nav-text">输入流和输出流</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#节点流和处理流"><span class="nav-number">6.</span> <span class="nav-text">节点流和处理流</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#IO流的分类"><span class="nav-number">7.</span> <span class="nav-text">IO流的分类</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
       
 
       
@@ -760,6 +702,10 @@
   
 
   
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
 
   
 
