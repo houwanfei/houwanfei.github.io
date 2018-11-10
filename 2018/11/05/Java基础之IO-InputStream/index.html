@@ -1,0 +1,768 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="Java,IO," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="概述之前介绍过一篇IO总览的文章，概述性的讲解了现有的一些Java IO。从这一篇开始，详细讲解Java IO的各个模块，今天首先讲一下InputStream。 InputStream是一个字节输入流，什么是字节流呢？我们知道在java中有一个叫byte的基本类型，就是同一个。字节是一个8位表示的二进制。很多人会误认为输入流就是打开一个磁盘文件然后从里边读数据，但是输入流并不局限于文件，应该说IO">
+<meta name="keywords" content="Java,IO">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Java基础之IO(1)-InputStream">
+<meta property="og:url" content="http://yoursite.com/2018/11/05/Java基础之IO-InputStream/index.html">
+<meta property="og:site_name" content="IkanのBolg">
+<meta property="og:description" content="概述之前介绍过一篇IO总览的文章，概述性的讲解了现有的一些Java IO。从这一篇开始，详细讲解Java IO的各个模块，今天首先讲一下InputStream。 InputStream是一个字节输入流，什么是字节流呢？我们知道在java中有一个叫byte的基本类型，就是同一个。字节是一个8位表示的二进制。很多人会误认为输入流就是打开一个磁盘文件然后从里边读数据，但是输入流并不局限于文件，应该说IO">
+<meta property="og:locale" content="default">
+<meta property="og:image" content="http://yoursite.com/images/InputStream_1.png">
+<meta property="og:image" content="http://yoursite.com/images/piped.png">
+<meta property="og:image" content="http://yoursite.com/images/wechat.jpeg">
+<meta property="og:updated_time" content="2018-11-10T07:50:35.052Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Java基础之IO(1)-InputStream">
+<meta name="twitter:description" content="概述之前介绍过一篇IO总览的文章，概述性的讲解了现有的一些Java IO。从这一篇开始，详细讲解Java IO的各个模块，今天首先讲一下InputStream。 InputStream是一个字节输入流，什么是字节流呢？我们知道在java中有一个叫byte的基本类型，就是同一个。字节是一个8位表示的二进制。很多人会误认为输入流就是打开一个磁盘文件然后从里边读数据，但是输入流并不局限于文件，应该说IO">
+<meta name="twitter:image" content="http://yoursite.com/images/InputStream_1.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: 'Author'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2018/11/05/Java基础之IO-InputStream/"/>
+
+
+
+
+
+  <title>Java基础之IO(1)-InputStream | IkanのBolg</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="default">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">IkanのBolg</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">只想安安静静撸代码</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            Home
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            Tags
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            Categories
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            Archives
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2018/11/05/Java基础之IO-InputStream/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="ikan">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="IkanのBolg">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">Java基础之IO(1)-InputStream</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-11-05T22:00:36+08:00">
+                2018-11-05
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Java学习笔记/" itemprop="url" rel="index">
+                    <span itemprop="name">Java学习笔记</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h4 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h4><p>之前介绍过一篇IO总览的文章，概述性的讲解了现有的一些Java IO。从这一篇开始，详细讲解Java IO的各个模块，今天首先讲一下InputStream。</p>
+<p>InputStream是一个字节输入流，什么是字节流呢？我们知道在java中有一个叫byte的基本类型，就是同一个。字节是一个8位表示的二进制。很多人会误认为输入流就是打开一个磁盘文件然后从里边读数据，但是输入流并不局限于文件，应该说IO并不代表和磁盘交互。所以读取磁盘文件仅仅是输入流中的一种FileInputStream，在输入流中还有很多其他的输入流。接下会介绍几种，虽然有些不常用。在介绍之前先看一下在JDK中，InputStream的继承关系：</p>
+<a id="more"></a>
+<p><img src="/images/InputStream_1.png" alt="ALt"></p>
+<h4 id="AutoCloseable"><a href="#AutoCloseable" class="headerlink" title="AutoCloseable"></a>AutoCloseable</h4><p>这里的AutoCloseable是jdk1.7引入的一种语法糖，可配合jdk1.7出现的try-with-resources新语法特性一起使用，用于在使用完资源后自动关闭。Closeable是表示这是一个可关闭的数据源或目标。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">public class AutoCloseableDemo &#123;</span><br><span class="line">    public static void main(String[] args) &#123;</span><br><span class="line">        try (FileInputStream fis = new FileInputStream(&quot;/tmp/test&quot;))&#123;</span><br><span class="line">            int i;</span><br><span class="line">            while ((i=fis.read()) != -1)&#123;</span><br><span class="line">                System.out.println(i);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125; catch (FileNotFoundException e) &#123;</span><br><span class="line">            e.printStackTrace();</span><br><span class="line">        &#125; catch (IOException e) &#123;</span><br><span class="line">            e.printStackTrace();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h4 id="节点流"><a href="#节点流" class="headerlink" title="节点流"></a>节点流</h4><p>什么是节点流呢？节点流指可以从一个数据源读写数据，这个数据源可以是磁盘文件，内存或者网络。根据这个定义可以将上图中的流FileInputStream、PipedInputStream、ByteArrayInputStream划分为节点流。最熟悉的可能就是FileInputStream，因为平时读取磁盘文件应该用得最多，先介绍FileInputStream。</p>
+<h5 id="FileInputStream"><a href="#FileInputStream" class="headerlink" title="FileInputStream"></a>FileInputStream</h5><p>看一下该类的构造函数</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">//参数：文件路径</span><br><span class="line">public FileInputStream(String name) throws FileNotFoundException;</span><br><span class="line">//参数：一个File对象</span><br><span class="line">public FileInputStream(File file) throws FileNotFoundException;</span><br><span class="line">//一个文件描述符</span><br><span class="line">public FileInputStream(FileDescriptor fdObj);</span><br></pre></td></tr></table></figure>
+<p>通过jdk api文档可以看到FileInputStream有三个构造函数，第一个和第二个比较常用，第三个是一个已存在的文件系统的真实连接。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br></pre></td><td class="code"><pre><span class="line">public class FileInputStreamDemo &#123;</span><br><span class="line">    /**</span><br><span class="line">     * 文件路径参数创建</span><br><span class="line">     * @throws IOException</span><br><span class="line">     */</span><br><span class="line">    public void FilePathDemo() throws IOException &#123;</span><br><span class="line">        FileInputStream fis = null;</span><br><span class="line">        try &#123;</span><br><span class="line">            fis = new FileInputStream(&quot;/tmp/test&quot;);</span><br><span class="line">            int i;</span><br><span class="line">            while ((i=fis.read()) != -1)&#123;</span><br><span class="line">                System.out.println(i);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125; catch (FileNotFoundException e) &#123;</span><br><span class="line">            e.printStackTrace();</span><br><span class="line">        &#125; finally &#123;</span><br><span class="line">            if (fis != null) &#123;</span><br><span class="line">                fis.close();</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    /**</span><br><span class="line">     * 以File对象方式创建</span><br><span class="line">     */</span><br><span class="line">    public void FileDemo() throws IOException &#123;</span><br><span class="line">        File file = new File(&quot;/tmp/test&quot;);</span><br><span class="line">        FileInputStream fis = null;</span><br><span class="line">        try &#123;</span><br><span class="line">            fis = new FileInputStream(file);</span><br><span class="line">            int i;</span><br><span class="line">            while ((i=fis.read()) != -1)&#123;</span><br><span class="line">                System.out.println(i);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125; catch (FileNotFoundException e) &#123;</span><br><span class="line">            e.printStackTrace();</span><br><span class="line">        &#125; finally &#123;</span><br><span class="line">            if (fis != null) &#123;</span><br><span class="line">                fis.close();</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    /**</span><br><span class="line">     * 以文件描述符参数创建</span><br><span class="line">     */</span><br><span class="line">    public void FileDescriptorDemo() throws IOException &#123;</span><br><span class="line">        FileInputStream fis = new FileInputStream(FileDescriptor.in);</span><br><span class="line">        System.out.println(fis.read());</span><br><span class="line">        fis.close();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    public static void main(String[] args) &#123;</span><br><span class="line">        FileInputStreamDemo demo = new FileInputStreamDemo();</span><br><span class="line">        try &#123;</span><br><span class="line">            demo.FilePathDemo();</span><br><span class="line">            demo.FileDemo();</span><br><span class="line">            demo.FileDescriptorDemo();</span><br><span class="line">        &#125; catch (IOException e) &#123;</span><br><span class="line">            e.printStackTrace();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h5 id="ByteArrayInputStream"><a href="#ByteArrayInputStream" class="headerlink" title="ByteArrayInputStream"></a>ByteArrayInputStream</h5><p>ByteArrayInputStream比较少见，ByteArrayInputStream内部维护着一个缓冲区，从该缓冲区中读取字节，内部计数器跟踪read要读取的下一个字节。看一下构造函数：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">ByteArrayInputStream(byte[] buf);</span><br><span class="line"></span><br><span class="line">ByteArrayInputStream(byte[] buf, int offset, int length)</span><br></pre></td></tr></table></figure>
+<p>可以看到ByteArrayInputStream以byte数组为参数构造ByteArrayInputStream对象。ByteArrayInputStream和FileInputStream的区别在于，FileInputStream以磁盘文件为数据源，ByteArrayInputStream以内存数据为数据源。ByteArrayInputStream的用法：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">public class ByteArrayInputStreamDemo &#123;</span><br><span class="line">    public static void main(String[] args) &#123;</span><br><span class="line">        byte[] bytes = new byte[]&#123;1, 2, 3, 4, 5&#125;;</span><br><span class="line">        ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(bytes, 2, 2);</span><br><span class="line">        int i;</span><br><span class="line">        while ((i = byteArrayInputStream.read()) != -1)&#123;</span><br><span class="line">            System.out.println(i);</span><br><span class="line">        &#125;</span><br><span class="line">        try &#123;</span><br><span class="line">            byteArrayInputStream.close();</span><br><span class="line">        &#125; catch (IOException e) &#123;</span><br><span class="line">            e.printStackTrace();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>结果：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">Connected to the target VM, address: &apos;127.0.0.1:38135&apos;, transport: &apos;socket&apos;</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">Disconnected from the target VM, address: &apos;127.0.0.1:38135&apos;, transport: &apos;socket&apos;</span><br><span class="line"></span><br><span class="line">Process finished with exit code 0</span><br></pre></td></tr></table></figure>
+<p>从结果中看到虽然bytes有5个数据，但是只能读取2个数据，因为在构造时传入了offset和length表示从offset开始的length个数据。至于ByteArrayInputStream的内部实现细节，在以后的进阶文章中再详细论述。</p>
+<h5 id="PipedInputStream"><a href="#PipedInputStream" class="headerlink" title="PipedInputStream"></a>PipedInputStream</h5><p>PipedInputStream是一种很特殊的输入流，因为它单独存在没有什么意义，它需要和PipedOutputStream一起使用，数据的流向是从PipedOutputStream流向PipedInputStream的缓存区，然后PipedInputStream的read方法从PipedInputStream的缓冲区中读取数据。如下图</p>
+<p><img src="/images/piped.png" alt="Alt"></p>
+<p>接下来看一下使用PipedInputStream来实现一个简单线程通信例子，当然线程通信有其他方式来实现，但是如果两个线程之间需要传递字节数组时，PipedInputStream还是不错的选择。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br></pre></td><td class="code"><pre><span class="line">public class PipedInputStreamDemo &#123;</span><br><span class="line">    public static void main(String[] args) &#123;</span><br><span class="line">        PipedInputStream pipedInputStream = new PipedInputStream();</span><br><span class="line">        PipedOutputStream pipedOutputStream = new PipedOutputStream();</span><br><span class="line"></span><br><span class="line">        try &#123;</span><br><span class="line">            pipedOutputStream.connect(pipedInputStream);</span><br><span class="line">        &#125; catch (IOException e) &#123;</span><br><span class="line">            e.printStackTrace();</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        ExecutorService executor = Executors.newFixedThreadPool(2);</span><br><span class="line">        executor.execute(new ReadWorker(pipedInputStream));</span><br><span class="line">        executor.execute(new WirteWorker(pipedOutputStream));</span><br><span class="line"></span><br><span class="line">        try &#123;</span><br><span class="line">            Thread.sleep(10000);</span><br><span class="line">        &#125; catch (InterruptedException e) &#123;</span><br><span class="line">            e.printStackTrace();</span><br><span class="line">        &#125;</span><br><span class="line">        executor.shutdown();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">class ReadWorker implements Runnable &#123;</span><br><span class="line">    private PipedInputStream pipedInputStream;</span><br><span class="line"></span><br><span class="line">    public ReadWorker(PipedInputStream pipedInputStream)&#123;</span><br><span class="line">        this.pipedInputStream = pipedInputStream;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    @Override</span><br><span class="line">    public void run() &#123;</span><br><span class="line">        byte[] bytes = new byte[1024];</span><br><span class="line">        try &#123;</span><br><span class="line">            while (pipedInputStream.read(bytes) != -1)&#123;</span><br><span class="line">                System.out.println(new String(bytes, Charset.forName(&quot;UTF-8&quot;)));</span><br><span class="line">            &#125;</span><br><span class="line">        &#125; catch (IOException e)&#123;</span><br><span class="line"></span><br><span class="line">        &#125; finally &#123;</span><br><span class="line">            try &#123;</span><br><span class="line">                pipedInputStream.close();</span><br><span class="line">            &#125; catch (IOException e) &#123;</span><br><span class="line">                e.printStackTrace();</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">class WirteWorker implements Runnable &#123;</span><br><span class="line">    private PipedOutputStream pipedOutputStream;</span><br><span class="line"></span><br><span class="line">    public WirteWorker(PipedOutputStream pipedOutputStream)&#123;</span><br><span class="line">        this.pipedOutputStream = pipedOutputStream;</span><br><span class="line">    &#125;</span><br><span class="line">    @Override</span><br><span class="line">    public void run() &#123;</span><br><span class="line">        String str = &quot;hello world!&quot;;</span><br><span class="line">        try &#123;</span><br><span class="line">            pipedOutputStream.write(str.getBytes(Charset.forName(&quot;UTF-8&quot;)));</span><br><span class="line">        &#125; catch (IOException e) &#123;</span><br><span class="line">            e.printStackTrace();</span><br><span class="line">        &#125; finally &#123;</span><br><span class="line">            try &#123;</span><br><span class="line">                pipedOutputStream.close();</span><br><span class="line">            &#125; catch (IOException e) &#123;</span><br><span class="line">                e.printStackTrace();</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h4 id="处理流"><a href="#处理流" class="headerlink" title="处理流"></a>处理流</h4><p>什么又是处理流呢？处理流是连接在已存在的流（节点流或者处理流）之上，通过对数据的处理提供更强大的读写功能。在InputStream中有如下几种处理流，BufferedInputStream、DataInputStream、ObjectInputStream、SequenceInputStream。接下来简单介绍一下几种流。</p>
+<h5 id="BufferedInputStream"><a href="#BufferedInputStream" class="headerlink" title="BufferedInputStream"></a>BufferedInputStream</h5><p>BufferedInputStream是一个处理流，它的作用是增强InputStream，为其提供缓冲区的功能。这里可能会有疑问，BufferedInputStream实现的方法和InputStream的方法差不多，它存在的意义是什么？</p>
+<p>这里要从Java IO读取数据的过程说起，仅仅简单的介绍一下，InputStream读取数据源的数据需要操作系统支持，也就是说Java的线程发出读取数据(read方法)的请求，操作系统接收到这个请求，然后从数据源读取一个byte(read方法，不是read(byte[]))，然后将数据从内核空间复制到用户空间，java线程拿到要的数据，返回。可以看到，如果调用read()方法，那么读取10个字节，就要进行10个这样的流程，是相当低效的，当然可以用read(byte[])，但是有时需要read()的场景，所以就出现了InputStream的增强类BufferedInputStream，该BufferedInputStream提供了缓存区的功能。</p>
+<p>举个例子，以前你要把一堆砖从一个地方搬到另一个地方整理好，你力气小一次只能搬一块，当然别人可能力气大，一次可以搬两块，这样你搬10块砖要来回跑10次，那现在为了增强你的能力，给你提供一个小车，你一次可以运50块，这个时候你只需要一次就可以运50块砖，而你要整理好这些砖，只需要从小车上一次一块拿下来放好，就像从缓冲区里读取数据一样。通过提供缓冲区来增强IO的能力，减小系统开销。</p>
+<p>简单使用</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br></pre></td><td class="code"><pre><span class="line">public void readDemo(String path)&#123;</span><br><span class="line">        FileInputStream fis = null;</span><br><span class="line">        BufferedInputStream bis = null;</span><br><span class="line">        try &#123;</span><br><span class="line">            fis = new FileInputStream(path);</span><br><span class="line">            //可以在构造时传入参数指定缓冲区的大小</span><br><span class="line">            bis = new BufferedInputStream(fis, 2048);</span><br><span class="line">            int data;</span><br><span class="line">            while ((data = bis.read()) != -1)&#123;</span><br><span class="line">                System.out.println(data);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125; catch (IOException e) &#123;</span><br><span class="line">            e.printStackTrace();</span><br><span class="line">        &#125; finally &#123;</span><br><span class="line">            try &#123;</span><br><span class="line">                if (bis != null)</span><br><span class="line">                    bis.close();</span><br><span class="line">            &#125; catch (IOException e) &#123;</span><br><span class="line">                e.printStackTrace();</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    public void readBytesDemo(String path)&#123;</span><br><span class="line">        FileInputStream fis = null;</span><br><span class="line">        BufferedInputStream bis = null;</span><br><span class="line">        try &#123;</span><br><span class="line">            fis = new FileInputStream(path);</span><br><span class="line">            bis = new BufferedInputStream(fis);</span><br><span class="line">            byte[] bytes = new byte[1024];</span><br><span class="line">            while (bis.read(bytes) != -1)&#123;</span><br><span class="line">                System.out.println(bytes);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125; catch (IOException e) &#123;</span><br><span class="line">            e.printStackTrace();</span><br><span class="line">        &#125; finally &#123;</span><br><span class="line">            try &#123;</span><br><span class="line">                if (bis != null)</span><br><span class="line">                    bis.close();</span><br><span class="line">            &#125; catch (IOException e) &#123;</span><br><span class="line">                e.printStackTrace();</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    public static void main(String[] args) &#123;</span><br><span class="line">        BufferedInputStreamDemo demo = new BufferedInputStreamDemo();</span><br><span class="line">        demo.readDemo(&quot;/tmp/test&quot;);</span><br><span class="line">        demo.readBytesDemo(&quot;/tmp/test&quot;);</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+<h5 id="DataInputStream"><a href="#DataInputStream" class="headerlink" title="DataInputStream"></a>DataInputStream</h5><p>DataInputStream提供了从字节输入流中读取Java基本类型的能力，比如，如果要想从输入流中读取一个int类型的数据，需要读取4个字节然后自己组装成一个int，而DataInputStream通过提供一个InputStream的装饰器，增加了自动包装的功能。</p>
+<p>简单使用</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br></pre></td><td class="code"><pre><span class="line">public class DataInputStreamDemo &#123;</span><br><span class="line">    public static void main(String[] args) &#123;</span><br><span class="line">        FileInputStream fis = null;</span><br><span class="line">        DataInputStream dis = null;</span><br><span class="line">        FileOutputStream fos = null;</span><br><span class="line">        DataOutputStream dos = null;</span><br><span class="line"></span><br><span class="line">        try &#123;</span><br><span class="line">            fos = new FileOutputStream(&quot;/tmp/test1&quot;);</span><br><span class="line"></span><br><span class="line">            dos = new DataOutputStream(fos);</span><br><span class="line"></span><br><span class="line">            dos.writeChars(&quot;hello world&quot;);</span><br><span class="line">            dos.flush();</span><br><span class="line">        &#125; catch (IOException e) &#123;</span><br><span class="line">            e.printStackTrace();</span><br><span class="line">        &#125; finally &#123;</span><br><span class="line">            if (dos != null)&#123;</span><br><span class="line">                try &#123;</span><br><span class="line">                    dos.close();</span><br><span class="line">                &#125; catch (IOException e) &#123;</span><br><span class="line">                    e.printStackTrace();</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        try &#123;</span><br><span class="line">            fis = new FileInputStream(&quot;/tmp/test1&quot;);</span><br><span class="line">            dis = new DataInputStream(fis);</span><br><span class="line">            while(dis.available() &gt; 0) &#123;</span><br><span class="line">                System.out.println(dis.readChar());</span><br><span class="line">            &#125;</span><br><span class="line">        &#125; catch (IOException e) &#123;</span><br><span class="line">            e.printStackTrace();</span><br><span class="line">        &#125; finally &#123;</span><br><span class="line">            if (dis != null)&#123;</span><br><span class="line">                try &#123;</span><br><span class="line">                    dis.close();</span><br><span class="line">                &#125; catch (IOException e) &#123;</span><br><span class="line">                    e.printStackTrace();</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>打开文件test1看到的结果，如果以字节流读取出来，将两两字节组合转换为char便可以还原。DataInputStream提供的就是这种功能，此外还有readInt()、readLong()、readFloat()等，比较特殊一点的readUTF()，readUTF是转化成utf-8编码格式的，用readUTF()读,那么你写的时候也要用writeUTF()写，writeUTF在写时会在开头写两个字节表示写入的数据大小。readUTF时会首先读取这两个字节，来设置读取的字节数。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">^@h^@e^@l^@l^@o^@ ^@w^@o^@r^@l^@d</span><br></pre></td></tr></table></figure>
+<p>读取结果：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">Connected to the target VM, address: &apos;127.0.0.1:44515&apos;, transport: &apos;socket&apos;</span><br><span class="line">Disconnected from the target VM, address: &apos;127.0.0.1:44515&apos;, transport: &apos;socket&apos;</span><br><span class="line">h</span><br><span class="line">e</span><br><span class="line">l</span><br><span class="line">l</span><br><span class="line">o</span><br><span class="line"> </span><br><span class="line">w</span><br><span class="line">o</span><br><span class="line">r</span><br><span class="line">l</span><br><span class="line">d</span><br><span class="line"></span><br><span class="line">Process finished with exit code 0</span><br></pre></td></tr></table></figure>
+<h5 id="ObjectInputStream"><a href="#ObjectInputStream" class="headerlink" title="ObjectInputStream"></a>ObjectInputStream</h5><p>ObjectInputStream是java提供的反序列化的功能，ObjectOutputStream提供序列号输出的功能，能将java对象序列化之后输出到指定的输出流中。被持久化的对象需要实现Serializable、Externalizable接口。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br></pre></td><td class="code"><pre><span class="line">public class ObjectOutputStreamDemo &#123;</span><br><span class="line">    public static void main(String[] args) &#123;</span><br><span class="line">        FileOutputStream fileOutputStream;</span><br><span class="line">        ObjectOutputStream objectOutputStream = null;</span><br><span class="line">        &#123;</span><br><span class="line">            try &#123;</span><br><span class="line">                fileOutputStream = new FileOutputStream(&quot;/tmp/person&quot;);</span><br><span class="line">                objectOutputStream = new ObjectOutputStream(fileOutputStream);</span><br><span class="line">                Person person = new Person();</span><br><span class="line">                person.setName(&quot;mark&quot;);</span><br><span class="line">                person.setAge(20);</span><br><span class="line">                objectOutputStream.writeObject(person);</span><br><span class="line">            &#125; catch (IOException e) &#123;</span><br><span class="line">                e.printStackTrace();</span><br><span class="line">            &#125; finally &#123;</span><br><span class="line">                try &#123;</span><br><span class="line">                    if (objectOutputStream != null) &#123;</span><br><span class="line">                        objectOutputStream.close();</span><br><span class="line">                    &#125;</span><br><span class="line">                &#125; catch (IOException e) &#123;</span><br><span class="line">                    e.printStackTrace();</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">            FileInputStream fileInputStream;</span><br><span class="line">            ObjectInputStream objectInputStream = null;</span><br><span class="line">            try &#123;</span><br><span class="line">                fileInputStream = new FileInputStream(&quot;/tmp/person&quot;);</span><br><span class="line">                objectInputStream = new ObjectInputStream(fileInputStream);</span><br><span class="line">                Person person = (Person) objectInputStream.readObject();</span><br><span class="line">                System.out.println(&quot;Person name:&quot; + person.getName() + &quot; age:&quot; + person.getAge());</span><br><span class="line">            &#125; catch (IOException | ClassNotFoundException e) &#123;</span><br><span class="line">                e.printStackTrace();</span><br><span class="line">            &#125; finally &#123;</span><br><span class="line">                try &#123;</span><br><span class="line">                    if (objectInputStream != null) &#123;</span><br><span class="line">                        objectInputStream.close();</span><br><span class="line">                    &#125;</span><br><span class="line">                &#125; catch (IOException e) &#123;</span><br><span class="line">                    e.printStackTrace();</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">class Person implements Serializable &#123;</span><br><span class="line">    private String name;</span><br><span class="line"></span><br><span class="line">    private Integer age;</span><br><span class="line"></span><br><span class="line">    public String getName() &#123;</span><br><span class="line">        return name;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    public void setName(String name) &#123;</span><br><span class="line">        this.name = name;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    public Integer getAge() &#123;</span><br><span class="line">        return age;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    public void setAge(Integer age) &#123;</span><br><span class="line">        this.age = age;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h5 id="SequenceInputStream"><a href="#SequenceInputStream" class="headerlink" title="SequenceInputStream"></a>SequenceInputStream</h5><p>SequenceInputStream的作用是将多个输入流合并为一个SequenceInputStream输入流，然后从第一个输入流开始读取数据，接着第二个，直到最后一个。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">public class SequenceInputStreamDemo &#123;</span><br><span class="line">    public static void main(String[] args) &#123;</span><br><span class="line">        try &#123;</span><br><span class="line">            FileInputStream is1 = new FileInputStream(&quot;/tmp/test1&quot;);</span><br><span class="line">            FileInputStream is2 = new FileInputStream(&quot;/tmp/test2&quot;);</span><br><span class="line"></span><br><span class="line">            SequenceInputStream sis = new SequenceInputStream(is1, is2);</span><br><span class="line">            int i;</span><br><span class="line">            while ((i = sis.read()) != -1)&#123;</span><br><span class="line">                System.out.println(i);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125; catch (IOException e) &#123;</span><br><span class="line">            e.printStackTrace();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>小弟才疏学浅，轻喷。附上个人微信，欢迎交流指教。</p>
+<p><img src="/images/wechat.jpeg" width="20%" height="20"></p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Java/" rel="tag"># Java</a>
+          
+            <a href="/tags/IO/" rel="tag"># IO</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2018/05/26/IO总览/" rel="next" title="Java 基础之IO总览">
+                <i class="fa fa-chevron-left"></i> Java 基础之IO总览
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Overview
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">ikan</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">3</span>
+                  <span class="site-state-item-name">posts</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">1</span>
+                  <span class="site-state-item-name">categories</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">4</span>
+                  <span class="site-state-item-name">tags</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-4"><a class="nav-link" href="#概述"><span class="nav-number">1.</span> <span class="nav-text">概述</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#AutoCloseable"><span class="nav-number">2.</span> <span class="nav-text">AutoCloseable</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#节点流"><span class="nav-number">3.</span> <span class="nav-text">节点流</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#FileInputStream"><span class="nav-number">3.1.</span> <span class="nav-text">FileInputStream</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#ByteArrayInputStream"><span class="nav-number">3.2.</span> <span class="nav-text">ByteArrayInputStream</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#PipedInputStream"><span class="nav-number">3.3.</span> <span class="nav-text">PipedInputStream</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#处理流"><span class="nav-number">4.</span> <span class="nav-text">处理流</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#BufferedInputStream"><span class="nav-number">4.1.</span> <span class="nav-text">BufferedInputStream</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#DataInputStream"><span class="nav-number">4.2.</span> <span class="nav-text">DataInputStream</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#ObjectInputStream"><span class="nav-number">4.3.</span> <span class="nav-text">ObjectInputStream</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#SequenceInputStream"><span class="nav-number">4.4.</span> <span class="nav-text">SequenceInputStream</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2018</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">ikan</span>
+
+  
+</div>
+
+
+  <div class="powered-by">Powered by <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a></div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">Theme &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
