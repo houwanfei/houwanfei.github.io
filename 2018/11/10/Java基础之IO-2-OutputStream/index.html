@@ -1,0 +1,841 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="Java,IO," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="概述上一篇讲了InputStream，和InputStream相对的，InputStream是把数据从一个源中读取出来，而OutputStream是把数据输出到一个源，这个源可以是一个文件，网络，内存，终端等。和InputStream一样，OutputStream也是字节流，前边解释过什么是字节流，这里再简单说一下，字节流就是以字节的方式操作流。 举个例子:  字节编码上图中上边一行就是字符，字符">
+<meta name="keywords" content="Java,IO">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Java基础之IO(2)-OutputStream">
+<meta property="og:url" content="http://yoursite.com/2018/11/10/Java基础之IO-2-OutputStream/index.html">
+<meta property="og:site_name" content="IkanのBolg">
+<meta property="og:description" content="概述上一篇讲了InputStream，和InputStream相对的，InputStream是把数据从一个源中读取出来，而OutputStream是把数据输出到一个源，这个源可以是一个文件，网络，内存，终端等。和InputStream一样，OutputStream也是字节流，前边解释过什么是字节流，这里再简单说一下，字节流就是以字节的方式操作流。 举个例子:  字节编码上图中上边一行就是字符，字符">
+<meta property="og:locale" content="default">
+<meta property="og:image" content="http://yoursite.com/images/bytes.png">
+<meta property="og:image" content="http://yoursite.com/images/OutputStream.png">
+<meta property="og:image" content="http://yoursite.com/images/piped.png">
+<meta property="og:image" content="http://yoursite.com/images/data_output_stream.png">
+<meta property="og:image" content="http://yoursite.com/images/wechat.jpeg">
+<meta property="og:updated_time" content="2018-11-11T14:00:28.315Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Java基础之IO(2)-OutputStream">
+<meta name="twitter:description" content="概述上一篇讲了InputStream，和InputStream相对的，InputStream是把数据从一个源中读取出来，而OutputStream是把数据输出到一个源，这个源可以是一个文件，网络，内存，终端等。和InputStream一样，OutputStream也是字节流，前边解释过什么是字节流，这里再简单说一下，字节流就是以字节的方式操作流。 举个例子:  字节编码上图中上边一行就是字符，字符">
+<meta name="twitter:image" content="http://yoursite.com/images/bytes.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: 'Author'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2018/11/10/Java基础之IO-2-OutputStream/"/>
+
+
+
+
+
+  <title>Java基础之IO(2)-OutputStream | IkanのBolg</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="default">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">IkanのBolg</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">只想安安静静撸代码</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            Home
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            Tags
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            Categories
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            Archives
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2018/11/10/Java基础之IO-2-OutputStream/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="ikan">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="IkanのBolg">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">Java基础之IO(2)-OutputStream</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-11-10T15:55:41+08:00">
+                2018-11-10
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Java学习笔记/" itemprop="url" rel="index">
+                    <span itemprop="name">Java学习笔记</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h4 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h4><p>上一篇讲了InputStream，和InputStream相对的，InputStream是把数据从一个源中读取出来，而OutputStream是把数据输出到一个源，这个源可以是一个文件，网络，内存，终端等。和InputStream一样，OutputStream也是字节流，前边解释过什么是字节流，这里再简单说一下，字节流就是以字节的方式操作流。</p>
+<p>举个例子:</p>
+<p><img src="/images/bytes.png" alt="Alt"></p>
+<h4 id="字节编码"><a href="#字节编码" class="headerlink" title="字节编码"></a>字节编码</h4><p>上图中上边一行就是字符，字符就是通常我们看到的字母，汉字等各个国家的语言以及符号。下边一行是以UTF-8编码的字节，为了体现UTF-8变长的特点，所以里边的标点符号是英文标点符号。你可能已经注意到了，难道不同的编码还有不同的字节表示？</p>
+<a id="more"></a>
+<p>是的，因为开始各个国家都有自己的一套标准，因为各个国家的语言和符号不一样，所以各个国家、地区就都有一套自己的编码。ASCII是一个用一个字节表示的符号集，iso-8859-1被称为西欧语言，是ASCII的一种扩展，但是它们不能表示汉字，所以大陆地区又制定了GBK编码来覆盖汉字，台湾地区制定了BIG5编码。大家觉得你一套我一套不方便，就制定了国际通用的Unicode符号集，但是Unicode是用定长字节来表示字符的，如UTF-16是用两个字节来表示字符。但是有些字符如字母，其实用一个字节就够了，用两个是一种浪费，所有又制定了可变长的UTF-8，可用1-6个字节来编码字符。这里不做字符集的详细介绍，有计划专门写一篇字符集的介绍，这里只是希望大家能理解字符与字节的关系。</p>
+<h4 id="OutputStream继承关系图"><a href="#OutputStream继承关系图" class="headerlink" title="OutputStream继承关系图"></a>OutputStream继承关系图</h4><p><img src="/images/OutputStream.png" alt="Alt"></p>
+<p>按照惯例，将上图中的OutputStream分为节点流和处理流，上一篇中介绍了节点流和处理流，这里不多介绍了。</p>
+<h4 id="节点流"><a href="#节点流" class="headerlink" title="节点流"></a>节点流</h4><p>上图中的FileOutputStream、PipedOutputStream、ByteArrayOutputStream属于节点流，和上一篇中的FileInputStream、PipedInputStream、ByteArrayInputStream相对应。</p>
+<h5 id="FileOutputStream"><a href="#FileOutputStream" class="headerlink" title="FileOutputStream"></a>FileOutputStream</h5><ul>
+<li><p>FileOutputStream构造函数</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">//以File对象做为构造参数</span><br><span class="line">FileOutputStream(File file)</span><br><span class="line">//以一个已连接的文件描述符为构造参数</span><br><span class="line">FileOutputStream(FileDescriptor fdObj)</span><br><span class="line">//以File对象做为构造参数是否追加内容</span><br><span class="line">FileOutputStream(File file, boolean append)</span><br><span class="line">//以文件路径为参数</span><br><span class="line">FileOutputStream(String name)</span><br><span class="line">//以文件路径和是否追加内容</span><br><span class="line">FileOutputStream(String name, boolean append)</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>FileOutputStream方法</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">//关闭流</span><br><span class="line">void close()</span><br><span class="line">//这个方法不推荐使用并且在未来会被移除</span><br><span class="line">protected void finalize()</span><br><span class="line">//获取文件流的channel，这个在NIO中会用到</span><br><span class="line">FileChannel getChannel()</span><br><span class="line">//获取文件描述符</span><br><span class="line">FileDescriptor getFD()</span><br><span class="line">//写byte数组</span><br><span class="line">void write(byte[] b)</span><br><span class="line">//从off位置开始写byte数组的内容，写len个字节</span><br><span class="line">void write(byte[] b, int off, int len)</span><br><span class="line"></span><br><span class="line">void write(int b)</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>使用例子</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><span class="line">public class FileOutputStreamDemo &#123;</span><br><span class="line">    public void wirteFile()&#123;</span><br><span class="line">        try (FileOutputStream fot = new FileOutputStream(&quot;/tmp/out&quot;)) &#123;</span><br><span class="line">            String str = &quot;File:你好，世界！&quot;;</span><br><span class="line">            fot.write(str.getBytes(Charset.forName(&quot;UTF-8&quot;)));</span><br><span class="line">            fot.flush();</span><br><span class="line">        &#125; catch (IOException e) &#123;</span><br><span class="line">            e.printStackTrace();</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        try (FileInputStream fis = new FileInputStream(&quot;/tmp/out&quot;)) &#123;</span><br><span class="line">            byte[] bytes = new byte[1024];</span><br><span class="line">            while (fis.read(bytes) != -1)&#123;</span><br><span class="line">                System.out.println(new String(bytes, Charset.forName(&quot;utf-8&quot;)));</span><br><span class="line">            &#125;</span><br><span class="line">        &#125; catch (IOException e) &#123;</span><br><span class="line">            e.printStackTrace();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    public void wiriteFD()&#123;</span><br><span class="line">        try (FileOutputStream fos = new FileOutputStream(FileDescriptor.out)) &#123;</span><br><span class="line">            fos.write(&quot;FD:你好，世界！&quot;.getBytes(Charset.forName(&quot;UTF-8&quot;)));</span><br><span class="line">            fos.flush();</span><br><span class="line">        &#125; catch (IOException e) &#123;</span><br><span class="line">            e.printStackTrace();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    public static void main(String[] args) &#123;</span><br><span class="line">        FileOutputStreamDemo demo = new FileOutputStreamDemo();</span><br><span class="line">        demo.wirteFile();</span><br><span class="line">        demo.wiriteFD();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>输出：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">File:你好，世界！</span><br><span class="line">FD:你好，世界！</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<h5 id="PipedOutputStream"><a href="#PipedOutputStream" class="headerlink" title="PipedOutputStream"></a>PipedOutputStream</h5><p>上一篇讲PipedInputStream时讲过Pipe的结构，如下图</p>
+<p><img src="/images/piped.png" alt="Alt"></p>
+<p>数据是有流向的，从PipedOutputStream流向PipedInputStream的缓冲区。</p>
+<ul>
+<li><p>PipedOutputStream构造函数</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">//空构造函数，创建一个尚未与PipedInputStream相连接的PipedOutputStream，再之后通过connect方法连接</span><br><span class="line">PipedOutputStream()	</span><br><span class="line">//创建一个与传入PipedInputStream相连接的PipedOutputStream</span><br><span class="line">PipedOutputStream(PipedInputStream snk)</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>PipedOutputStream方法</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">void close()</span><br><span class="line">//与一个PipedInputStream相连接</span><br><span class="line">void connect(PipedInputStream snk)</span><br><span class="line">//</span><br><span class="line">void flush()</span><br><span class="line"></span><br><span class="line">void write(byte[] b, int off, int len)</span><br><span class="line">void write(int b)</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>使用例子</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br></pre></td><td class="code"><pre><span class="line">public class PipedInputStreamDemo &#123;</span><br><span class="line">    public static void main(String[] args) &#123;</span><br><span class="line">        PipedInputStream pipedInputStream = new PipedInputStream();</span><br><span class="line">        PipedOutputStream pipedOutputStream = new PipedOutputStream();</span><br><span class="line"></span><br><span class="line">        try &#123;</span><br><span class="line">            pipedOutputStream.connect(pipedInputStream);</span><br><span class="line">        &#125; catch (IOException e) &#123;</span><br><span class="line">            e.printStackTrace();</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        ExecutorService executor = Executors.newFixedThreadPool(2);</span><br><span class="line">        executor.execute(new ReadWorker(pipedInputStream));</span><br><span class="line">        executor.execute(new WirteWorker(pipedOutputStream));</span><br><span class="line"></span><br><span class="line">        try &#123;</span><br><span class="line">            Thread.sleep(10000);</span><br><span class="line">        &#125; catch (InterruptedException e) &#123;</span><br><span class="line">            e.printStackTrace();</span><br><span class="line">        &#125;</span><br><span class="line">        executor.shutdown();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">class ReadWorker implements Runnable &#123;</span><br><span class="line">    private PipedInputStream pipedInputStream;</span><br><span class="line"></span><br><span class="line">    public ReadWorker(PipedInputStream pipedInputStream)&#123;</span><br><span class="line">        this.pipedInputStream = pipedInputStream;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    @Override</span><br><span class="line">    public void run() &#123;</span><br><span class="line">        byte[] bytes = new byte[1024];</span><br><span class="line">        try &#123;</span><br><span class="line">            while (pipedInputStream.read(bytes) != -1)&#123;</span><br><span class="line">                System.out.println(new String(bytes, Charset.forName(&quot;UTF-8&quot;)));</span><br><span class="line">            &#125;</span><br><span class="line">        &#125; catch (IOException e)&#123;</span><br><span class="line"></span><br><span class="line">        &#125; finally &#123;</span><br><span class="line">            try &#123;</span><br><span class="line">                pipedInputStream.close();</span><br><span class="line">            &#125; catch (IOException e) &#123;</span><br><span class="line">                e.printStackTrace();</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">class WirteWorker implements Runnable &#123;</span><br><span class="line">    private PipedOutputStream pipedOutputStream;</span><br><span class="line"></span><br><span class="line">    public WirteWorker(PipedOutputStream pipedOutputStream)&#123;</span><br><span class="line">        this.pipedOutputStream = pipedOutputStream;</span><br><span class="line">    &#125;</span><br><span class="line">    @Override</span><br><span class="line">    public void run() &#123;</span><br><span class="line">        String str = &quot;hello world!&quot;;</span><br><span class="line">        try &#123;</span><br><span class="line">            pipedOutputStream.write(str.getBytes(Charset.forName(&quot;UTF-8&quot;)));</span><br><span class="line">        &#125; catch (IOException e) &#123;</span><br><span class="line">            e.printStackTrace();</span><br><span class="line">        &#125; finally &#123;</span><br><span class="line">            try &#123;</span><br><span class="line">                pipedOutputStream.close();</span><br><span class="line">            &#125; catch (IOException e) &#123;</span><br><span class="line">                e.printStackTrace();</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<h5 id="ByteArrayOutputStream"><a href="#ByteArrayOutputStream" class="headerlink" title="ByteArrayOutputStream"></a>ByteArrayOutputStream</h5><p>前面一篇讲过ByteArrayInputStream，这里讲的是ByteArrayOutputStream，ByteArrayOutputStream在创建时会提供一个缓冲区，然后可以将输出暂存与缓冲区内，待处理完所有流程后一次将缓冲区内的数据一次取出。</p>
+<ul>
+<li><p>ByteArrayOutputStream构造函数</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">ByteArrayOutputStream()	</span><br><span class="line"></span><br><span class="line">ByteArrayOutputStream(int size)</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<ul>
+<li><p>ByteArrayOutputStream方法</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line">void close()</span><br><span class="line">//重置ByteArrayOutputStream的count为0，之前的数据将丢失</span><br><span class="line">void reset()</span><br><span class="line">//当前缓存区内数据大小</span><br><span class="line">int size()</span><br><span class="line">//新创建一个byte数组来返回缓冲区内的数据，注意返回的这个byte数组不是缓冲区，而是一个新的byte数组</span><br><span class="line">byte[] toByteArray()</span><br><span class="line">//以平台默认的字符集解码缓存区的字节为字符串</span><br><span class="line">String toString()</span><br><span class="line">//不推荐使用</span><br><span class="line">String toString(int hibyte)</span><br><span class="line">//以指定的字符集名称解码缓存区的字节为字符串</span><br><span class="line">String toString(String charsetName)</span><br><span class="line">//以指定的字符集解码缓存区的字节为字符串</span><br><span class="line">String toString(Charset charset)</span><br><span class="line">//将byte数组从off位置开始的len个数组写入ByteArrayOutputStream</span><br><span class="line">void write(byte[] b, int off, int len)</span><br><span class="line"></span><br><span class="line">void write(int b)</span><br><span class="line"></span><br><span class="line">void writeBytes(byte[] b)</span><br><span class="line">//将ByteArrayOutputStream的数据全部写入OutputStream输出流中</span><br><span class="line">void writeTo(OutputStream out)</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<ul>
+<li><p>使用例子</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line">public class ByteArrayOutputStreamDemo &#123;</span><br><span class="line">    public void toByteArrayDemo()&#123;</span><br><span class="line">        try (ByteArrayOutputStream baou = new ByteArrayOutputStream())&#123;</span><br><span class="line">            baou.write(&quot;你好，&quot;.getBytes(Charset.forName(&quot;UTF-8&quot;)));</span><br><span class="line">            baou.write(&quot;世界！&quot;.getBytes(Charset.forName(&quot;UTF-8&quot;)));</span><br><span class="line">            System.out.println(new String(baou.toByteArray(), Charset.forName(&quot;UTF-8&quot;)));</span><br><span class="line">        &#125; catch (IOException e) &#123;</span><br><span class="line">            e.printStackTrace();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    public void wirteToDemo()&#123;</span><br><span class="line">        try (ByteArrayOutputStream baou = new ByteArrayOutputStream();</span><br><span class="line">             FileOutputStream fos = new FileOutputStream(&quot;/tmp/byte&quot;))&#123;</span><br><span class="line">            baou.write(&quot;你好，&quot;.getBytes(Charset.forName(&quot;UTF-8&quot;)));</span><br><span class="line">            //会重置缓冲区，之前写的数据会丢失</span><br><span class="line">            baou.reset();</span><br><span class="line">            baou.write(&quot;世界！&quot;.getBytes(Charset.forName(&quot;UTF-8&quot;)));</span><br><span class="line">            baou.writeTo(fos);</span><br><span class="line">        &#125; catch (IOException e) &#123;</span><br><span class="line">            e.printStackTrace();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    public static void main(String[] args) &#123;</span><br><span class="line">        ByteArrayOutputStreamDemo demo = new ByteArrayOutputStreamDemo();</span><br><span class="line">        demo.wirteToDemo();</span><br><span class="line">        demo.toByteArrayDemo();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>输出结果：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">//wirteToDemo byte文件中显示，可以看到调用了reset之后，前边的”你好“已经丢失。</span><br><span class="line"> 1 世界！</span><br><span class="line">//toByteArrayDemo终端结果</span><br><span class="line">你好，世界！</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<h4 id="处理流"><a href="#处理流" class="headerlink" title="处理流"></a>处理流</h4><h5 id="BufferedOutputStream"><a href="#BufferedOutputStream" class="headerlink" title="BufferedOutputStream"></a>BufferedOutputStream</h5><p>和BufferedInputStream类似，BufferedOutputStream也提供一个缓冲区，增强OutputStream的能力，使得用户在写数据时，不用关系写的数据是如何写入源端，而只有当缓冲区填满或者用户主动调用flush、close时才会将数据真正写入到源端，这样可以减少与源端交互的次数，从而提升性能。要注意的是，当调用BufferedOutputStream方法数据不够填满缓冲区而没有立刻调用flush，并且流没有关闭时，数据并不会立刻写入源端，如果写入的是磁盘文件，打开文件是看不到刚刚写入的数据的。</p>
+<ul>
+<li><p>BufferedOutputStream构造函数</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">BufferedOutputStream(OutputStream out)</span><br><span class="line">//创建时设置缓冲区大小，默认是8192</span><br><span class="line">BufferedOutputStream(OutputStream out, int size)</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>BufferedOutputStream方法</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">void flush()	</span><br><span class="line"></span><br><span class="line">void write(byte[] b, int off, int len)</span><br><span class="line"></span><br><span class="line">void write(int b)</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>使用例子</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">//BufferedOutputStream方法比较简单</span><br><span class="line">public class BufferedOutputStreamDemo &#123;</span><br><span class="line">    public static void main(String[] args) &#123;</span><br><span class="line">        try (BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(&quot;/tmp/buffer&quot;))) &#123;</span><br><span class="line">            bos.write(&quot;你好，世界！&quot;.getBytes(Charset.forName(&quot;UTF-8&quot;)));</span><br><span class="line">            bos.flush();</span><br><span class="line">        &#125; catch (IOException e) &#123;</span><br><span class="line">            e.printStackTrace();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<h5 id="DataOutputStream"><a href="#DataOutputStream" class="headerlink" title="DataOutputStream"></a>DataOutputStream</h5><p>DataOutputStream和DataInputStream是一对操作，它们提供了一组操作来对用户屏蔽具体数据类型的底层存储细节，但是在用DataInputStream读取时，需要知道数据的格式然后用对应的方法来读取。</p>
+<ul>
+<li><p>DataOutputStream构造函数</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">DataOutputStream(OutputStream out)</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>DataOutputStream方法</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line">//方法都很简单，基本看名字都知道作用，但是还有有两个方法要说明一下</span><br><span class="line"></span><br><span class="line">void flush()</span><br><span class="line"></span><br><span class="line">int size()</span><br><span class="line"></span><br><span class="line">void write(byte[] b, int off, int len)</span><br><span class="line"></span><br><span class="line">void write(int b)</span><br><span class="line"></span><br><span class="line">void writeBoolean(boolean v)</span><br><span class="line"></span><br><span class="line">void writeByte(int v)</span><br><span class="line">//该方法不能写入中文，因为在写入时执行out.write((byte)s.charAt(i))，在java中char是两个字节表示的，这里直接强制转换为byte导致信息丢失</span><br><span class="line">void writeBytes(String s)</span><br><span class="line"></span><br><span class="line">void writeChar(int v)</span><br><span class="line"></span><br><span class="line">void writeChars(String s)</span><br><span class="line"></span><br><span class="line">void writeDouble(double v)</span><br><span class="line"></span><br><span class="line">void writeFloat(float v)</span><br><span class="line"></span><br><span class="line">void writeInt(int v)</span><br><span class="line"></span><br><span class="line">void writeLong(long v)</span><br><span class="line"></span><br><span class="line">void writeShort(int v)</span><br><span class="line">//在写入时，会自动将字符串的UTF-8字节编码数大写写入开头，</span><br><span class="line">//如果DataInputStream的readUTF不是读取该方法的写入，并且没有补齐前两个表示字节数的标识，会得到EOFException异常</span><br><span class="line">void writeUTF(String str)</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>使用例子</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br></pre></td><td class="code"><pre><span class="line">public class DataOutputStreamDemo &#123;</span><br><span class="line">    /**</span><br><span class="line">     * 测试wirteBytes(String s)写中文</span><br><span class="line">     */</span><br><span class="line">    public void wirteBytesChinseStringTest()&#123;</span><br><span class="line">        ByteArrayOutputStream bos = new ByteArrayOutputStream();</span><br><span class="line">        try (DataOutputStream dos = new DataOutputStream(bos)) &#123;</span><br><span class="line">            dos.writeBytes(&quot;你好&quot;);</span><br><span class="line">            dos.flush();</span><br><span class="line">        &#125; catch (IOException e) &#123;</span><br><span class="line">            e.printStackTrace();</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        ByteArrayInputStream bis = new ByteArrayInputStream(bos.toByteArray());</span><br><span class="line">        try (DataInputStream dis = new DataInputStream(bis)) &#123;</span><br><span class="line">            byte[] bytes = new byte[128];</span><br><span class="line">            dis.readFully(bytes, 0, 2);</span><br><span class="line">            System.out.println(new String(bytes, Charset.forName(&quot;UTF-8&quot;)));</span><br><span class="line">        &#125; catch (IOException e) &#123;</span><br><span class="line">            e.printStackTrace();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    /**</span><br><span class="line">     * 测试writeUTF</span><br><span class="line">     */</span><br><span class="line">    public void wirteUTF()&#123;</span><br><span class="line">        ByteArrayOutputStream bos = new ByteArrayOutputStream();</span><br><span class="line">        try (DataOutputStream dos = new DataOutputStream(bos)) &#123;</span><br><span class="line">            dos.writeUTF(&quot;你好&quot;);</span><br><span class="line">            dos.flush();</span><br><span class="line">        &#125; catch (IOException e) &#123;</span><br><span class="line">            e.printStackTrace();</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        ByteArrayInputStream bis = new ByteArrayInputStream(bos.toByteArray());</span><br><span class="line">        try (DataInputStream dis = new DataInputStream(bis)) &#123;</span><br><span class="line">            System.out.println(dis.readUTF());</span><br><span class="line">        &#125; catch (IOException e) &#123;</span><br><span class="line">            e.printStackTrace();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    public static void main(String[] args) &#123;</span><br><span class="line">        DataOutputStreamDemo demo = new DataOutputStreamDemo();</span><br><span class="line">        demo.wirteBytesChinseStringTest();</span><br><span class="line">        demo.wirteUTF();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>输出结果：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">`&#125;                                                                                                                              </span><br><span class="line">你好</span><br></pre></td></tr></table></figure>
+<p>第一个方法测试writeBytes(String s)输出中文时，会出现字节丢失导致无法还原原始数据。第二个方法是以UTF-8方式输出，该方法会将写入字符串以UTF-8编码的字节数大小以两个字节写在数据的最前端，来保证DataInputStream的readUTF方法能知道数据的结尾。如下图是写入了“你好”的字节数组，前两个字节表示总共有6个字节。</p>
+<p><img src="/images/data_output_stream.png" alt="Alt"></p>
+</li>
+</ul>
+<h5 id="ObjectOutputStream"><a href="#ObjectOutputStream" class="headerlink" title="ObjectOutputStream"></a>ObjectOutputStream</h5><p>ObjectOutputStream将实现Serializable、Externalizable接口的对象序列化到源端。反序列化需要ObjectInputStream。</p>
+<ul>
+<li><p>ObjectOutputStream构造函数</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">protected ObjectOutputStream()	</span><br><span class="line"></span><br><span class="line">ObjectOutputStream(OutputStream out)</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>ObjectOutputStream方法</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br></pre></td><td class="code"><pre><span class="line">protected void	annotateClass(Class&lt;?&gt; cl)</span><br><span class="line"></span><br><span class="line">protected void	annotateProxyClass(Class&lt;?&gt; cl)</span><br><span class="line"></span><br><span class="line">void	close()</span><br><span class="line"></span><br><span class="line">void	defaultWriteObject()</span><br><span class="line"></span><br><span class="line">protected void	drain()</span><br><span class="line"></span><br><span class="line">protected boolean	enableReplaceObject(boolean enable)</span><br><span class="line"></span><br><span class="line">void	flush()</span><br><span class="line"></span><br><span class="line">ObjectOutputStream.PutField	putFields()</span><br><span class="line"></span><br><span class="line">protected Object	replaceObject(Object obj)</span><br><span class="line"></span><br><span class="line">void	reset()</span><br><span class="line"></span><br><span class="line">void	useProtocolVersion(int version)</span><br><span class="line"></span><br><span class="line">void	write(byte[] buf)</span><br><span class="line"></span><br><span class="line">void	write(byte[] buf, int off, int len)</span><br><span class="line"></span><br><span class="line">void	write(int val)</span><br><span class="line"></span><br><span class="line">void	writeBoolean(boolean val)</span><br><span class="line"></span><br><span class="line">void	writeByte(int val)</span><br><span class="line"></span><br><span class="line">void	writeBytes(String str)</span><br><span class="line"></span><br><span class="line">void	writeChar(int val)</span><br><span class="line"></span><br><span class="line">void	writeChars(String str)</span><br><span class="line"></span><br><span class="line">protected void	writeClassDescriptor(ObjectStreamClass desc)</span><br><span class="line"></span><br><span class="line">void	writeDouble(double val)</span><br><span class="line"></span><br><span class="line">void	writeFields()</span><br><span class="line"></span><br><span class="line">void	writeFloat(float val)</span><br><span class="line"></span><br><span class="line">void	writeInt(int val)</span><br><span class="line"></span><br><span class="line">void	writeLong(long val)</span><br><span class="line"></span><br><span class="line">void	writeObject(Object obj)</span><br><span class="line"></span><br><span class="line">protected void	writeObjectOverride(Object obj)</span><br><span class="line"></span><br><span class="line">void	writeShort(int val)</span><br><span class="line"></span><br><span class="line">protected void	writeStreamHeader()</span><br><span class="line"></span><br><span class="line">void	writeUnshared(Object obj)</span><br><span class="line"></span><br><span class="line">void	writeUTF(String str)</span><br></pre></td></tr></table></figure>
+<p>方法有点多，不要被吓到，其实很多方法都是一眼就看出用途的。</p>
+</li>
+<li><p>使用例子</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br></pre></td><td class="code"><pre><span class="line">public class ObjectOutputStreamDemo extends ObjectOutputStream&#123;</span><br><span class="line">    public ObjectOutputStreamDemo(OutputStream out) throws IOException &#123;</span><br><span class="line">        super(out);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    protected ObjectOutputStreamDemo() throws IOException, SecurityException &#123;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    public static void main(String[] args) &#123;</span><br><span class="line"></span><br><span class="line">        try (ObjectOutputStreamDemo oos = new ObjectOutputStreamDemo(new FileOutputStream(&quot;/tmp/person&quot;))) &#123;</span><br><span class="line">            Person person = new Person();</span><br><span class="line">            person.setName(&quot;mark&quot;);</span><br><span class="line">            person.setAge(20);</span><br><span class="line">            oos.writeObject(person);</span><br><span class="line">            oos.flush();</span><br><span class="line">        &#125; catch (IOException e) &#123;</span><br><span class="line">            e.printStackTrace();</span><br><span class="line">        &#125;</span><br><span class="line">        try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(&quot;/tmp/person&quot;))) &#123;</span><br><span class="line">            Person person = (Person) ois.readObject();</span><br><span class="line">            System.out.println(&quot;Person name:&quot; + person.getName() + &quot; age:&quot; + person.getAge());</span><br><span class="line">        &#125; catch (IOException | ClassNotFoundException e) &#123;</span><br><span class="line">            e.printStackTrace();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">class Person implements Serializable &#123;</span><br><span class="line">    private String name;</span><br><span class="line"></span><br><span class="line">    private Integer age;</span><br><span class="line"></span><br><span class="line">    public String getName() &#123;</span><br><span class="line">        return name;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    public void setName(String name) &#123;</span><br><span class="line">        this.name = name;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    public Integer getAge() &#123;</span><br><span class="line">        return age;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    public void setAge(Integer age) &#123;</span><br><span class="line">        this.age = age;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>ObjectOutputStream的有一些方法要起作用，需要用户继承ObjectInputStream重写该方法。</p>
+</li>
+</ul>
+<h5 id="PrintStream"><a href="#PrintStream" class="headerlink" title="PrintStream"></a>PrintStream</h5><p>PrintStream打印输出流，大家应该最熟悉了，如果你觉得不熟悉，你平时肯定用过System.out.println()，而且是经常使用，其中的out就是PrintStream，也就是说你System.out调用的方法都是PrintStream的方法。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">public static final PrintStream out = null;</span><br></pre></td></tr></table></figure>
+<p>PrintStream同样是一个处理流，通过对输出流的增强，提供一些打印的功能，如print()、println()等等功能。</p>
+<ul>
+<li><p>PrintStream构造函数</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">PrintStream(File file)	</span><br><span class="line"></span><br><span class="line">PrintStream(File file, String csn)	</span><br><span class="line"></span><br><span class="line">PrintStream(File file, Charset charset)	</span><br><span class="line"></span><br><span class="line">PrintStream(OutputStream out)	</span><br><span class="line"></span><br><span class="line">PrintStream(OutputStream out, boolean autoFlush)	</span><br><span class="line"></span><br><span class="line">PrintStream(OutputStream out, boolean autoFlush, String encoding)	</span><br><span class="line"></span><br><span class="line">PrintStream(OutputStream out, boolean autoFlush, Charset charset)	</span><br><span class="line"></span><br><span class="line">PrintStream(String fileName)	</span><br><span class="line"></span><br><span class="line">PrintStream(String fileName, String csn)	</span><br><span class="line"></span><br><span class="line">PrintStream(String fileName, Charset charset)</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<ul>
+<li><p>PrintStream方法</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br></pre></td><td class="code"><pre><span class="line">PrintStream	append(char c)	</span><br><span class="line"></span><br><span class="line">PrintStream	append(CharSequence csq)	</span><br><span class="line"></span><br><span class="line">PrintStream	append(CharSequence csq, int start, int end)	</span><br><span class="line"></span><br><span class="line">boolean	checkError()	</span><br><span class="line"></span><br><span class="line">protected void	clearError()	</span><br><span class="line"></span><br><span class="line">void	close()	</span><br><span class="line"></span><br><span class="line">void	flush()	</span><br><span class="line"></span><br><span class="line">PrintStream	format(String format, Object... args)	</span><br><span class="line"></span><br><span class="line">PrintStream	format(Locale l, String format, Object... args)	</span><br><span class="line"></span><br><span class="line">void	print(boolean b)	</span><br><span class="line"></span><br><span class="line">void	print(char c)	</span><br><span class="line"></span><br><span class="line">void	print(char[] s)	</span><br><span class="line"></span><br><span class="line">void	print(double d)	</span><br><span class="line"></span><br><span class="line">void	print(float f)	</span><br><span class="line"></span><br><span class="line">void	print(int i)	</span><br><span class="line"></span><br><span class="line">void	print(long l)	</span><br><span class="line"></span><br><span class="line">void	print(Object obj)	</span><br><span class="line"></span><br><span class="line">void	print(String s)	</span><br><span class="line"></span><br><span class="line">PrintStream	printf(String format, Object... args)	</span><br><span class="line"></span><br><span class="line">PrintStream	printf(Locale l, String format, Object... args)	</span><br><span class="line"></span><br><span class="line">void	println()	</span><br><span class="line"></span><br><span class="line">void	println(boolean x)	</span><br><span class="line"></span><br><span class="line">void	println(char x)	</span><br><span class="line"></span><br><span class="line">void	println(char[] x)	</span><br><span class="line"></span><br><span class="line">void	println(double x)	</span><br><span class="line"></span><br><span class="line">void	println(float x)	</span><br><span class="line"></span><br><span class="line">void	println(int x)	</span><br><span class="line"></span><br><span class="line">void	println(long x)	</span><br><span class="line"></span><br><span class="line">void	println(Object x)	</span><br><span class="line"></span><br><span class="line">void	println(String x)	</span><br><span class="line"></span><br><span class="line">protected void	setError()	</span><br><span class="line"></span><br><span class="line">void	write(byte[] buf, int off, int len)	</span><br><span class="line"></span><br><span class="line">void	write(int b)</span><br></pre></td></tr></table></figure>
+<p>PrintStream大家经常用，这里就不举例子了。</p>
+</li>
+</ul>
+<p>小弟才疏学浅，轻喷。附上个人微信，欢迎交流指教。</p>
+<p><img src="/images/wechat.jpeg" width="20%" height="20"></p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Java/" rel="tag"># Java</a>
+          
+            <a href="/tags/IO/" rel="tag"># IO</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2018/11/05/Java基础之IO-InputStream/" rel="next" title="Java基础之IO(1)-InputStream">
+                <i class="fa fa-chevron-left"></i> Java基础之IO(1)-InputStream
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Overview
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">ikan</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">4</span>
+                  <span class="site-state-item-name">posts</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">1</span>
+                  <span class="site-state-item-name">categories</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">4</span>
+                  <span class="site-state-item-name">tags</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-4"><a class="nav-link" href="#概述"><span class="nav-number">1.</span> <span class="nav-text">概述</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#字节编码"><span class="nav-number">2.</span> <span class="nav-text">字节编码</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#OutputStream继承关系图"><span class="nav-number">3.</span> <span class="nav-text">OutputStream继承关系图</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#节点流"><span class="nav-number">4.</span> <span class="nav-text">节点流</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#FileOutputStream"><span class="nav-number">4.1.</span> <span class="nav-text">FileOutputStream</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#PipedOutputStream"><span class="nav-number">4.2.</span> <span class="nav-text">PipedOutputStream</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#ByteArrayOutputStream"><span class="nav-number">4.3.</span> <span class="nav-text">ByteArrayOutputStream</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#处理流"><span class="nav-number">5.</span> <span class="nav-text">处理流</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#BufferedOutputStream"><span class="nav-number">5.1.</span> <span class="nav-text">BufferedOutputStream</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#DataOutputStream"><span class="nav-number">5.2.</span> <span class="nav-text">DataOutputStream</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#ObjectOutputStream"><span class="nav-number">5.3.</span> <span class="nav-text">ObjectOutputStream</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#PrintStream"><span class="nav-number">5.4.</span> <span class="nav-text">PrintStream</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2018</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">ikan</span>
+
+  
+</div>
+
+
+  <div class="powered-by">Powered by <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a></div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">Theme &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
