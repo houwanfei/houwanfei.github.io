@@ -249,6 +249,153 @@
   
   
   <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2018/11/11/Java基础之IO-3-Reader/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="ikan">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="IkanのBolg">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2018/11/11/Java基础之IO-3-Reader/" itemprop="url">Java基础之IO(3)-Reader</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-11-11T22:09:17+08:00">
+                2018-11-11
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Java学习笔记/" itemprop="url" rel="index">
+                    <span itemprop="name">Java学习笔记</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          <h4 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h4><p>前两节学习过了字节输入流和字节输出流，大家可能会疑惑，为什么已经有了字节输入流，还需要字符输入流。其实从字面意思就可以理解，字节输入流在读取的时候是按字节的方式，而字节是一个对计算机友好，但是对人类用户不友好的方式，字符才是对人类友好的传递信息的方式。字符流对处理文字特别方便，而字节流在处理图像、音频、视频方面比较方便。</p>
+<h4 id="Reader的继承结构"><a href="#Reader的继承结构" class="headerlink" title="Reader的继承结构"></a>Reader的继承结构</h4><p><img src="/images/Reader.png" alt="Alt"></p>
+          <!--noindex-->
+          <div class="post-button text-center">
+            <a class="btn" href="/2018/11/11/Java基础之IO-3-Reader/#more" rel="contents">
+              Read more &raquo;
+            </a>
+          </div>
+          <!--/noindex-->
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="http://yoursite.com/2018/11/10/Java基础之IO-2-OutputStream/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -639,6 +786,7 @@
         
           <h4 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h4><p>IO在一般业务开发中不常用到，因此也是很久没有对这部分进行一次系统性的总结，最近有时间也是总结一下。</p>
 <h4 id="Java-IO总览"><a href="#Java-IO总览" class="headerlink" title="Java IO总览"></a>Java IO总览</h4><p>Java IO这里指的传统IO，NIO会放到其他文章中介绍。在分类之前先了解一些概念。</p>
+<h4 id="流"><a href="#流" class="headerlink" title="流"></a>流</h4><p>流是一种对数据传递的抽象概念。比如，我们通过输入流读取磁盘上读取数据，就像水流一样连续源源不断流向用户态内存中。但是本质并非如此，至少不像水流那样源源不断，因为用户开发的程序运行在用户空间，而用户空间的进程是没有直接操作I/O设备的权限，需要内核进程帮忙操作I/O设备，用户空间进程会交出执行权，这个状态叫陷入内核，而用户空间的进程则表现为阻塞状态，等到需要读取的数据被内核进程准备好后，用户空间进程重新获得执行权，继续运行。</p>
 <h4 id="字节流"><a href="#字节流" class="headerlink" title="字节流"></a>字节流</h4><p>字节流和它的名字一样，是以字节的方式来操作文件的，这里的文件包括图片、视频、文本等，它的使用范围比字符流广泛，并且后面我们会介绍某些字符流如FilerReader也是建立在字节流上操作的，利用StreamDecoder按照编码方式将字节转换成字符，后面会详细介绍。字节流操作的byte。</p>
           <!--noindex-->
           <div class="post-button text-center">
@@ -878,7 +1026,7 @@
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">4</span>
+                  <span class="site-state-item-count">5</span>
                   <span class="site-state-item-name">posts</span>
                 </a>
               </div>

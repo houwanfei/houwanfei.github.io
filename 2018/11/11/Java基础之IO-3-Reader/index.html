@@ -1,0 +1,826 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="Java,IO," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="概述前两节学习过了字节输入流和字节输出流，大家可能会疑惑，为什么已经有了字节输入流，还需要字符输入流。其实从字面意思就可以理解，字节输入流在读取的时候是按字节的方式，而字节是一个对计算机友好，但是对人类用户不友好的方式，字符才是对人类友好的传递信息的方式。字符流对处理文字特别方便，而字节流在处理图像、音频、视频方面比较方便。 Reader的继承结构">
+<meta name="keywords" content="Java,IO">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Java基础之IO(3)-Reader">
+<meta property="og:url" content="http://yoursite.com/2018/11/11/Java基础之IO-3-Reader/index.html">
+<meta property="og:site_name" content="IkanのBolg">
+<meta property="og:description" content="概述前两节学习过了字节输入流和字节输出流，大家可能会疑惑，为什么已经有了字节输入流，还需要字符输入流。其实从字面意思就可以理解，字节输入流在读取的时候是按字节的方式，而字节是一个对计算机友好，但是对人类用户不友好的方式，字符才是对人类友好的传递信息的方式。字符流对处理文字特别方便，而字节流在处理图像、音频、视频方面比较方便。 Reader的继承结构">
+<meta property="og:locale" content="default">
+<meta property="og:image" content="http://yoursite.com/images/Reader.png">
+<meta property="og:image" content="http://yoursite.com/images/wechat.jpeg">
+<meta property="og:updated_time" content="2018-11-18T13:43:09.290Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Java基础之IO(3)-Reader">
+<meta name="twitter:description" content="概述前两节学习过了字节输入流和字节输出流，大家可能会疑惑，为什么已经有了字节输入流，还需要字符输入流。其实从字面意思就可以理解，字节输入流在读取的时候是按字节的方式，而字节是一个对计算机友好，但是对人类用户不友好的方式，字符才是对人类友好的传递信息的方式。字符流对处理文字特别方便，而字节流在处理图像、音频、视频方面比较方便。 Reader的继承结构">
+<meta name="twitter:image" content="http://yoursite.com/images/Reader.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: 'Author'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2018/11/11/Java基础之IO-3-Reader/"/>
+
+
+
+
+
+  <title>Java基础之IO(3)-Reader | IkanのBolg</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="default">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">IkanのBolg</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">只想安安静静撸代码</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            Home
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            Tags
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            Categories
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            Archives
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2018/11/11/Java基础之IO-3-Reader/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="ikan">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="IkanのBolg">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">Java基础之IO(3)-Reader</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-11-11T22:09:17+08:00">
+                2018-11-11
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Java学习笔记/" itemprop="url" rel="index">
+                    <span itemprop="name">Java学习笔记</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h4 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h4><p>前两节学习过了字节输入流和字节输出流，大家可能会疑惑，为什么已经有了字节输入流，还需要字符输入流。其实从字面意思就可以理解，字节输入流在读取的时候是按字节的方式，而字节是一个对计算机友好，但是对人类用户不友好的方式，字符才是对人类友好的传递信息的方式。字符流对处理文字特别方便，而字节流在处理图像、音频、视频方面比较方便。</p>
+<h4 id="Reader的继承结构"><a href="#Reader的继承结构" class="headerlink" title="Reader的继承结构"></a>Reader的继承结构</h4><p><img src="/images/Reader.png" alt="Alt"></p>
+<a id="more"></a>
+<h4 id="字符流和字节流的区别"><a href="#字符流和字节流的区别" class="headerlink" title="字符流和字节流的区别"></a>字符流和字节流的区别</h4><p>字符流是用两字节表示Unicode编码，和FileInputStream返回的read方法返回的一样是int，但是两个的含义是不一样的。FileInputStream返回的是一个8位字节表示的10进制编码，范围是-128~127，而FileReader因为返回的是2个字节的Unicode10进制编码，范围是-1～65535。比如用FileReader读取文件，调用read方法读“你”，返回的是20320。在Unicode编码中20320代表的就是中文的“你”。</p>
+<h5 id="StreamDecoder"><a href="#StreamDecoder" class="headerlink" title="StreamDecoder"></a>StreamDecoder</h5><p>在介绍Reader之前先介绍一个工具类StreamDecoder，StreamDecoder是讲字节流转换为字符流的工具，因为字节转换为字符流转换为需要写入字节的编码方式解码才能正确的解析为字符。</p>
+<ul>
+<li><p>StreamDecoder构造函数</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">//设置需要转换的InputStream，以及通过设置编码名来解码输入流字节</span><br><span class="line">public static StreamDecoder forInputStreamReader(InputStream in,</span><br><span class="line">                                                     Object lock,</span><br><span class="line">                                                     String charsetName)</span><br><span class="line">        throws UnsupportedEncodingException;</span><br><span class="line">public static StreamDecoder forInputStreamReader(InputStream in,</span><br><span class="line">                                                     Object lock,</span><br><span class="line">                                                     Charset cs);</span><br><span class="line">public static StreamDecoder forInputStreamReader(InputStream in,</span><br><span class="line">                                                     Object lock,</span><br><span class="line">                                                     CharsetDecoder dec);</span><br><span class="line">public static StreamDecoder forDecoder(ReadableByteChannel ch,</span><br><span class="line">                                           CharsetDecoder dec,</span><br><span class="line">                                           int minBufferCap);</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>StreamDecoder方法</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">public String getEncoding();</span><br><span class="line"></span><br><span class="line">public int read() throws IOException;</span><br><span class="line"></span><br><span class="line">public int read(char cbuf[], int offset, int length) throws IOException;</span><br><span class="line"></span><br><span class="line">public boolean ready() throws IOException;</span><br><span class="line"></span><br><span class="line">public void close() throws IOException;</span><br><span class="line"></span><br><span class="line">private boolean isOpen();</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>简单例子</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">public class StreamDecoderDemo &#123;</span><br><span class="line">    public static void main(String[] args) &#123;</span><br><span class="line">        Object lock = new Object();</span><br><span class="line">        try (FileInputStream fis = new FileInputStream(&quot;/tmp/test&quot;))&#123;</span><br><span class="line">            StreamDecoder sd = StreamDecoder.forInputStreamReader(fis, lock, &quot;UTF-8&quot;);</span><br><span class="line">            char[] chars = new char[2];</span><br><span class="line">            System.out.println(sd.read(chars, 0, 2));</span><br><span class="line">            System.out.println(chars);</span><br><span class="line">        &#125; catch (IOException e) &#123;</span><br><span class="line">            e.printStackTrace();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>输出结果</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">2</span><br><span class="line">你好</span><br></pre></td></tr></table></figure>
+<p>上面文件是以utf-8编码的文件，所以用utf-8来解析，得到了正确的中文。</p>
+</li>
+</ul>
+<h4 id="节点流"><a href="#节点流" class="headerlink" title="节点流"></a>节点流</h4><h5 id="FileReader"><a href="#FileReader" class="headerlink" title="FileReader"></a>FileReader</h5><p>FileReader是一个读取磁盘文件的字符输入流，它的作用是以字符方式读取磁盘文件。如果去看一下其构造函数，会发现其实它是通过InputStreamReader将InputStream转换成为FileReader，而InputStreamReader是利用StreamDecoder来解析字节流。</p>
+<ul>
+<li><p>FileReader构造函数</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">FileReader(File file)</span><br><span class="line"></span><br><span class="line">FileReader(FileDescriptor fd)</span><br><span class="line"></span><br><span class="line">FileReader(File file, Charset charset)</span><br><span class="line"></span><br><span class="line">FileReader(String fileName)</span><br><span class="line"></span><br><span class="line">FileReader(String fileName, Charset charset)</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>FileReader方法</p>
+<p>FileReader除了提供了新的构造函数并没有增加新的方法，其所有读取字符流的方法全部继承自InputStreamReader。</p>
+</li>
+<li><p>FileReader简单例子</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">public class FileReaderDemo &#123;</span><br><span class="line">    public static void main(String[] args) &#123;</span><br><span class="line">        try (FileReader fr = new FileReader(&quot;/tmp/test&quot;))&#123;</span><br><span class="line">            System.out.println(fr.read());</span><br><span class="line">        &#125; catch (IOException e) &#123;</span><br><span class="line">            e.printStackTrace();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<h5 id="PipedReader"><a href="#PipedReader" class="headerlink" title="PipedReader"></a>PipedReader</h5><p>前面讲过PipedInputStream，PipedReader和PipedInputStream类似，也不能单独起作用，需要和PipiedWriter一起使用才能起作用。同样的线程通过向PipiedWriter写入字符，而PipedReader提供一个缓冲区，接收PipiedWriter写入的字符，然后从PipiedReader的缓冲区中读取出来。只是PipedInputStream面向的是字节，而PipedReader面向字符。</p>
+<ul>
+<li><p>PipedReader构造函数</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">PipedReader()</span><br><span class="line">//创建一个用户pipeSize大小缓冲区的PipedReader</span><br><span class="line">PipedReader(int pipeSize)</span><br><span class="line">//创建一个和PipedWriter连接的PipedReader</span><br><span class="line">PipedReader(PipedWriter src)</span><br><span class="line">//创建一个和PipedWriter连接拥有pipeSize大小缓冲区的PipedReader</span><br><span class="line">PipedReader(PipedWriter src, int pipeSize)</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>PipedReader方法</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">void close()</span><br><span class="line"></span><br><span class="line">void connect(PipedWriter src)</span><br><span class="line"></span><br><span class="line">int	read()</span><br><span class="line">//传入cbuf的char数组读取PipedReader的读取字符</span><br><span class="line">int	read(char[] cbuf, int off, int len)	</span><br><span class="line">//判断PipedReader是否已经与PipedWriter连接，且缓冲区中是否有数据</span><br><span class="line">boolean	ready()</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>简单例子</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br></pre></td><td class="code"><pre><span class="line">public class PipedReaderDemo &#123;</span><br><span class="line">    public static void main(String[] args) &#123;</span><br><span class="line">        PipedReader pipedReader = new PipedReader();</span><br><span class="line">        PipedWriter pipedWriter = new PipedWriter();</span><br><span class="line">        try &#123;</span><br><span class="line">            pipedReader.connect(pipedWriter);</span><br><span class="line">        &#125; catch (IOException e) &#123;</span><br><span class="line">            e.printStackTrace();</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        ExecutorService executorService = Executors.newFixedThreadPool(2);</span><br><span class="line">        executorService.execute(new Productor(pipedWriter));</span><br><span class="line">        executorService.execute(new Consumer(pipedReader));</span><br><span class="line">        try &#123;</span><br><span class="line">            Thread.sleep(1000);</span><br><span class="line">        &#125; catch (InterruptedException e) &#123;</span><br><span class="line">            e.printStackTrace();</span><br><span class="line">        &#125;</span><br><span class="line">        executorService.shutdown();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">class Productor implements Runnable&#123;</span><br><span class="line">    private PipedWriter pipedWriter;</span><br><span class="line"></span><br><span class="line">    public Productor(PipedWriter pipedWriter)&#123;</span><br><span class="line">        this.pipedWriter = pipedWriter;</span><br><span class="line">    &#125;</span><br><span class="line">    @Override</span><br><span class="line">    public void run() &#123;</span><br><span class="line">        String str = &quot;你好&quot;;</span><br><span class="line">        try &#123;</span><br><span class="line">            pipedWriter.write(str.toCharArray());</span><br><span class="line">        &#125; catch (IOException e) &#123;</span><br><span class="line">            e.printStackTrace();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">class Consumer implements Runnable&#123;</span><br><span class="line">    private PipedReader pipedReader;</span><br><span class="line"></span><br><span class="line">    public Consumer(PipedReader pipedReader)&#123;</span><br><span class="line">        this.pipedReader = pipedReader;</span><br><span class="line">    &#125;</span><br><span class="line">    @Override</span><br><span class="line">    public void run() &#123;</span><br><span class="line">        char[] chars = new char[2];</span><br><span class="line">        try &#123;</span><br><span class="line">            pipedReader.read(chars, 0, 2);</span><br><span class="line">            System.out.println(chars);</span><br><span class="line">        &#125; catch (IOException e) &#123;</span><br><span class="line">            e.printStackTrace();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<h5 id="CharArrayReader"><a href="#CharArrayReader" class="headerlink" title="CharArrayReader"></a>CharArrayReader</h5><p>CharArrayReader是字符数组输入流，它和ByteArrayInputStream有点类似，但是ByteArrayInputStream缓冲区存放的是字节。</p>
+<ul>
+<li><p>CharArrayReader构造函数</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">//以字符数组作为构造参数，该buf会被存入CharArrayReader缓冲区中</span><br><span class="line">CharArrayReader(char[] buf)	</span><br><span class="line">//以字符数组作为构造参数，该buf从offset开始的length个字符会被存入CharArrayReader缓冲区中</span><br><span class="line">CharArrayReader(char[] buf, int offset, int length)</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>CharArrayReader方法</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">void close()</span><br><span class="line"></span><br><span class="line">void mark(int readAheadLimit)</span><br><span class="line"></span><br><span class="line">boolean markSupported()</span><br><span class="line"></span><br><span class="line">int read()</span><br><span class="line"></span><br><span class="line">int read(char[] b, int off, int len)</span><br><span class="line"></span><br><span class="line">boolean ready()</span><br><span class="line"></span><br><span class="line">void reset()</span><br><span class="line"></span><br><span class="line">long skip(long n)</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<ul>
+<li><p>简单例子</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line">public class CharArrayReaderDemo &#123;</span><br><span class="line">    public static void main(String[] args) &#123;</span><br><span class="line">        char[] chars = &quot;hello world!&quot;.toCharArray();</span><br><span class="line">        CharArrayReader charArrayReader = new CharArrayReader(chars);</span><br><span class="line">        try &#123;</span><br><span class="line">            //read一个字符返回为int类型 读取第一个应该是h</span><br><span class="line">            System.out.println((char)charArrayReader.read());</span><br><span class="line">            //跳过3个字符</span><br><span class="line">            charArrayReader.skip(3);</span><br><span class="line">            //读取第5个字符o</span><br><span class="line">            System.out.println((char)charArrayReader.read());</span><br><span class="line">            //标记当前位置，当调用reset时会重置到该位置，该参数会被忽略</span><br><span class="line">            charArrayReader.mark(5);</span><br><span class="line">            //输出第6位 空格</span><br><span class="line">            System.out.println((char)charArrayReader.read());</span><br><span class="line">            //输出第7位 w</span><br><span class="line">            System.out.println((char)charArrayReader.read());</span><br><span class="line">            //重置到mark标记的位置</span><br><span class="line">            charArrayReader.reset();</span><br><span class="line">            //输出第6位 空格</span><br><span class="line">            System.out.println((char)charArrayReader.read());</span><br><span class="line">            //输出第7位 w</span><br><span class="line">            System.out.println((char)charArrayReader.read());</span><br><span class="line"></span><br><span class="line">            char[] chars1 = new char[2];</span><br><span class="line">            //定义一个char数组来接收字符，读取第8,9位字符 o r</span><br><span class="line">            charArrayReader.read(chars1, 0, 2);</span><br><span class="line">            System.out.println(chars1);</span><br><span class="line">        &#125; catch (IOException e) &#123;</span><br><span class="line">            e.printStackTrace();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>输出结果</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">h</span><br><span class="line">o</span><br><span class="line"> </span><br><span class="line">w</span><br><span class="line"> </span><br><span class="line">w</span><br><span class="line">or</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<h5 id="StringReader"><a href="#StringReader" class="headerlink" title="StringReader"></a>StringReader</h5><p>StringReader和CharArrayReader类似，也会创建一个缓存区，不过CharArrayReader的缓冲区是char数组类型，而StringReader的缓冲区是String类型。StringReader在创建时会传入一个String然后读取该字符串。</p>
+<ul>
+<li><p>StringReader的构造函数</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">//StringReader只有一个构造函数</span><br><span class="line">StringReader(String s)</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>StringReader方法</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">void close()</span><br><span class="line"></span><br><span class="line">void mark(int readAheadLimit)</span><br><span class="line"></span><br><span class="line">boolean markSupported()</span><br><span class="line"></span><br><span class="line">int read()</span><br><span class="line"></span><br><span class="line">int read(char[] cbuf, int off, int len)</span><br><span class="line"></span><br><span class="line">boolean ready()</span><br><span class="line"></span><br><span class="line">void reset()</span><br><span class="line"></span><br><span class="line">long skip(long ns)</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>简单例子</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line">public class StringReaderDemo &#123;</span><br><span class="line">    public static void main(String[] args) &#123;</span><br><span class="line">        StringReader sr = new StringReader(&quot;hello world!&quot;);</span><br><span class="line">        try &#123;</span><br><span class="line">            //read读取一个字符</span><br><span class="line">            System.out.println((char) sr.read());</span><br><span class="line"></span><br><span class="line">            char[] chars = new char[2];</span><br><span class="line">            //用字符数组接收read方法</span><br><span class="line">            sr.read(chars, 0, 2);</span><br><span class="line">            System.out.println(chars);</span><br><span class="line">            //mark标记位置用以reset重置读取的位置</span><br><span class="line">            sr.mark(6);</span><br><span class="line">            sr.read(chars, 0, 2);</span><br><span class="line">            System.out.println(chars);</span><br><span class="line">            //reset调用重置读取位置到mark标记的位置</span><br><span class="line">            sr.reset();</span><br><span class="line">            sr.read(chars, 0, 2);</span><br><span class="line">            System.out.println(chars);</span><br><span class="line">        &#125; catch (IOException e) &#123;</span><br><span class="line">            e.printStackTrace();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>输出结果</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">h</span><br><span class="line">el</span><br><span class="line">lo</span><br><span class="line">lo</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<h4 id="处理流"><a href="#处理流" class="headerlink" title="处理流"></a>处理流</h4><h5 id="BufferedReader"><a href="#BufferedReader" class="headerlink" title="BufferedReader"></a>BufferedReader</h5><p>BufferedReader叫字符缓冲输入流，是一个处理流，其作用和前面介绍过的BufferedInp类似。BufferedReader通过包装Reader来增强Reader的功能，为其提供缓冲的功能。</p>
+<ul>
+<li><p>BufferedReader构造函数</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">BufferedReader(Reader in)</span><br><span class="line">//sz是缓冲区大小</span><br><span class="line">BufferedReader(Reader in, int sz)</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>BufferedReader方法</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">//lines方法返回一个Stream流</span><br><span class="line">Stream&lt;String&gt; lines()</span><br><span class="line">//标记当前位置，在调用reset后会将读取位置重置到该标记的位置</span><br><span class="line">void mark(int readAheadLimit)</span><br><span class="line">//判断该字符缓冲流是否支持mark操作</span><br><span class="line">boolean markSupported()</span><br><span class="line"></span><br><span class="line">int read()</span><br><span class="line"></span><br><span class="line">int read(char[] cbuf, int off, int len)</span><br><span class="line">//很长用，读取一行</span><br><span class="line">String readLine()</span><br><span class="line">//判断缓冲区是否准备好数据</span><br><span class="line">boolean ready()</span><br><span class="line">//和mark结合使用</span><br><span class="line">void reset()</span><br><span class="line"></span><br><span class="line">long skip(long n)</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>简单例子</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line">public class BufferedReaderDemo &#123;</span><br><span class="line">    public static void main(String[] args) &#123;</span><br><span class="line"></span><br><span class="line">        try (BufferedReader br = new BufferedReader(new FileReader(&quot;/tmp/test&quot;))) &#123;</span><br><span class="line">            //read读取一个字符</span><br><span class="line">            System.out.println((char) br.read());</span><br><span class="line"></span><br><span class="line">            char[] chars = new char[2];</span><br><span class="line">            //用字符数组接收read方法</span><br><span class="line">            br.read(chars, 0, 2);</span><br><span class="line">            System.out.println(chars);</span><br><span class="line">            //mark标记位置用以reset重置读取的位置</span><br><span class="line">            br.mark(6);</span><br><span class="line">            br.read(chars, 0, 2);</span><br><span class="line">            System.out.println(chars);</span><br><span class="line">            //reset调用重置读取位置到mark标记的位置</span><br><span class="line">            br.reset();</span><br><span class="line">            br.read(chars, 0, 2);</span><br><span class="line">            System.out.println(chars);</span><br><span class="line">            //读取一行</span><br><span class="line">            System.out.println(br.readLine());</span><br><span class="line">            System.out.println(br.readLine());</span><br><span class="line">            //lines方法返回一个Stream流，这个流和之前的输入流不一样，</span><br><span class="line">            //是有关算法和计算的，它更像一个高级版本的 Iterator，这里不展开讲有兴趣可以查询相关资料</span><br><span class="line">            Stream&lt;String&gt; strs =  br.lines();</span><br><span class="line">        &#125; catch (IOException e) &#123;</span><br><span class="line">            e.printStackTrace();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<h5 id="InputStreamReader"><a href="#InputStreamReader" class="headerlink" title="InputStreamReader"></a>InputStreamReader</h5><p>InputStreamReader是一个处理流，InputStreamReader的作用是将InputStream转换为Reader，也就是将字节流转换为字符流，因为字节转换为字符需要知道编码方式，所以，在构造InputStreamReader时需要指定字符编码格式，如果没有指定编码那会判断系统的文件编码类型，如果没有，则默认为utf-8。</p>
+<ul>
+<li><p>InputStreamReader构造函数</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">InputStreamReader(InputStream in)	</span><br><span class="line"></span><br><span class="line">InputStreamReader(InputStream in, String charsetName)	</span><br><span class="line"></span><br><span class="line">InputStreamReader(InputStream in, Charset cs)	</span><br><span class="line"></span><br><span class="line">InputStreamReader(InputStream in, CharsetDecoder dec)</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>InputStreamReader方法</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">//获取InputStreamReader编码</span><br><span class="line">String	getEncoding()</span><br><span class="line"></span><br><span class="line">int	read()</span><br><span class="line"></span><br><span class="line">int	read(char[] cbuf, int offset, int length)</span><br><span class="line">//判断是否准备好</span><br><span class="line">boolean	ready()</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>InputStreamReader简单例子</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">public class InputStreamReaderDemo &#123;</span><br><span class="line">    public static void main(String[] args) &#123;</span><br><span class="line">        try (FileInputStream fis = new FileInputStream(&quot;/tmp/test&quot;))&#123;</span><br><span class="line">            InputStreamReader isr = new InputStreamReader(fis, Charset.forName(&quot;utf-8&quot;));</span><br><span class="line">            char[] chars = new char[2];</span><br><span class="line">            isr.read(chars, 0, 2);</span><br><span class="line">            System.out.println(chars);</span><br><span class="line">        &#125; catch (IOException e) &#123;</span><br><span class="line">            e.printStackTrace();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<p>小弟才疏学浅，轻喷。附上个人微信，欢迎交流指教。</p>
+<p><img src="/images/wechat.jpeg" width="20%" height="20"></p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Java/" rel="tag"># Java</a>
+          
+            <a href="/tags/IO/" rel="tag"># IO</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2018/11/10/Java基础之IO-2-OutputStream/" rel="next" title="Java基础之IO(2)-OutputStream">
+                <i class="fa fa-chevron-left"></i> Java基础之IO(2)-OutputStream
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Overview
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">ikan</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">5</span>
+                  <span class="site-state-item-name">posts</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">1</span>
+                  <span class="site-state-item-name">categories</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">4</span>
+                  <span class="site-state-item-name">tags</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-4"><a class="nav-link" href="#概述"><span class="nav-number">1.</span> <span class="nav-text">概述</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Reader的继承结构"><span class="nav-number">2.</span> <span class="nav-text">Reader的继承结构</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#字符流和字节流的区别"><span class="nav-number">3.</span> <span class="nav-text">字符流和字节流的区别</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#StreamDecoder"><span class="nav-number">3.1.</span> <span class="nav-text">StreamDecoder</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#节点流"><span class="nav-number">4.</span> <span class="nav-text">节点流</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#FileReader"><span class="nav-number">4.1.</span> <span class="nav-text">FileReader</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#PipedReader"><span class="nav-number">4.2.</span> <span class="nav-text">PipedReader</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#CharArrayReader"><span class="nav-number">4.3.</span> <span class="nav-text">CharArrayReader</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#StringReader"><span class="nav-number">4.4.</span> <span class="nav-text">StringReader</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#处理流"><span class="nav-number">5.</span> <span class="nav-text">处理流</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#BufferedReader"><span class="nav-number">5.1.</span> <span class="nav-text">BufferedReader</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#InputStreamReader"><span class="nav-number">5.2.</span> <span class="nav-text">InputStreamReader</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2018</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">ikan</span>
+
+  
+</div>
+
+
+  <div class="powered-by">Powered by <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a></div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">Theme &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

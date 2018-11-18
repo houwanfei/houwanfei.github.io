@@ -79,23 +79,23 @@
 
 
 
-<meta name="description" content="背景IO在一般业务开发中不常用到，因此也是很久没有对这部分进行一次系统性的总结，最近有时间也是总结一下。 Java IO总览Java IO这里指的传统IO，NIO会放到其他文章中介绍。在分类之前先了解一些概念。 字节流字节流和它的名字一样，是以字节的方式来操作文件的，这里的文件包括图片、视频、文本等，它的使用范围比字符流广泛，并且后面我们会介绍某些字符流如FilerReader也是建立在字节流上操">
+<meta name="description" content="背景IO在一般业务开发中不常用到，因此也是很久没有对这部分进行一次系统性的总结，最近有时间也是总结一下。 Java IO总览Java IO这里指的传统IO，NIO会放到其他文章中介绍。在分类之前先了解一些概念。 流流是一种对数据传递的抽象概念。比如，我们通过输入流读取磁盘上读取数据，就像水流一样连续源源不断流向用户态内存中。但是本质并非如此，至少不像水流那样源源不断，因为用户开发的程序运行在用户空">
 <meta name="keywords" content="Java,IO">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Java 基础之IO总览">
 <meta property="og:url" content="http://yoursite.com/2018/05/26/IO总览/index.html">
 <meta property="og:site_name" content="IkanのBolg">
-<meta property="og:description" content="背景IO在一般业务开发中不常用到，因此也是很久没有对这部分进行一次系统性的总结，最近有时间也是总结一下。 Java IO总览Java IO这里指的传统IO，NIO会放到其他文章中介绍。在分类之前先了解一些概念。 字节流字节流和它的名字一样，是以字节的方式来操作文件的，这里的文件包括图片、视频、文本等，它的使用范围比字符流广泛，并且后面我们会介绍某些字符流如FilerReader也是建立在字节流上操">
+<meta property="og:description" content="背景IO在一般业务开发中不常用到，因此也是很久没有对这部分进行一次系统性的总结，最近有时间也是总结一下。 Java IO总览Java IO这里指的传统IO，NIO会放到其他文章中介绍。在分类之前先了解一些概念。 流流是一种对数据传递的抽象概念。比如，我们通过输入流读取磁盘上读取数据，就像水流一样连续源源不断流向用户态内存中。但是本质并非如此，至少不像水流那样源源不断，因为用户开发的程序运行在用户空">
 <meta property="og:locale" content="default">
 <meta property="og:image" content="http://yoursite.com/images/stream_uml.png">
 <meta property="og:image" content="http://yoursite.com/images/ReaderWriter.png">
 <meta property="og:image" content="http://yoursite.com/images/iostream.png">
 <meta property="og:image" content="http://yoursite.com/images/stream2.png">
 <meta property="og:image" content="http://yoursite.com/images/wechat.jpeg">
-<meta property="og:updated_time" content="2018-11-10T07:50:54.640Z">
+<meta property="og:updated_time" content="2018-11-17T03:57:41.207Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Java 基础之IO总览">
-<meta name="twitter:description" content="背景IO在一般业务开发中不常用到，因此也是很久没有对这部分进行一次系统性的总结，最近有时间也是总结一下。 Java IO总览Java IO这里指的传统IO，NIO会放到其他文章中介绍。在分类之前先了解一些概念。 字节流字节流和它的名字一样，是以字节的方式来操作文件的，这里的文件包括图片、视频、文本等，它的使用范围比字符流广泛，并且后面我们会介绍某些字符流如FilerReader也是建立在字节流上操">
+<meta name="twitter:description" content="背景IO在一般业务开发中不常用到，因此也是很久没有对这部分进行一次系统性的总结，最近有时间也是总结一下。 Java IO总览Java IO这里指的传统IO，NIO会放到其他文章中介绍。在分类之前先了解一些概念。 流流是一种对数据传递的抽象概念。比如，我们通过输入流读取磁盘上读取数据，就像水流一样连续源源不断流向用户态内存中。但是本质并非如此，至少不像水流那样源源不断，因为用户开发的程序运行在用户空">
 <meta name="twitter:image" content="http://yoursite.com/images/stream_uml.png">
 
 
@@ -350,6 +350,7 @@
       
         <h4 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h4><p>IO在一般业务开发中不常用到，因此也是很久没有对这部分进行一次系统性的总结，最近有时间也是总结一下。</p>
 <h4 id="Java-IO总览"><a href="#Java-IO总览" class="headerlink" title="Java IO总览"></a>Java IO总览</h4><p>Java IO这里指的传统IO，NIO会放到其他文章中介绍。在分类之前先了解一些概念。</p>
+<h4 id="流"><a href="#流" class="headerlink" title="流"></a>流</h4><p>流是一种对数据传递的抽象概念。比如，我们通过输入流读取磁盘上读取数据，就像水流一样连续源源不断流向用户态内存中。但是本质并非如此，至少不像水流那样源源不断，因为用户开发的程序运行在用户空间，而用户空间的进程是没有直接操作I/O设备的权限，需要内核进程帮忙操作I/O设备，用户空间进程会交出执行权，这个状态叫陷入内核，而用户空间的进程则表现为阻塞状态，等到需要读取的数据被内核进程准备好后，用户空间进程重新获得执行权，继续运行。</p>
 <h4 id="字节流"><a href="#字节流" class="headerlink" title="字节流"></a>字节流</h4><p>字节流和它的名字一样，是以字节的方式来操作文件的，这里的文件包括图片、视频、文本等，它的使用范围比字符流广泛，并且后面我们会介绍某些字符流如FilerReader也是建立在字节流上操作的，利用StreamDecoder按照编码方式将字节转换成字符，后面会详细介绍。字节流操作的byte。</p>
 <a id="more"></a>
 <p>字节流IO包中类继承关系如下</p>
@@ -515,7 +516,7 @@
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">4</span>
+                  <span class="site-state-item-count">5</span>
                   <span class="site-state-item-name">posts</span>
                 </a>
               </div>
@@ -570,7 +571,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-4"><a class="nav-link" href="#背景"><span class="nav-number">1.</span> <span class="nav-text">背景</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Java-IO总览"><span class="nav-number">2.</span> <span class="nav-text">Java IO总览</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#字节流"><span class="nav-number">3.</span> <span class="nav-text">字节流</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#字符流"><span class="nav-number">4.</span> <span class="nav-text">字符流</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#输入流和输出流"><span class="nav-number">5.</span> <span class="nav-text">输入流和输出流</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#节点流和处理流"><span class="nav-number">6.</span> <span class="nav-text">节点流和处理流</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#IO流的分类"><span class="nav-number">7.</span> <span class="nav-text">IO流的分类</span></a></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-4"><a class="nav-link" href="#背景"><span class="nav-number">1.</span> <span class="nav-text">背景</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Java-IO总览"><span class="nav-number">2.</span> <span class="nav-text">Java IO总览</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#流"><span class="nav-number">3.</span> <span class="nav-text">流</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#字节流"><span class="nav-number">4.</span> <span class="nav-text">字节流</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#字符流"><span class="nav-number">5.</span> <span class="nav-text">字符流</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#输入流和输出流"><span class="nav-number">6.</span> <span class="nav-text">输入流和输出流</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#节点流和处理流"><span class="nav-number">7.</span> <span class="nav-text">节点流和处理流</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#IO流的分类"><span class="nav-number">8.</span> <span class="nav-text">IO流的分类</span></a></li></ol></div>
             
 
           </div>
