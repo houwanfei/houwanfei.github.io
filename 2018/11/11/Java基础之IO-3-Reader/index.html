@@ -88,8 +88,7 @@
 <meta property="og:description" content="概述前两节学习过了字节输入流和字节输出流，大家可能会疑惑，为什么已经有了字节输入流，还需要字符输入流。其实从字面意思就可以理解，字节输入流在读取的时候是按字节的方式，而字节是一个对计算机友好，但是对人类用户不友好的方式，字符才是对人类友好的传递信息的方式。字符流对处理文字特别方便，而字节流在处理图像、音频、视频方面比较方便。 Reader的继承结构">
 <meta property="og:locale" content="default">
 <meta property="og:image" content="http://yoursite.com/images/Reader.png">
-<meta property="og:image" content="http://yoursite.com/images/wechat.jpeg">
-<meta property="og:updated_time" content="2018-11-18T13:43:09.290Z">
+<meta property="og:updated_time" content="2018-12-01T04:17:11.114Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Java基础之IO(3)-Reader">
 <meta name="twitter:description" content="概述前两节学习过了字节输入流和字节输出流，大家可能会疑惑，为什么已经有了字节输入流，还需要字符输入流。其实从字面意思就可以理解，字节输入流在读取的时候是按字节的方式，而字节是一个对计算机友好，但是对人类用户不友好的方式，字符才是对人类友好的传递信息的方式。字符流对处理文字特别方便，而字节流在处理图像、音频、视频方面比较方便。 Reader的继承结构">
@@ -443,8 +442,6 @@
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">public class InputStreamReaderDemo &#123;</span><br><span class="line">    public static void main(String[] args) &#123;</span><br><span class="line">        try (FileInputStream fis = new FileInputStream(&quot;/tmp/test&quot;))&#123;</span><br><span class="line">            InputStreamReader isr = new InputStreamReader(fis, Charset.forName(&quot;utf-8&quot;));</span><br><span class="line">            char[] chars = new char[2];</span><br><span class="line">            isr.read(chars, 0, 2);</span><br><span class="line">            System.out.println(chars);</span><br><span class="line">        &#125; catch (IOException e) &#123;</span><br><span class="line">            e.printStackTrace();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 </li>
 </ul>
-<p>小弟才疏学浅，轻喷。附上个人微信，欢迎交流指教。</p>
-<p><img src="/images/wechat.jpeg" width="20%" height="20"></p>
 
       
     </div>
@@ -486,6 +483,10 @@
           <span class="post-nav-divider"></span>
 
           <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2018/11/18/Java基础之IO-4-Writer/" rel="prev" title="Java基础之IO(4)-Writer">
+                Java基础之IO(4)-Writer <i class="fa fa-chevron-right"></i>
+              </a>
             
           </div>
         </div>
@@ -562,7 +563,7 @@
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">5</span>
+                  <span class="site-state-item-count">6</span>
                   <span class="site-state-item-name">posts</span>
                 </a>
               </div>
