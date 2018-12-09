@@ -94,7 +94,7 @@
 <meta property="og:image" content="http://yoursite.com/images/char_utf8_gbk.png">
 <meta property="og:image" content="http://yoursite.com/images/runtime_code.png">
 <meta property="og:image" content="http://yoursite.com/images/Charset.png">
-<meta property="og:updated_time" content="2018-12-09T06:06:15.294Z">
+<meta property="og:updated_time" content="2018-12-09T06:11:10.204Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Java编码详解">
 <meta name="twitter:description" content="背景从一个问题说起，前几天在和一家公司做项目对接时，我方公司提供给对方的是返回的code码作为成功还是失败校验，对方公司因为使用了我方返回的msg作为组合校验，而返回msg出现乱码，导致对方公司作字符串匹配时失败，以为我方返回的是失败。这时，对方公司截图发给我方要求我方检查编码。我虽不才，但是我方使用的编码我还是可以保证的，我敢大声的说不是我方的问题。为此开启了一条甩锅之路（不对啊，明明不是我的锅">
@@ -384,7 +384,7 @@
 <p>由于各个国家都这样自己搞了一套编码，导致非常不通用，ISO解决了这个问题，废弃了其他国家或地区的编码，制定了一套国际通用的编码，该编码强制用两个字节来表示任何字符，包括ASCII中的半角字符也是两字节编码，UNICODE可以表示65535个不同字符。</p>
 </li>
 <li><p>UTF</p>
-<p>由于网络的兴起，UNICODE由于必须由两个字节表示，在网络传输中那些半角字符会浪费带宽，所以UNICODE在网络中如何传输就成为一个问题，这时出现各种UTF标准，UTF-8就是每次8位传输数据，UTF-16则一次传输16位。UTF-8编码从1-4字节，编码中文用3个字节。</p>
+<p>由于网络的兴起，UNICODE由于必须由两个字节表示，在网络传输中那些半角字符会浪费带宽，所以UNICODE在网络中如何传输就成为一个问题，这时出现各种UTF标准，UTF-8就是每次8位传输数据，UTF-16则一次传输16位。UTF-8编码从1-6字节，编码常用汉字用3个字节。</p>
 </li>
 </ul>
 <h5 id="例子"><a href="#例子" class="headerlink" title="例子"></a>例子</h5><p>现在举个例子，我们以“你好啊，Ikan！”为例子，分别看一下将它编码成ISO-8859-1、GBK、UTF-8，所占的字节数和字节数组的值是否与上一小节描述相符。</p>
