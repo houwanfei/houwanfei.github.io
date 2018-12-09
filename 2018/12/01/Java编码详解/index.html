@@ -1,0 +1,821 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="Java,字符编码," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="背景从一个问题说起，前几天在和一家公司做项目对接时，我方公司提供给对方的是返回的code码作为成功还是失败校验，对方公司因为使用了我方返回的msg作为组合校验，而返回msg出现乱码，导致对方公司作字符串匹配时失败，以为我方返回的是失败。这时，对方公司截图发给我方要求我方检查编码。我虽不才，但是我方使用的编码我还是可以保证的，我敢大声的说不是我方的问题。为此开启了一条甩锅之路（不对啊，明明不是我的锅">
+<meta name="keywords" content="Java,字符编码">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Java编码详解">
+<meta property="og:url" content="http://yoursite.com/2018/12/01/Java编码详解/index.html">
+<meta property="og:site_name" content="IkanのBolg">
+<meta property="og:description" content="背景从一个问题说起，前几天在和一家公司做项目对接时，我方公司提供给对方的是返回的code码作为成功还是失败校验，对方公司因为使用了我方返回的msg作为组合校验，而返回msg出现乱码，导致对方公司作字符串匹配时失败，以为我方返回的是失败。这时，对方公司截图发给我方要求我方检查编码。我虽不才，但是我方使用的编码我还是可以保证的，我敢大声的说不是我方的问题。为此开启了一条甩锅之路（不对啊，明明不是我的锅">
+<meta property="og:locale" content="default">
+<meta property="og:image" content="http://yoursite.com/images/1720823141.jpg">
+<meta property="og:image" content="http://yoursite.com/images/char_code_iso.png">
+<meta property="og:image" content="http://yoursite.com/images/char_code_gbk.png">
+<meta property="og:image" content="http://yoursite.com/images/char_code_utf8.png">
+<meta property="og:image" content="http://yoursite.com/images/char_utf8_gbk.png">
+<meta property="og:image" content="http://yoursite.com/images/runtime_code.png">
+<meta property="og:image" content="http://yoursite.com/images/Charset.png">
+<meta property="og:updated_time" content="2018-12-09T06:06:15.294Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Java编码详解">
+<meta name="twitter:description" content="背景从一个问题说起，前几天在和一家公司做项目对接时，我方公司提供给对方的是返回的code码作为成功还是失败校验，对方公司因为使用了我方返回的msg作为组合校验，而返回msg出现乱码，导致对方公司作字符串匹配时失败，以为我方返回的是失败。这时，对方公司截图发给我方要求我方检查编码。我虽不才，但是我方使用的编码我还是可以保证的，我敢大声的说不是我方的问题。为此开启了一条甩锅之路（不对啊，明明不是我的锅">
+<meta name="twitter:image" content="http://yoursite.com/images/1720823141.jpg">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: 'Author'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2018/12/01/Java编码详解/"/>
+
+
+
+
+
+  <title>Java编码详解 | IkanのBolg</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="default">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">IkanのBolg</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">只想安安静静撸代码</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            Home
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            Tags
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            Categories
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            Archives
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2018/12/01/Java编码详解/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="ikan">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="IkanのBolg">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">Java编码详解</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-12-01T12:31:24+08:00">
+                2018-12-01
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Java学习笔记/" itemprop="url" rel="index">
+                    <span itemprop="name">Java学习笔记</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h4 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h4><p>从一个问题说起，前几天在和一家公司做项目对接时，我方公司提供给对方的是返回的code码作为成功还是失败校验，对方公司因为使用了我方返回的msg作为组合校验，而返回msg出现乱码，导致对方公司作字符串匹配时失败，以为我方返回的是失败。这时，对方公司截图发给我方要求我方检查编码。我虽不才，但是我方使用的编码我还是可以保证的，我敢大声的说不是我方的问题。为此开启了一条甩锅之路（不对啊，明明不是我的锅，为什么要叫甩锅）。</p>
+<a id="more"></a>
+<p>这时，我开始找证据，首先我得搞清楚那句乱码正常应该是什么信息，我看到该请求在执行数据查询时抛了一个RuntimeException，这个会交给全局异常处理器处理，然后找到了本来该返回的信息“内部系统错误，请联系管理员”这一句，总共13个中文字符，这时我在看了一下对方截图的乱码如下图所示，我数了一下总共39个乱码字符，哈哈，这个字数符和我方UTF-8的编码编码13个中文字符的字节数刚刚吻合，这个时候已经可以甩掉这个锅，但是我决定帮对方找到他们错误使用的编码，这时浮现在我脑海中单字节编码集ISO-8859-1和ASCII。</p>
+<p><img src="/images/1720823141.jpg" alt="Alt"></p>
+<p>接下来我要帮对方找到问题的原因，写了一段测试代码</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">public class EncodeTest &#123;</span><br><span class="line">    public static void main(String[] args) &#123;</span><br><span class="line">        String str = &quot;系统内部错误，请联系管理员&quot;;</span><br><span class="line">        try &#123;</span><br><span class="line">            byte[] bytes = str.getBytes(&quot;UTF-8&quot;);</span><br><span class="line">            String newStr = new String(bytes, &quot;iso-8859-1&quot;);</span><br><span class="line">            //String newStr = new String(bytes, &quot;ASCII&quot;);</span><br><span class="line">            System.out.println(newStr);</span><br><span class="line">        &#125; catch (UnsupportedEncodingException e) &#123;</span><br><span class="line">            e.printStackTrace();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>iso-8859-1的输出</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ç³»ç»åé¨éè¯¯ï¼è¯·èç³»ç®¡çå</span><br></pre></td></tr></table></figure>
+<p>ASCII的输出</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">���������������������������������������</span><br></pre></td></tr></table></figure>
+<p>完美，这下可以确定对方在解码我方返回结果时采用的是什么编码了，就是ASCII码。眼尖的朋友可能看到了为什么图片里还有其他正常的中文，如果有这个疑问，看完后边的解析后应该能够明白。</p>
+<h4 id="编码集"><a href="#编码集" class="headerlink" title="编码集"></a>编码集</h4><h5 id="单字节编码"><a href="#单字节编码" class="headerlink" title="单字节编码"></a>单字节编码</h5><ul>
+<li><p>ASCII</p>
+<p>ASCII是现今最通用的单字节编码系统，使用7位二进制数来表示所有的字母、数字、标点符号及一些特殊控制字符，作为美国编码标准来使用。ASCII定义了128个字符，包括33个不可打印的控制字符(non-printing control characters)和95个可打印的字符。</p>
+</li>
+<li><p>ISO-8859-1</p>
+<p>ISO-8859-1是单字节编码，又称Latin-1，用８为编码，向下兼容ASCII，是许多欧洲国家使用的编码标准。其编码范围是0x00-0xFF，0x00-0x7F之间完全和ASCII一致，0x80-0x9F之间是控制字符，0xA0-0xFF之间是文字符号。</p>
+</li>
+</ul>
+<h5 id="多字节编码"><a href="#多字节编码" class="headerlink" title="多字节编码"></a>多字节编码</h5><p>单字节编码在使用英文的国家可以满足需求，可是对于其他国家的文字则不能用单字节编码，比如我们使用的中文。因为ISO-8859-1使用８位编码，最多也只能表示256个字符，而世界上其他国家的文字，单是我们使用的中文就远远不止256。</p>
+<ul>
+<li><p>GB2312</p>
+<p>gb2312使用两个字节（或一个字节，半角字符）编码，分为高位和低位，规定当字节值小于127时和ASCII码相同，如果两个大于127的字节连着时，就表示中文字符，此外这些编码里，还把数学符号、罗马希腊的字母、日文的假名们都编进去了，连在 ASCII 里本来就有的数字、标点、字母都统统重新编码，这就是常说的”全角”字符，而原来在127号以下的那些就叫”半角”字符了。</p>
+</li>
+<li><p>GBK</p>
+<p>即使GB2312可以编码7000多个字符，但是还是不够，于是又进一步规定两个字节中的低位不一定要大于127，只要高位大于127就表示一个中文字符。通过这样扩展就增加了20000多个中文字符，其中包括繁体字。</p>
+</li>
+<li><p>GB18030</p>
+<p>扩展了GBK，增加了少数名族字符。</p>
+</li>
+<li><p>UNICODE</p>
+<p>由于各个国家都这样自己搞了一套编码，导致非常不通用，ISO解决了这个问题，废弃了其他国家或地区的编码，制定了一套国际通用的编码，该编码强制用两个字节来表示任何字符，包括ASCII中的半角字符也是两字节编码，UNICODE可以表示65535个不同字符。</p>
+</li>
+<li><p>UTF</p>
+<p>由于网络的兴起，UNICODE由于必须由两个字节表示，在网络传输中那些半角字符会浪费带宽，所以UNICODE在网络中如何传输就成为一个问题，这时出现各种UTF标准，UTF-8就是每次8位传输数据，UTF-16则一次传输16位。UTF-8编码从1-4字节，编码中文用3个字节。</p>
+</li>
+</ul>
+<h5 id="例子"><a href="#例子" class="headerlink" title="例子"></a>例子</h5><p>现在举个例子，我们以“你好啊，Ikan！”为例子，分别看一下将它编码成ISO-8859-1、GBK、UTF-8，所占的字节数和字节数组的值是否与上一小节描述相符。</p>
+<ul>
+<li><p>ISO-8859-1编码解码</p>
+<p><img src="/images/char_code_iso.png" alt="Alt"></p>
+<p>从图中看到，用ISO编码中文，因为找不到对应的编码，全部被编码为了63，所以就出现大家很熟悉的乱码。</p>
+</li>
+<li><p>GBK编码解码</p>
+<p><img src="/images/char_code_gbk.png" alt="Alt"></p>
+<p>GBK用两个字节编码中文字符，用一个字节编码ASCII字符。</p>
+</li>
+<li><p>UTF-8编码解码</p>
+<p><img src="/images/char_code_utf8.png" alt="Alt"></p>
+<p>UTF-8用3个字节编码中文字符，用一个字节编码ASCII字符。具体是怎么表示的呢？UTF-8规定，字节以0开头表示后面7位表示一个ASCII字符，如果以10开头表示这个字节后6位表示字符的部分内容，如果以110\1110\11110…表示这是一个起始字符有多少个1就表示这个字符有多少个字节。</p>
+</li>
+<li><p>乱码产生的原因</p>
+<p>通过上面的分析，可以知道，乱码产生的原因</p>
+<ol>
+<li><p>用ASCII或ISO-8859-1编码中文，导致信息丢失，无法还原。</p>
+</li>
+<li><p>编码和解码用的不是同一种编码，比如用GBK解UTF-8的编码</p>
+<p><img src="/images/char_utf8_gbk.png" alt="Alt"></p>
+<p>从上图看到中文字符串的前四个字符编码为12个字节，而GBK用2个字节编码中文，所以产生了6个中文字符，因为编码不一致，导致不能得到正确的中文。由此得到一个规律，当原始字符串中有中文时，gbk解utf-8编码的字符将得到比原始字符串多的乱码字符串，同理iso-8859-1和ASCII码。</p>
+</li>
+</ol>
+</li>
+</ul>
+<h4 id="Java中的编码"><a href="#Java中的编码" class="headerlink" title="Java中的编码"></a>Java中的编码</h4><h5 id="Java内编码"><a href="#Java内编码" class="headerlink" title="Java内编码"></a>Java内编码</h5><p>Java的内编码指JVM运行时是如何表示字符，Java的内编码用UTF-16，UTF-16即用两个字节来编码字符。大家可能对Java的编码系统有疑惑，或者经常Java运行时乱码搞不清楚，看一张图，来理一下Java从编辑java文件到编译然后在到JVM加载运行到传输过程中字符的表示方式以及转换过程。</p>
+<p><img src="/images/runtime_code.png" alt="Alt"></p>
+<p>上图中我们看到不管你编辑.java文件时用的是什么编码，这就是我们可能经常用ide编辑代码时project是UTF-8这个时候ide在编译时是按UTF-8来编码，如果这个时候不知你从哪里复制过来一个.java文件，这个文件是GBK编码的，刚好这个文件里又有中文，这个时候如果编译，那么这个文件中的中文在程序运行产生结果传输时就会变乱码。在编译时都会被转换为UTF-8表示的.class文件（注意：在编译时如果没有指定.java文件编码，会采用系统本地编码格式），然后被加载到内存中时，我们知道在运行时，String内部其实是char数组，而我们知道一个char由两个byte组成，所以在运行时字符是UTF-16表示。至于如果传输程序结果，这个可以有多种编码方式，看程序如何指定。这个涉及到字符集和编码解码，接下来详细介绍这些部分。</p>
+<h5 id="CharsetEncoder-编码器"><a href="#CharsetEncoder-编码器" class="headerlink" title="CharsetEncoder(编码器)"></a>CharsetEncoder(编码器)</h5><ul>
+<li><p>CharsetEncoder构造方法</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">protected	CharsetEncoder(Charset cs, float averageBytesPerChar, float maxBytesPerChar)</span><br><span class="line"></span><br><span class="line">protected	CharsetEncoder(Charset cs, float averageBytesPerChar, float maxBytesPerChar, byte[] replacement)</span><br></pre></td></tr></table></figure>
+<p>通过两个构造函数的修饰符，可以知道CharsetEncoder的构造函数是受保护的，设计者不希望用户直接构造该对象，如果用户要使用该对象那么就要通过Charset的newEncoder方法获取到CharsetEncoder对象，或者是通过继承CharsetEncoder来构造。 </p>
+</li>
+<li><p>CharsetEncoder方法</p>
+<p>CharsetEncoder方法较多，感兴趣的可以从<a href="https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/nio/charset/CharsetEncoder.html" target="_blank" rel="noopener">这里</a>去查看详细的介绍。</p>
+</li>
+</ul>
+<h5 id="CharsetDecoder-解码器"><a href="#CharsetDecoder-解码器" class="headerlink" title="CharsetDecoder(解码器)"></a>CharsetDecoder(解码器)</h5><p>CharsetDecoder和CharsetEncoder类似，不啰嗦了，感兴趣的可以通过<a href="https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/nio/charset/CharsetEncoder.html" target="_blank" rel="noopener">这里</a>获得详细介绍。</p>
+<h5 id="CharSet（字符集）"><a href="#CharSet（字符集）" class="headerlink" title="CharSet（字符集）"></a>CharSet（字符集）</h5><p>Java支持的字符集很广泛，CharSet是所有字符集的父类。这里列几个常用的字符集和CharSet的继承关系图</p>
+<p><img src="/images/Charset.png" alt="Alt"></p>
+<p>Charset是一个抽象类，本身是不能实例化的。</p>
+<ul>
+<li><p>Charset方法</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br></pre></td><td class="code"><pre><span class="line">Set&lt;String&gt;	aliases()	</span><br><span class="line"></span><br><span class="line">static SortedMap&lt;String,Charset&gt;	availableCharsets()	</span><br><span class="line"></span><br><span class="line">boolean	canEncode()	</span><br><span class="line">//和传入的字符集比较</span><br><span class="line">int	compareTo(Charset that)	</span><br><span class="line">//</span><br><span class="line">abstract boolean	contains(Charset cs)	</span><br><span class="line">//重要方法，传入byte缓冲以该字符集编码方式解码</span><br><span class="line">CharBuffer	decode(ByteBuffer bb)	</span><br><span class="line"></span><br><span class="line">static Charset	defaultCharset()	</span><br><span class="line"></span><br><span class="line">String	displayName()	</span><br><span class="line"></span><br><span class="line">String	displayName(Locale locale)	</span><br><span class="line">//重要方法，传入字符串以该字符集编码方式编码</span><br><span class="line">ByteBuffer	encode(String str)	</span><br><span class="line">//重要方法，传入字符缓冲以该字符集编码方式编码</span><br><span class="line">ByteBuffer	encode(CharBuffer cb)	</span><br><span class="line"></span><br><span class="line">boolean	equals(Object ob)	</span><br><span class="line"></span><br><span class="line">static Charset	forName(String charsetName)	</span><br><span class="line"></span><br><span class="line">int	hashCode()	</span><br><span class="line"></span><br><span class="line">boolean	isRegistered()	</span><br><span class="line"></span><br><span class="line">static boolean	isSupported(String charsetName)	</span><br><span class="line"></span><br><span class="line">String	name()	</span><br><span class="line">//创建一个解码器</span><br><span class="line">abstract CharsetDecoder	newDecoder()	</span><br><span class="line">//创建一个编码器</span><br><span class="line">abstract CharsetEncoder	newEncoder()	</span><br><span class="line"></span><br><span class="line">String	toString()</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>简单例子</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">public static void main(String[] args) &#123;</span><br><span class="line">        Charset charset = Charset.forName(&quot;UTF-8&quot;);</span><br><span class="line"></span><br><span class="line">        ByteBuffer byteBuffer = charset.encode(&quot;你好啊，Ikan!&quot;);</span><br><span class="line">        for (int i=0; i&lt;byteBuffer.array().length; i++)&#123;</span><br><span class="line">            System.out.print(byteBuffer.array()[i]);</span><br><span class="line">        &#125;</span><br><span class="line">        System.out.println();</span><br><span class="line">        System.out.println(charset.decode(ByteBuffer.wrap(byteBuffer.array())));</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+<p>输出结果：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">-28 -67 -96 -27 -91 -67 -27 -107 -118 -17 -68 -116 73 107 97 110 -17 -68 -127</span><br><span class="line">你好啊，Ikan！</span><br></pre></td></tr></table></figure>
+<p>和我们前边的UTF-8编码一样。</p>
+</li>
+</ul>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Java/" rel="tag"># Java</a>
+          
+            <a href="/tags/字符编码/" rel="tag"># 字符编码</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2018/11/18/Java基础之IO-4-Writer/" rel="next" title="Java基础之IO(4)-Writer">
+                <i class="fa fa-chevron-left"></i> Java基础之IO(4)-Writer
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Overview
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">ikan</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">7</span>
+                  <span class="site-state-item-name">posts</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">1</span>
+                  <span class="site-state-item-name">categories</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">5</span>
+                  <span class="site-state-item-name">tags</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-4"><a class="nav-link" href="#背景"><span class="nav-number">1.</span> <span class="nav-text">背景</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#编码集"><span class="nav-number">2.</span> <span class="nav-text">编码集</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#单字节编码"><span class="nav-number">2.1.</span> <span class="nav-text">单字节编码</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#多字节编码"><span class="nav-number">2.2.</span> <span class="nav-text">多字节编码</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#例子"><span class="nav-number">2.3.</span> <span class="nav-text">例子</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Java中的编码"><span class="nav-number">3.</span> <span class="nav-text">Java中的编码</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#Java内编码"><span class="nav-number">3.1.</span> <span class="nav-text">Java内编码</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#CharsetEncoder-编码器"><span class="nav-number">3.2.</span> <span class="nav-text">CharsetEncoder(编码器)</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#CharsetDecoder-解码器"><span class="nav-number">3.3.</span> <span class="nav-text">CharsetDecoder(解码器)</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#CharSet（字符集）"><span class="nav-number">3.4.</span> <span class="nav-text">CharSet（字符集）</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2018</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">ikan</span>
+
+  
+</div>
+
+
+  <div class="powered-by">Powered by <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a></div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">Theme &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
