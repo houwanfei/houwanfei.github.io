@@ -1,0 +1,761 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="Spark,Docker,大数据," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="Spark概述Apache Spark是一个开源集群运算框架，最初是由加州大学柏克莱分校AMPLab所开发。相对于Hadoop的MapReduce会在运行完工作后将中介数据存放到磁盘中，Spark使用了存储器内运算技术，能在数据尚未写入硬盘时即在存储器内分析运算。Spark在存储器内运行程序的运算速度能做到比Hadoop MapReduce的运算速度快上100倍，即便是运行程序于硬盘时，Spark">
+<meta name="keywords" content="Spark,Docker,大数据">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Docker构建Spark并提交WordCount任务">
+<meta property="og:url" content="http://yoursite.com/2020/04/29/Docker构建Spark并提交WordCount任务/index.html">
+<meta property="og:site_name" content="IkanのBolg">
+<meta property="og:description" content="Spark概述Apache Spark是一个开源集群运算框架，最初是由加州大学柏克莱分校AMPLab所开发。相对于Hadoop的MapReduce会在运行完工作后将中介数据存放到磁盘中，Spark使用了存储器内运算技术，能在数据尚未写入硬盘时即在存储器内分析运算。Spark在存储器内运行程序的运算速度能做到比Hadoop MapReduce的运算速度快上100倍，即便是运行程序于硬盘时，Spark">
+<meta property="og:locale" content="default">
+<meta property="og:image" content="http://yoursite.com/images/spark_idea1.png">
+<meta property="og:image" content="http://yoursite.com/images/spark_idea2.png">
+<meta property="og:image" content="http://yoursite.com/images/spark_idea3.png">
+<meta property="og:updated_time" content="2020-04-29T14:57:29.915Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Docker构建Spark并提交WordCount任务">
+<meta name="twitter:description" content="Spark概述Apache Spark是一个开源集群运算框架，最初是由加州大学柏克莱分校AMPLab所开发。相对于Hadoop的MapReduce会在运行完工作后将中介数据存放到磁盘中，Spark使用了存储器内运算技术，能在数据尚未写入硬盘时即在存储器内分析运算。Spark在存储器内运行程序的运算速度能做到比Hadoop MapReduce的运算速度快上100倍，即便是运行程序于硬盘时，Spark">
+<meta name="twitter:image" content="http://yoursite.com/images/spark_idea1.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: 'Author'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2020/04/29/Docker构建Spark并提交WordCount任务/"/>
+
+
+
+
+
+  <title>Docker构建Spark并提交WordCount任务 | IkanのBolg</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="default">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">IkanのBolg</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">只想安安静静撸代码</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            Home
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            Tags
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            Categories
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            Archives
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2020/04/29/Docker构建Spark并提交WordCount任务/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="ikan">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="IkanのBolg">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">Docker构建Spark并提交WordCount任务</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2020-04-29T21:57:30+08:00">
+                2020-04-29
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Spark学习/" itemprop="url" rel="index">
+                    <span itemprop="name">Spark学习</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h4 id="Spark概述"><a href="#Spark概述" class="headerlink" title="Spark概述"></a>Spark概述</h4><p><strong>Apache Spark</strong>是一个<a href="http://www.bosimedia.com/wiki/%E5%BC%80%E6%BA%90" target="_blank" rel="noopener">开源</a>集群运算框架，最初是由加州大学柏克莱分校AMPLab所开发。相对于<a href="http://www.bosimedia.com/wiki/Apache_Hadoop" target="_blank" rel="noopener">Hadoop</a>的<a href="http://www.bosimedia.com/wiki/MapReduce" target="_blank" rel="noopener">MapReduce</a>会在运行完工作后将中介数据存放到磁盘中，Spark使用了存储器内运算技术，能在数据尚未写入硬盘时即在存储器内分析运算。Spark在存储器内运行程序的运算速度能做到比Hadoop MapReduce的运算速度快上100倍，即便是运行程序于硬盘时，Spark也能快上10倍速度。<a href="http://www.bosimedia.com/wiki/Apache_Spark#cite_note-1" target="_blank" rel="noopener">[1]</a>Spark允许用户将数据加载至集群存储器，并多次对其进行查询，非常适合用于<a href="http://www.bosimedia.com/wiki/%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0" target="_blank" rel="noopener">机器学习</a>算法。摘自维基百科。总结一下就是，hadoop的mapreduce是将中间结果存在磁盘上，而spark是将中间结果存在主存中，所以速度比Hadoop的mapreduce快。</p>
+<a id="more"></a>
+<h4 id="准备工作"><a href="#准备工作" class="headerlink" title="准备工作"></a>准备工作</h4><h5 id="环境选择"><a href="#环境选择" class="headerlink" title="环境选择"></a>环境选择</h5><ul>
+<li>宿主机系统：win10</li>
+<li>hadoop版本：3.1.1(构建基于HDFS的spark)</li>
+<li>Spark版本：2.4.5</li>
+<li>容器系统：ubuntu16</li>
+<li>jdk：1.8</li>
+</ul>
+<h5 id="准备"><a href="#准备" class="headerlink" title="准备"></a>准备</h5><ul>
+<li>下载jdk1.8<a href="https://www.oracle.com/cn/java/technologies/javase/javase-jdk8-downloads.html" target="_blank" rel="noopener">下载地址</a>放入E:/docker/spark目录下</li>
+<li>下载Hadoop<a href="https://hadoop.apache.org/releases.html" target="_blank" rel="noopener">下载地址</a>放入E:/docker/spark目录下，这一步不是必须的，只是因为我部署hdfs的时候选择了版本3.1.1不想重新部署，所以下载Spark时选择了Pre-build with user-provided Apache Haddop，啥意思呢？就是自定义版本的Hadoop，如果选择的Spark版本是Pre-build for Apache Haddop 2.6/2.7，那就不需要单独下载Hadoop，因为下载的Spark已经预编译了。</li>
+<li>下载spark<a href="http://spark.apache.org/downloads.html" target="_blank" rel="noopener">下载地址</a>放入E:/docker/spark目录下，选择好自己的版本，如果已经安装了Hadoop2.6/2.7建议直接下载预编译了Hadoop的版本，不需要后续配置环境参数。</li>
+</ul>
+<h5 id="编写Dockerfile文件"><a href="#编写Dockerfile文件" class="headerlink" title="编写Dockerfile文件"></a>编写Dockerfile文件</h5><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br></pre></td><td class="code"><pre><span class="line">FROM ubuntu:16.04</span><br><span class="line">MAINTAINER houwanfei</span><br><span class="line"></span><br><span class="line"># 安装openssh-server</span><br><span class="line">RUN  apt-get update &amp;&amp; apt-get install -y openssh-server</span><br><span class="line"></span><br><span class="line"># 配置ssh免密登陆</span><br><span class="line">RUN ssh-keygen -t rsa -f ~/.ssh/id_rsa -P &apos;&apos; &amp;&amp; \</span><br><span class="line">    cat ~/.ssh/id_rsa.pub &gt;&gt; ~/.ssh/authorized_keys</span><br><span class="line"># 复制jdk和配置jdk环境</span><br><span class="line">RUN mkdir /usr/lib/jvm/</span><br><span class="line">ADD openjdk-8u40-b25-linux-x64-10_feb_2015.tar.gz /usr/lib/jvm/</span><br><span class="line">ENV JAVA_HOME /usr/lib/jvm/java-se-8u40-ri/ </span><br><span class="line">ENV PATH $PATH:$JAVA_HOME/bin</span><br><span class="line"></span><br><span class="line"># 复制hadoop和配置hadoop配置</span><br><span class="line">RUN mkdir /usr/local/hadoop/</span><br><span class="line">ADD hadoop-3.1.1.tar.gz /usr/local/hadoop/</span><br><span class="line">ENV HADOOP_HOME /usr/local/hadoop/hadoop-3.1.1</span><br><span class="line">ENV PATH $PATH:$HADOOP_HOME/bin:$HADOOP_HOME/sbin</span><br><span class="line"></span><br><span class="line"># 复制spark和配置spark环境</span><br><span class="line">RUN mkdir /usr/local/spark</span><br><span class="line">ADD spark-2.4.5-bin-without-hadoop.tgz /usr/local/spark</span><br><span class="line">ENV SPARK_HOME=/usr/local/spark/spark-2.4.5-bin-without-hadoop</span><br><span class="line">ENV PATH=$PATH:$SPARK_HOME/bin</span><br><span class="line">ENV SPARK_MASTER_PORT 7077</span><br><span class="line">ENV SPARK_MASTER_WEBUI_PORT 8080</span><br><span class="line">ENV SPARK_MASTER_LOG /tmp/logs</span><br><span class="line">ENV SPARK_WORKER_LOG /tmp/logs</span><br><span class="line">ENV SPARK_VERSION 2.4.5</span><br><span class="line"></span><br><span class="line"># 复制配置文件</span><br><span class="line">COPY config/* /tmp/</span><br><span class="line">RUN mv /tmp/spark-config.sh  $SPARK_HOME/sbin &amp;&amp; \</span><br><span class="line">	mv /tmp/spark-env.sh $SPARK_HOME/conf</span><br><span class="line"># 暴露端口</span><br><span class="line">EXPOSE 8080 7077 6066</span><br><span class="line"></span><br><span class="line">CMD [ &quot;sh&quot;, &quot;-c&quot;, &quot;service ssh start; bash&quot;]</span><br></pre></td></tr></table></figure>
+<h5 id="配置配置文件"><a href="#配置配置文件" class="headerlink" title="配置配置文件"></a>配置配置文件</h5><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"># 将两个文件放入E:/docker/spark/config目录下</span><br><span class="line"># spark-env.sh</span><br><span class="line">export SPARK_DIST_CLASSPATH=$($&#123;HADOOP_HOME&#125;/bin/hadoop classpath)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"># spark-config.sh 这里复制出来一个文件然后在最后加上这一句</span><br><span class="line">export JAVA_HOME=/usr/lib/jvm/java-se-8u40-ri/</span><br></pre></td></tr></table></figure>
+<h5 id="构建镜像"><a href="#构建镜像" class="headerlink" title="构建镜像"></a>构建镜像</h5><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"># cd切换目录到E:/docker/spark目录</span><br><span class="line">docker build -t hou/spark .</span><br></pre></td></tr></table></figure>
+<h4 id="启动"><a href="#启动" class="headerlink" title="启动"></a>启动</h4><h5 id="运行镜像"><a href="#运行镜像" class="headerlink" title="运行镜像"></a>运行镜像</h5><p>镜像已经构建完成下面开始启动镜像并启动spark</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"># 因为要利用hdfs，所以我将它和hadoop放入同一个网段</span><br><span class="line">docker run -dit --name spark-master --net hadoop --hostname spark-master hou/spark</span><br><span class="line"></span><br><span class="line"># 进入容器</span><br><span class="line">docker exec -it spark-master /bin/bash</span><br><span class="line"></span><br><span class="line"># 进入spark解压目录/usr/local/spark 进入sbin目录运行start-all.sh启动</span><br><span class="line">./start-all.sh</span><br></pre></td></tr></table></figure>
+<h5 id="验证"><a href="#验证" class="headerlink" title="验证"></a>验证</h5><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"># 浏览器输入，将ip换成自己对应的ip，spark的web ui端口默认是8080</span><br><span class="line">http://172.19.0.5:8080/</span><br></pre></td></tr></table></figure>
+<h4 id="执行第一计算任务"><a href="#执行第一计算任务" class="headerlink" title="执行第一计算任务"></a>执行第一计算任务</h4><h5 id="创建一个java的maven空项目"><a href="#创建一个java的maven空项目" class="headerlink" title="创建一个java的maven空项目"></a>创建一个java的maven空项目</h5><p><img src="/images/spark_idea1.png" alt="Alt"></p>
+<h5 id="填写groupid等信息"><a href="#填写groupid等信息" class="headerlink" title="填写groupid等信息"></a>填写groupid等信息</h5><p><img src="/images/spark_idea2.png" alt="Alt"></p>
+<h5 id="配置spark开发jar依赖"><a href="#配置spark开发jar依赖" class="headerlink" title="配置spark开发jar依赖"></a>配置spark开发jar依赖</h5><p>需要下载的jar相关依赖很多，可能要等很久看个人网速</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">&lt;dependency&gt;</span><br><span class="line">    &lt;groupId&gt;org.apache.spark&lt;/groupId&gt;</span><br><span class="line">    &lt;artifactId&gt;spark-core_2.12&lt;/artifactId&gt;</span><br><span class="line">    &lt;version&gt;2.4.5&lt;/version&gt;</span><br><span class="line">&lt;/dependency&gt;</span><br></pre></td></tr></table></figure>
+<h5 id="编写计算任务代码"><a href="#编写计算任务代码" class="headerlink" title="编写计算任务代码"></a>编写计算任务代码</h5><p>这里我是写的一个词频统计的</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line">package com.hou.test;</span><br><span class="line"></span><br><span class="line">import org.apache.spark.SparkConf;</span><br><span class="line">import org.apache.spark.api.java.JavaPairRDD;</span><br><span class="line">import org.apache.spark.api.java.JavaRDD;</span><br><span class="line">import org.apache.spark.api.java.JavaSparkContext;</span><br><span class="line">import scala.Tuple2;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">import java.util.Arrays;</span><br><span class="line"></span><br><span class="line">/**</span><br><span class="line"> * @Description</span><br><span class="line"> * @auther houwf</span><br><span class="line"> * @create 2020-04-29 10:50</span><br><span class="line"> */</span><br><span class="line">public class WordCountJob &#123;</span><br><span class="line">    public static void main(String[] args) &#123;</span><br><span class="line">        SparkConf conf = new SparkConf().setMaster(&quot;local&quot;).setAppName(&quot;WordCountApp&quot;);</span><br><span class="line">        JavaSparkContext sc = new JavaSparkContext(conf);</span><br><span class="line">        JavaRDD&lt;String&gt; input = sc.textFile(&quot;hdfs://172.19.0.2:9000/user/root/learn/madame_bovary&quot;);</span><br><span class="line">        System.out.println(&quot;inputs line:&quot; + input.count());</span><br><span class="line">        JavaRDD&lt;String&gt; words = input.flatMap(s -&gt; Arrays.asList(s.split(&quot; &quot;)).iterator());</span><br><span class="line">        JavaPairRDD&lt;String, Integer&gt; wordAndOne = words.mapToPair(word -&gt; new Tuple2&lt;&gt;(word, 1));</span><br><span class="line">        JavaPairRDD&lt;String, Integer&gt; result = wordAndOne.reduceByKey((a, b) -&gt; a+b);</span><br><span class="line">        JavaPairRDD&lt;Integer, String&gt; swap = result.mapToPair(Tuple2::swap);</span><br><span class="line">        JavaPairRDD&lt;Integer, String&gt; sorted = swap.sortByKey(false);</span><br><span class="line">        JavaPairRDD&lt;String, Integer&gt; sortResult = sorted.mapToPair(Tuple2::swap);</span><br><span class="line">        System.out.println(&quot;words:&quot; + sortResult.count());</span><br><span class="line">        sortResult.saveAsTextFile(&quot;hdfs://172.19.0.2:9000/user/root/learn/madame_bovary_word_count&quot;);</span><br><span class="line">        sc.stop();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h5 id="编译打包"><a href="#编译打包" class="headerlink" title="编译打包"></a>编译打包</h5><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">mvn clean package</span><br></pre></td></tr></table></figure>
+<h5 id="复制到spark容器"><a href="#复制到spark容器" class="headerlink" title="复制到spark容器"></a>复制到spark容器</h5><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker cp study.word.count-1.0-SNAPSHOT.jar spark-master:/tmp</span><br></pre></td></tr></table></figure>
+<h5 id="提交任务到spark执行"><a href="#提交任务到spark执行" class="headerlink" title="提交任务到spark执行"></a>提交任务到spark执行</h5><p>如果没有明显报错信息，就说明执行成功。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"># spark/bin目录下</span><br><span class="line"> ./spark-submit --class com.hou.test.WordCountJob --master local /tmp/study.word.count-1.0-SNAPSHOT.jar</span><br></pre></td></tr></table></figure>
+<h5 id="查看运行结果"><a href="#查看运行结果" class="headerlink" title="查看运行结果"></a>查看运行结果</h5><p>在hdfs上查看运行结果，如果看到madame_bovary_word_count目录，点进去如果有结果说明词频统计以完成并将结果写入了HDFS。</p>
+<p><img src="/images/spark_idea3.png" alt="Alt"></p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Spark/" rel="tag"># Spark</a>
+          
+            <a href="/tags/Docker/" rel="tag"># Docker</a>
+          
+            <a href="/tags/大数据/" rel="tag"># 大数据</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2020/02/09/Hadoop学习笔记-1-环境搭建/" rel="next" title="Hadoop学习笔记(1)-环境搭建">
+                <i class="fa fa-chevron-left"></i> Hadoop学习笔记(1)-环境搭建
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Overview
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">ikan</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">11</span>
+                  <span class="site-state-item-name">posts</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">5</span>
+                  <span class="site-state-item-name">categories</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">11</span>
+                  <span class="site-state-item-name">tags</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-4"><a class="nav-link" href="#Spark概述"><span class="nav-number">1.</span> <span class="nav-text">Spark概述</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#准备工作"><span class="nav-number">2.</span> <span class="nav-text">准备工作</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#环境选择"><span class="nav-number">2.1.</span> <span class="nav-text">环境选择</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#准备"><span class="nav-number">2.2.</span> <span class="nav-text">准备</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#编写Dockerfile文件"><span class="nav-number">2.3.</span> <span class="nav-text">编写Dockerfile文件</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#配置配置文件"><span class="nav-number">2.4.</span> <span class="nav-text">配置配置文件</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#构建镜像"><span class="nav-number">2.5.</span> <span class="nav-text">构建镜像</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#启动"><span class="nav-number">3.</span> <span class="nav-text">启动</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#运行镜像"><span class="nav-number">3.1.</span> <span class="nav-text">运行镜像</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#验证"><span class="nav-number">3.2.</span> <span class="nav-text">验证</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#执行第一计算任务"><span class="nav-number">4.</span> <span class="nav-text">执行第一计算任务</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#创建一个java的maven空项目"><span class="nav-number">4.1.</span> <span class="nav-text">创建一个java的maven空项目</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#填写groupid等信息"><span class="nav-number">4.2.</span> <span class="nav-text">填写groupid等信息</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#配置spark开发jar依赖"><span class="nav-number">4.3.</span> <span class="nav-text">配置spark开发jar依赖</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#编写计算任务代码"><span class="nav-number">4.4.</span> <span class="nav-text">编写计算任务代码</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#编译打包"><span class="nav-number">4.5.</span> <span class="nav-text">编译打包</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#复制到spark容器"><span class="nav-number">4.6.</span> <span class="nav-text">复制到spark容器</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#提交任务到spark执行"><span class="nav-number">4.7.</span> <span class="nav-text">提交任务到spark执行</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#查看运行结果"><span class="nav-number">4.8.</span> <span class="nav-text">查看运行结果</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">ikan</span>
+
+  
+</div>
+
+
+  <div class="powered-by">Powered by <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a></div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">Theme &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
