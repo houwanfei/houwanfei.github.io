@@ -268,7 +268,7 @@
         
           <h1 class="post-title" itemprop="name headline">
                 
-                <a class="post-title-link" href="/2020/04/29/Docker构建Spark并提交WordCount任务/" itemprop="url">Docker构建Spark并提交WordCount任务</a></h1>
+                <a class="post-title-link" href="/2020/04/29/Docker构建Spark并提交WordCount任务/" itemprop="url">Docker部署Spark并提交WordCount任务</a></h1>
         
 
         <div class="post-meta">
@@ -487,158 +487,20 @@
 
       
         
-          
-            <h4 id="认识Hadoop"><a href="#认识Hadoop" class="headerlink" title="认识Hadoop"></a>认识Hadoop</h4><p>简单描述，Hadoop是一款实现分布式海量数据存储和离线海量数据分析的工具。<a href="http://hadoop.apache.org/" target="_blank" rel="noopener">官方地址</a>。Hadoop提供的安装方式有单机模式、伪分布式模式和完全分布式模式，不知道为什么有强迫症似的，如果有分布式模式必须要安装完全分布式模式。为了部署完全分布式模式的Hadoop，我采用docker的方式部署3个容器。不得不说docker确实是一个非常适合个人学习的安装各种软件的工具，如果你是windows环境，docker可以让你很方便的安装一个软件在Linux系统上。</p>
+          <h4 id="认识Hadoop"><a href="#认识Hadoop" class="headerlink" title="认识Hadoop"></a>认识Hadoop</h4><p>简单描述，Hadoop是一款实现分布式海量数据存储和离线海量数据分析的工具。<a href="http://hadoop.apache.org/" target="_blank" rel="noopener">官方地址</a>。Hadoop提供的安装方式有单机模式、伪分布式模式和完全分布式模式，不知道为什么有强迫症似的，如果有分布式模式必须要安装完全分布式模式。为了部署完全分布式模式的Hadoop，我采用docker的方式部署3个容器。不得不说docker确实是一个非常适合个人学习的安装各种软件的工具，如果你是windows环境，docker可以让你很方便的安装一个软件在Linux系统上。</p>
 <h4 id="准备和部署"><a href="#准备和部署" class="headerlink" title="准备和部署"></a>准备和部署</h4><h5 id="环境选择"><a href="#环境选择" class="headerlink" title="环境选择"></a>环境选择</h5><ul>
 <li>宿主机系统：win10</li>
 <li>hadoop版本：3.1.0</li>
 <li>容器系统：ubuntu16</li>
 <li>jdk：1.8</li>
 </ul>
-<h5 id="准备"><a href="#准备" class="headerlink" title="准备"></a>准备</h5><p>由于我的网络原因，我选择预先下载好jdk和hadoop在本地然后用docker来构建Hadoop镜像。jdk<a href="https://www.oracle.com/cn/java/technologies/javase/javase-jdk8-downloads.html" target="_blank" rel="noopener">下载地址</a>这里我选择的是Linux x64的压缩包，因为我的镜像以ubuntu16为基础镜像，然后Hadoop<a href="https://hadoop.apache.org/releases.html" target="_blank" rel="noopener">下载地址</a>。然后将文件和DockerFile一起。</p>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2020/02/09/操作系统笔记-1-进程/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="ikan">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="IkanのBolg">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2020/02/09/操作系统笔记-1-进程/" itemprop="url">操作系统笔记(1)-进程</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">Posted on</span>
-              
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2020-02-09T15:33:50+08:00">
-                2020-02-09
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">In</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/OS学习笔记/" itemprop="url" rel="index">
-                    <span itemprop="name">OS学习笔记</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            
-          
+          <!--noindex-->
+          <div class="post-button text-center">
+            <a class="btn" href="/2020/02/09/Hadoop学习笔记-1-环境搭建/#more" rel="contents">
+              Read more &raquo;
+            </a>
+          </div>
+          <!--/noindex-->
         
       
     </div>
@@ -1704,13 +1566,161 @@
 
 
     
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2018/05/25/Buffer详解/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="ikan">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="IkanのBolg">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2018/05/25/Buffer详解/" itemprop="url">Java NIO入门到放弃系列之Buffer</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-05-25T21:28:29+08:00">
+                2018-05-25
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Java学习笔记/" itemprop="url" rel="index">
+                    <span itemprop="name">Java学习笔记</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          <h4 id="Buffer是什么"><a href="#Buffer是什么" class="headerlink" title="Buffer是什么"></a>Buffer是什么</h4><p>和它的名字一样，Buffer是一个缓冲区，本质上是一块可以写入数据。可以读取数据的内存。在NIO中，Buffer用于和NIO中的各种channel交互。数据可以从channel中读入Buffer，然后从Buffer中写入另一个channel。</p>
+<h4 id="Buffer中几个重要的概念"><a href="#Buffer中几个重要的概念" class="headerlink" title="Buffer中几个重要的概念"></a>Buffer中几个重要的概念</h4><ul>
+<li><p>capacity：容量，指定之后不可变动</p>
+</li>
+<li><p>limit：限制，第一个不应该读取或写入数据的索引，初始时和capacity在一个位置。</p>
+</li>
+<li><p>position：位置，下一个可读取或写入的位置，初始为0，不能为负，且不能大于limit</p>
+          <!--noindex-->
+          <div class="post-button text-center">
+            <a class="btn" href="/2018/05/25/Buffer详解/#more" rel="contents">
+              Read more &raquo;
+            </a>
+          </div>
+          <!--/noindex-->
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
   </section>
 
   
-  <nav class="pagination">
-    <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><a class="extend next" rel="next" href="/page/2/"><i class="fa fa-angle-right"></i></a>
-  </nav>
-
 
 
           </div>
@@ -1754,7 +1764,7 @@
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">11</span>
+                  <span class="site-state-item-count">10</span>
                   <span class="site-state-item-name">posts</span>
                 </a>
               </div>

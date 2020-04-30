@@ -68,7 +68,7 @@
 
 
 
-  <meta name="keywords" content="Spark,Docker,大数据," />
+  <meta name="keywords" content="Docker,大数据,Spark," />
 
 
 
@@ -80,9 +80,9 @@
 
 
 <meta name="description" content="Spark概述Apache Spark是一个开源集群运算框架，最初是由加州大学柏克莱分校AMPLab所开发。相对于Hadoop的MapReduce会在运行完工作后将中介数据存放到磁盘中，Spark使用了存储器内运算技术，能在数据尚未写入硬盘时即在存储器内分析运算。Spark在存储器内运行程序的运算速度能做到比Hadoop MapReduce的运算速度快上100倍，即便是运行程序于硬盘时，Spark">
-<meta name="keywords" content="Spark,Docker,大数据">
+<meta name="keywords" content="Docker,大数据,Spark">
 <meta property="og:type" content="article">
-<meta property="og:title" content="Docker构建Spark并提交WordCount任务">
+<meta property="og:title" content="Docker部署Spark并提交WordCount任务">
 <meta property="og:url" content="http://yoursite.com/2020/04/29/Docker构建Spark并提交WordCount任务/index.html">
 <meta property="og:site_name" content="IkanのBolg">
 <meta property="og:description" content="Spark概述Apache Spark是一个开源集群运算框架，最初是由加州大学柏克莱分校AMPLab所开发。相对于Hadoop的MapReduce会在运行完工作后将中介数据存放到磁盘中，Spark使用了存储器内运算技术，能在数据尚未写入硬盘时即在存储器内分析运算。Spark在存储器内运行程序的运算速度能做到比Hadoop MapReduce的运算速度快上100倍，即便是运行程序于硬盘时，Spark">
@@ -90,9 +90,9 @@
 <meta property="og:image" content="http://yoursite.com/images/spark_idea1.png">
 <meta property="og:image" content="http://yoursite.com/images/spark_idea2.png">
 <meta property="og:image" content="http://yoursite.com/images/spark_idea3.png">
-<meta property="og:updated_time" content="2020-04-29T14:57:29.915Z">
+<meta property="og:updated_time" content="2020-04-30T13:57:14.824Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="Docker构建Spark并提交WordCount任务">
+<meta name="twitter:title" content="Docker部署Spark并提交WordCount任务">
 <meta name="twitter:description" content="Spark概述Apache Spark是一个开源集群运算框架，最初是由加州大学柏克莱分校AMPLab所开发。相对于Hadoop的MapReduce会在运行完工作后将中介数据存放到磁盘中，Spark使用了存储器内运算技术，能在数据尚未写入硬盘时即在存储器内分析运算。Spark在存储器内运行程序的运算速度能做到比Hadoop MapReduce的运算速度快上100倍，即便是运行程序于硬盘时，Spark">
 <meta name="twitter:image" content="http://yoursite.com/images/spark_idea1.png">
 
@@ -130,7 +130,7 @@
 
 
 
-  <title>Docker构建Spark并提交WordCount任务 | IkanのBolg</title>
+  <title>Docker部署Spark并提交WordCount任务 | IkanのBolg</title>
   
 
 
@@ -274,7 +274,7 @@
 
         
         
-          <h1 class="post-title" itemprop="name headline">Docker构建Spark并提交WordCount任务</h1>
+          <h1 class="post-title" itemprop="name headline">Docker部署Spark并提交WordCount任务</h1>
         
 
         <div class="post-meta">
@@ -359,6 +359,7 @@
 <li>下载jdk1.8<a href="https://www.oracle.com/cn/java/technologies/javase/javase-jdk8-downloads.html" target="_blank" rel="noopener">下载地址</a>放入E:/docker/spark目录下</li>
 <li>下载Hadoop<a href="https://hadoop.apache.org/releases.html" target="_blank" rel="noopener">下载地址</a>放入E:/docker/spark目录下，这一步不是必须的，只是因为我部署hdfs的时候选择了版本3.1.1不想重新部署，所以下载Spark时选择了Pre-build with user-provided Apache Haddop，啥意思呢？就是自定义版本的Hadoop，如果选择的Spark版本是Pre-build for Apache Haddop 2.6/2.7，那就不需要单独下载Hadoop，因为下载的Spark已经预编译了。</li>
 <li>下载spark<a href="http://spark.apache.org/downloads.html" target="_blank" rel="noopener">下载地址</a>放入E:/docker/spark目录下，选择好自己的版本，如果已经安装了Hadoop2.6/2.7建议直接下载预编译了Hadoop的版本，不需要后续配置环境参数。</li>
+<li>关于Hadoop集群的部署可以参考<a href="/2020/02/09/Hadoop学习笔记-1-环境搭建/" title="Hadoop学习笔记(1)-环境搭建">Hadoop学习笔记(1)-环境搭建</a></li>
 </ul>
 <h5 id="编写Dockerfile文件"><a href="#编写Dockerfile文件" class="headerlink" title="编写Dockerfile文件"></a>编写Dockerfile文件</h5><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br></pre></td><td class="code"><pre><span class="line">FROM ubuntu:16.04</span><br><span class="line">MAINTAINER houwanfei</span><br><span class="line"></span><br><span class="line"># 安装openssh-server</span><br><span class="line">RUN  apt-get update &amp;&amp; apt-get install -y openssh-server</span><br><span class="line"></span><br><span class="line"># 配置ssh免密登陆</span><br><span class="line">RUN ssh-keygen -t rsa -f ~/.ssh/id_rsa -P &apos;&apos; &amp;&amp; \</span><br><span class="line">    cat ~/.ssh/id_rsa.pub &gt;&gt; ~/.ssh/authorized_keys</span><br><span class="line"># 复制jdk和配置jdk环境</span><br><span class="line">RUN mkdir /usr/lib/jvm/</span><br><span class="line">ADD openjdk-8u40-b25-linux-x64-10_feb_2015.tar.gz /usr/lib/jvm/</span><br><span class="line">ENV JAVA_HOME /usr/lib/jvm/java-se-8u40-ri/ </span><br><span class="line">ENV PATH $PATH:$JAVA_HOME/bin</span><br><span class="line"></span><br><span class="line"># 复制hadoop和配置hadoop配置</span><br><span class="line">RUN mkdir /usr/local/hadoop/</span><br><span class="line">ADD hadoop-3.1.1.tar.gz /usr/local/hadoop/</span><br><span class="line">ENV HADOOP_HOME /usr/local/hadoop/hadoop-3.1.1</span><br><span class="line">ENV PATH $PATH:$HADOOP_HOME/bin:$HADOOP_HOME/sbin</span><br><span class="line"></span><br><span class="line"># 复制spark和配置spark环境</span><br><span class="line">RUN mkdir /usr/local/spark</span><br><span class="line">ADD spark-2.4.5-bin-without-hadoop.tgz /usr/local/spark</span><br><span class="line">ENV SPARK_HOME=/usr/local/spark/spark-2.4.5-bin-without-hadoop</span><br><span class="line">ENV PATH=$PATH:$SPARK_HOME/bin</span><br><span class="line">ENV SPARK_MASTER_PORT 7077</span><br><span class="line">ENV SPARK_MASTER_WEBUI_PORT 8080</span><br><span class="line">ENV SPARK_MASTER_LOG /tmp/logs</span><br><span class="line">ENV SPARK_WORKER_LOG /tmp/logs</span><br><span class="line">ENV SPARK_VERSION 2.4.5</span><br><span class="line"></span><br><span class="line"># 复制配置文件</span><br><span class="line">COPY config/* /tmp/</span><br><span class="line">RUN mv /tmp/spark-config.sh  $SPARK_HOME/sbin &amp;&amp; \</span><br><span class="line">	mv /tmp/spark-env.sh $SPARK_HOME/conf</span><br><span class="line"># 暴露端口</span><br><span class="line">EXPOSE 8080 7077 6066</span><br><span class="line"></span><br><span class="line">CMD [ &quot;sh&quot;, &quot;-c&quot;, &quot;service ssh start; bash&quot;]</span><br></pre></td></tr></table></figure>
 <h5 id="配置配置文件"><a href="#配置配置文件" class="headerlink" title="配置配置文件"></a>配置配置文件</h5><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"># 将两个文件放入E:/docker/spark/config目录下</span><br><span class="line"># spark-env.sh</span><br><span class="line">export SPARK_DIST_CLASSPATH=$($&#123;HADOOP_HOME&#125;/bin/hadoop classpath)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"># spark-config.sh 这里复制出来一个文件然后在最后加上这一句</span><br><span class="line">export JAVA_HOME=/usr/lib/jvm/java-se-8u40-ri/</span><br></pre></td></tr></table></figure>
@@ -395,11 +396,11 @@
       
         <div class="post-tags">
           
-            <a href="/tags/Spark/" rel="tag"># Spark</a>
-          
             <a href="/tags/Docker/" rel="tag"># Docker</a>
           
             <a href="/tags/大数据/" rel="tag"># 大数据</a>
+          
+            <a href="/tags/Spark/" rel="tag"># Spark</a>
           
         </div>
       
@@ -497,7 +498,7 @@
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">11</span>
+                  <span class="site-state-item-count">10</span>
                   <span class="site-state-item-name">posts</span>
                 </a>
               </div>
