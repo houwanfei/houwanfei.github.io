@@ -1,0 +1,795 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="Spark,Docker,Azkaban," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="背景前段时间利用Docker部署了hadoop集群和spark，也简单的提交了任务。但是肯定有一个疑问，如果我们要执行定时任务怎么办呢？或者我们执行复杂的具有顺序的多任务怎么办？在大数据中，这种场景非常常见，一个大数据任务通常由大量的任务组成，并且可能是shell脚本、mapreduce任务、spark任务等，并且任务之间存在依赖关系。手动执行这种原始办法虽然可以，但是人总有出错的时候。今天要带来">
+<meta name="keywords" content="Spark,Docker,Azkaban">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Docker部署Azkaban Solo模式调度Spark">
+<meta property="og:url" content="http://yoursite.com/2020/05/11/Docker部署Azkaban-Solo模式调度Spark/index.html">
+<meta property="og:site_name" content="IkanのBolg">
+<meta property="og:description" content="背景前段时间利用Docker部署了hadoop集群和spark，也简单的提交了任务。但是肯定有一个疑问，如果我们要执行定时任务怎么办呢？或者我们执行复杂的具有顺序的多任务怎么办？在大数据中，这种场景非常常见，一个大数据任务通常由大量的任务组成，并且可能是shell脚本、mapreduce任务、spark任务等，并且任务之间存在依赖关系。手动执行这种原始办法虽然可以，但是人总有出错的时候。今天要带来">
+<meta property="og:locale" content="default">
+<meta property="og:image" content="http://yoursite.com/images/azkaban.png">
+<meta property="og:image" content="http://yoursite.com/images/az_project.png">
+<meta property="og:image" content="http://yoursite.com/images/az_upload.png">
+<meta property="og:image" content="http://yoursite.com/images/az_exe.png">
+<meta property="og:image" content="http://yoursite.com/images/az_success.png">
+<meta property="og:updated_time" content="2020-05-11T13:55:29.974Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Docker部署Azkaban Solo模式调度Spark">
+<meta name="twitter:description" content="背景前段时间利用Docker部署了hadoop集群和spark，也简单的提交了任务。但是肯定有一个疑问，如果我们要执行定时任务怎么办呢？或者我们执行复杂的具有顺序的多任务怎么办？在大数据中，这种场景非常常见，一个大数据任务通常由大量的任务组成，并且可能是shell脚本、mapreduce任务、spark任务等，并且任务之间存在依赖关系。手动执行这种原始办法虽然可以，但是人总有出错的时候。今天要带来">
+<meta name="twitter:image" content="http://yoursite.com/images/azkaban.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: 'Author'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2020/05/11/Docker部署Azkaban-Solo模式调度Spark/"/>
+
+
+
+
+
+  <title>Docker部署Azkaban Solo模式调度Spark | IkanのBolg</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="default">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">IkanのBolg</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">只想安安静静撸代码</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            Home
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            Tags
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            Categories
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            Archives
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2020/05/11/Docker部署Azkaban-Solo模式调度Spark/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="ikan">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="IkanのBolg">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">Docker部署Azkaban Solo模式调度Spark</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2020-05-11T21:05:19+08:00">
+                2020-05-11
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Docker/" itemprop="url" rel="index">
+                    <span itemprop="name">Docker</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h4 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h4><p>前段时间利用Docker部署了hadoop集群和spark，也简单的提交了任务。但是肯定有一个疑问，如果我们要执行定时任务怎么办呢？或者我们执行复杂的具有顺序的多任务怎么办？在大数据中，这种场景非常常见，一个大数据任务通常由大量的任务组成，并且可能是shell脚本、mapreduce任务、spark任务等，并且任务之间存在依赖关系。手动执行这种原始办法虽然可以，但是人总有出错的时候。今天要带来的一款具有复杂任务调度能力的框架-Azkaban，也支持定时调度。</p>
+<h4 id="Azkaban介绍"><a href="#Azkaban介绍" class="headerlink" title="Azkaban介绍"></a>Azkaban介绍</h4><p>Azkaban是由Linkedin开源的一个批量工作流任务调度器</p>
+<a id="more"></a>
+<h5 id="Azkaban特点"><a href="#Azkaban特点" class="headerlink" title="Azkaban特点"></a>Azkaban特点</h5><ul>
+<li>兼容任何版本的hadoop</li>
+<li>易于使用的Web用户界面</li>
+<li>简单的工作流的上传</li>
+<li>方便设置任务之间的关系</li>
+<li>调度工作流</li>
+<li><p>模块化和可插拔的插件机制</p>
+</li>
+<li><p>认证/授权(权限的工作)</p>
+</li>
+<li>能够杀死并重新启动工作流</li>
+<li>有关失败和成功的电子邮件提醒</li>
+</ul>
+<p>上面的描述太抽象？一个技术要想了解，必须得自己捣鼓一下，接下来我将用Docker来部署，Docker用来学习安装软件不要太舒服，一来它可以很方便的给你提供Linux环境，二来不用将软件装在自己电脑上，久而久之电脑变得很卡特别是win环境。</p>
+<h4 id="Docker部署Azkaban"><a href="#Docker部署Azkaban" class="headerlink" title="Docker部署Azkaban"></a>Docker部署Azkaban</h4><h5 id="环境准备"><a href="#环境准备" class="headerlink" title="环境准备"></a>环境准备</h5><ul>
+<li>宿主机系统：win10</li>
+<li>hadoop版本：3.1.1(构建基于HDFS的spark)</li>
+<li>Spark版本：2.4.5</li>
+<li>容器系统：ubuntu16</li>
+<li>jdk：oraclejdk1.8.0.251</li>
+<li>azkaban：开发版</li>
+</ul>
+<h5 id="配置Dockerfile"><a href="#配置Dockerfile" class="headerlink" title="配置Dockerfile"></a>配置Dockerfile</h5><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br></pre></td><td class="code"><pre><span class="line"># 配置ssh免密登陆</span><br><span class="line">RUN ssh-keygen -t rsa -f ~/.ssh/id_rsa -P &apos;&apos; &amp;&amp; \</span><br><span class="line">    cat ~/.ssh/id_rsa.pub &gt;&gt; ~/.ssh/authorized_keys</span><br><span class="line"># 复制jdk和配置jdk环境</span><br><span class="line">RUN mkdir /usr/lib/jvm/</span><br><span class="line">ADD jdk-8u251-linux-x64.tar.gz /usr/lib/jvm/</span><br><span class="line">ENV JAVA_HOME /usr/lib/jvm/jdk1.8.0_251/</span><br><span class="line">ENV PATH $PATH:$JAVA_HOME/bin</span><br><span class="line"></span><br><span class="line"># 复制hadoop和配置hadoop配置</span><br><span class="line">RUN mkdir /usr/local/hadoop/</span><br><span class="line">ADD hadoop-3.1.1.tar.gz /usr/local/hadoop/</span><br><span class="line">ENV HADOOP_HOME /usr/local/hadoop/hadoop-3.1.1</span><br><span class="line">ENV PATH $PATH:$HADOOP_HOME/bin:$HADOOP_HOME/sbin</span><br><span class="line"></span><br><span class="line"># 复制spark和配置spark环境</span><br><span class="line">RUN mkdir /usr/local/spark</span><br><span class="line">ADD spark-2.4.5-bin-without-hadoop.tgz /usr/local/spark</span><br><span class="line">ENV SPARK_HOME=/usr/local/spark/spark-2.4.5-bin-without-hadoop</span><br><span class="line">ENV PATH=$PATH:$SPARK_HOME/bin</span><br><span class="line">ENV SPARK_MASTER_PORT 7077</span><br><span class="line">ENV SPARK_MASTER_WEBUI_PORT 8080</span><br><span class="line">ENV SPARK_MASTER_LOG /tmp/logs</span><br><span class="line">ENV SPARK_WORKER_LOG /tmp/logs</span><br><span class="line">ENV SPARK_VERSION 2.4.5</span><br><span class="line"></span><br><span class="line">COPY config/* /tmp/</span><br><span class="line">RUN mv /tmp/spark-config.sh  $SPARK_HOME/sbin &amp;&amp; \</span><br><span class="line">	mv /tmp/spark-env.sh $SPARK_HOME/conf</span><br><span class="line"></span><br><span class="line"># 安装git</span><br><span class="line">RUN apt-get update &amp;&amp; apt-get install -y git</span><br><span class="line">RUN git clone https://github.com/azkaban/azkaban.git /usr/local/azkaban &amp;&amp; \</span><br><span class="line">	mv /tmp/build.gradle /usr/local/azkaban &amp;&amp; \</span><br><span class="line">	/usr/local/azkaban/gradlew build installDist -x test &amp;&amp; \</span><br><span class="line">	mv /tmp/commonprivate.properties /usr/local/azkaban/azkaban-solo-server/build/install/azkaban-solo-server/plugins/jobtypes</span><br><span class="line"></span><br><span class="line">EXPOSE 8080 7077 6066 8081</span><br><span class="line"></span><br><span class="line">CMD [ &quot;sh&quot;, &quot;-c&quot;, &quot;service ssh start; bash&quot;]</span><br></pre></td></tr></table></figure>
+<h5 id="azkaban配置文件"><a href="#azkaban配置文件" class="headerlink" title="azkaban配置文件"></a>azkaban配置文件</h5><ol>
+<li><p>关于spark的配置文件可以参考<a href="/2020/04/29/Docker构建Spark并提交WordCount任务/" title="Docker部署Spark并提交WordCount任务">Docker部署Spark并提交WordCount任务</a>，我把上一篇的openjdk换成oraclejdk，openjdk在编译azkaban时有ssl问题。</p>
+</li>
+<li><p>配置build.gradle</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line">buildscript &#123;</span><br><span class="line">  repositories &#123;</span><br><span class="line">    maven &#123;</span><br><span class="line">      url &apos;https://maven.aliyun.com/nexus/content/groups/public/&apos;</span><br><span class="line">    &#125;</span><br><span class="line">    mavenCentral()</span><br><span class="line">  &#125;</span><br><span class="line">  dependencies &#123;</span><br><span class="line">    classpath &apos;com.cinnober.gradle:semver-git:2.2.3&apos;</span><br><span class="line">    classpath &apos;net.ltgt.gradle:gradle-errorprone-plugin:0.0.14&apos;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">allprojects &#123;</span><br><span class="line">  apply plugin: &apos;jacoco&apos;</span><br><span class="line"></span><br><span class="line">  repositories &#123;</span><br><span class="line">    maven &#123;</span><br><span class="line">      url &apos;https://maven.aliyun.com/nexus/content/groups/public/&apos;</span><br><span class="line">    &#125;</span><br><span class="line">    mavenLocal()</span><br><span class="line">    mavenCentral()</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>拷贝一份build.gradle文件<strong>修改</strong>maven仓库地址，这里是为了gradle构建azkaban项目时，配置国内maven镜像仓库，速度可以快一些。</p>
+</li>
+<li><p>配置commonprivate.properties</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">execute.as.user=false</span><br><span class="line">memCheck.enabled=false</span><br></pre></td></tr></table></figure>
+<p>配置Azkaban执行任务时不检查内存，azkaban默认执行job会检查内存是否大于3G，docker部署的容器默认没有分配这么多内存，所以如果没有配置不检查内存，执行任务可能会失败。</p>
+</li>
+</ol>
+<h5 id="构建镜像"><a href="#构建镜像" class="headerlink" title="构建镜像"></a>构建镜像</h5><p>老规矩，cd切换到对应的目录，执行时间可能比较长，因为编译azkaban需要下载jar。我在Dockerfile配置中跳过了azkaban测试，不然时间更长。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker build -t hou/az-so-spark .</span><br></pre></td></tr></table></figure>
+<h5 id="启动容器"><a href="#启动容器" class="headerlink" title="启动容器"></a>启动容器</h5><p>这里启动容器设置了网络和Hadoop集群一个网段，方便调用hdfs</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker run -dit --name az-so-spark --hostname az-so-spark --net hadoop hou/az-so-spark</span><br></pre></td></tr></table></figure>
+<h5 id="启动Azkaban和Spark"><a href="#启动Azkaban和Spark" class="headerlink" title="启动Azkaban和Spark"></a>启动Azkaban和Spark</h5><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">docker exec -it az-so-spark /bin/bash</span><br><span class="line"># 启动spark</span><br><span class="line">/usr/local/spark/spark-2.4.5-bin-without-hadoop/sbin/start-all.sh</span><br><span class="line"># 检查spark是否启动成功,看是否有spark master和worker进程</span><br><span class="line">jps -l</span><br><span class="line"># 启动azkaban 务必要在该目录下启动，我第一次在bin目录下启动，启动不了，会报找不到数据库配置错误</span><br><span class="line">cd azkaban-solo-server/build/install/azkaban-solo-server</span><br><span class="line">bin/start-solo.sh</span><br></pre></td></tr></table></figure>
+<h5 id="检查azkaban和spark进程"><a href="#检查azkaban和spark进程" class="headerlink" title="检查azkaban和spark进程"></a>检查azkaban和spark进程</h5><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">jps -l</span><br></pre></td></tr></table></figure>
+<p>可以看到如图</p>
+<p><img src="/images/azkaban.png" alt="img"></p>
+<h4 id="任务调度"><a href="#任务调度" class="headerlink" title="任务调度"></a>任务调度</h4><h5 id="spark程序"><a href="#spark程序" class="headerlink" title="spark程序"></a>spark程序</h5><p>用上一次部署spark时用的wordcount程序</p>
+<h5 id="编写Azkaban脚本"><a href="#编写Azkaban脚本" class="headerlink" title="编写Azkaban脚本"></a>编写Azkaban脚本</h5><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"># wordCount.job</span><br><span class="line">type=command</span><br><span class="line">command=/usr/local/spark/spark-2.4.5-bin-without-hadoop/bin/spark-submit --class com.hou.test.WordCountJob --master local study.word.count-1.0-SNAPSHOT.jar</span><br></pre></td></tr></table></figure>
+<p>可以看到azkaban的command type调度本质上是执行shell命令</p>
+<h5 id="压缩打包zip"><a href="#压缩打包zip" class="headerlink" title="压缩打包zip"></a>压缩打包zip</h5><p>将study.word.count-1.0-SNAPSHOT.jar和wordCount.job文件打包为zip格式</p>
+<h5 id="创建项目"><a href="#创建项目" class="headerlink" title="创建项目"></a>创建项目</h5><p>登录azkaban管理后台，默认端口8081，name和password默认都是azkaban，首页点击create project</p>
+<p><img src="/images/az_project.png" alt="img"></p>
+<h5 id="上传压缩包"><a href="#上传压缩包" class="headerlink" title="上传压缩包"></a>上传压缩包</h5><p>azkaban这里压缩包格式要用zip，点击刚才创建好的项目，然后点击upload</p>
+<p><img src="/images/az_upload.png" alt="img"></p>
+<h5 id="执行和查看结果"><a href="#执行和查看结果" class="headerlink" title="执行和查看结果"></a>执行和查看结果</h5><ol>
+<li><p>执行</p>
+<p><img src="/images/az_exe.png" alt="img"></p>
+<p>我选择了实时执行，这里也可以选择schedule，设置定时任务执行</p>
+</li>
+<li><p>查看结果</p>
+<p><img src="/images/az_success.png" alt="img"></p>
+<p>我的这里因为一开始没有配置不检查内存，所以有两次失败的记录</p>
+</li>
+</ol>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Spark/" rel="tag"># Spark</a>
+          
+            <a href="/tags/Docker/" rel="tag"># Docker</a>
+          
+            <a href="/tags/Azkaban/" rel="tag"># Azkaban</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2020/04/29/Docker构建Spark并提交WordCount任务/" rel="next" title="Docker部署Spark并提交WordCount任务">
+                <i class="fa fa-chevron-left"></i> Docker部署Spark并提交WordCount任务
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Overview
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">ikan</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">11</span>
+                  <span class="site-state-item-name">posts</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">5</span>
+                  <span class="site-state-item-name">categories</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">11</span>
+                  <span class="site-state-item-name">tags</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-4"><a class="nav-link" href="#背景"><span class="nav-number">1.</span> <span class="nav-text">背景</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Azkaban介绍"><span class="nav-number">2.</span> <span class="nav-text">Azkaban介绍</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#Azkaban特点"><span class="nav-number">2.1.</span> <span class="nav-text">Azkaban特点</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Docker部署Azkaban"><span class="nav-number">3.</span> <span class="nav-text">Docker部署Azkaban</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#环境准备"><span class="nav-number">3.1.</span> <span class="nav-text">环境准备</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#配置Dockerfile"><span class="nav-number">3.2.</span> <span class="nav-text">配置Dockerfile</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#azkaban配置文件"><span class="nav-number">3.3.</span> <span class="nav-text">azkaban配置文件</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#构建镜像"><span class="nav-number">3.4.</span> <span class="nav-text">构建镜像</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#启动容器"><span class="nav-number">3.5.</span> <span class="nav-text">启动容器</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#启动Azkaban和Spark"><span class="nav-number">3.6.</span> <span class="nav-text">启动Azkaban和Spark</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#检查azkaban和spark进程"><span class="nav-number">3.7.</span> <span class="nav-text">检查azkaban和spark进程</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#任务调度"><span class="nav-number">4.</span> <span class="nav-text">任务调度</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#spark程序"><span class="nav-number">4.1.</span> <span class="nav-text">spark程序</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#编写Azkaban脚本"><span class="nav-number">4.2.</span> <span class="nav-text">编写Azkaban脚本</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#压缩打包zip"><span class="nav-number">4.3.</span> <span class="nav-text">压缩打包zip</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#创建项目"><span class="nav-number">4.4.</span> <span class="nav-text">创建项目</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#上传压缩包"><span class="nav-number">4.5.</span> <span class="nav-text">上传压缩包</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#执行和查看结果"><span class="nav-number">4.6.</span> <span class="nav-text">执行和查看结果</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">ikan</span>
+
+  
+</div>
+
+
+  <div class="powered-by">Powered by <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a></div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">Theme &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
