@@ -1,0 +1,817 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="OS," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="背景很早就看了《MODERN OPERATING SYSTEMS》这本书，当时也做了很多笔记。为了方便自己能更好的温故知新，也为了防止自己的笔记丢失，遂搬到云上（手动狗头）。这是操作系统学习笔记的一个系列，这是第一篇笔记，主要是讲个操作系统的大概，以及它是个什么东西，能做什么，我们平时做开发是怎么和它打交道。 做开发要不要了解OS答案肯定是要的。其实这个问题和写程序要不要学算法一个道理。如果觉得没">
+<meta name="keywords" content="OS">
+<meta property="og:type" content="article">
+<meta property="og:title" content="操作系统笔记-1-操作系统概述">
+<meta property="og:url" content="http://yoursite.com/2020/05/23/操作系统笔记-1-操作系统概述/index.html">
+<meta property="og:site_name" content="IkanのBolg">
+<meta property="og:description" content="背景很早就看了《MODERN OPERATING SYSTEMS》这本书，当时也做了很多笔记。为了方便自己能更好的温故知新，也为了防止自己的笔记丢失，遂搬到云上（手动狗头）。这是操作系统学习笔记的一个系列，这是第一篇笔记，主要是讲个操作系统的大概，以及它是个什么东西，能做什么，我们平时做开发是怎么和它打交道。 做开发要不要了解OS答案肯定是要的。其实这个问题和写程序要不要学算法一个道理。如果觉得没">
+<meta property="og:locale" content="default">
+<meta property="og:image" content="http://yoursite.com/images/os_user.png">
+<meta property="og:image" content="http://yoursite.com/images/computer_run.png">
+<meta property="og:image" content="http://yoursite.com/images/hardware.png">
+<meta property="og:image" content="http://yoursite.com/images/bus.png">
+<meta property="og:image" content="http://yoursite.com/images/address_space.png">
+<meta property="og:image" content="http://yoursite.com/images/system_call.png">
+<meta property="og:image" content="http://yoursite.com/images/process_call.png">
+<meta property="og:image" content="http://yoursite.com/images/file_system_call.png">
+<meta property="og:image" content="http://yoursite.com/images/file_mg_call.png">
+<meta property="og:image" content="http://yoursite.com/images/other_call.png">
+<meta property="og:updated_time" content="2020-05-23T05:38:43.575Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="操作系统笔记-1-操作系统概述">
+<meta name="twitter:description" content="背景很早就看了《MODERN OPERATING SYSTEMS》这本书，当时也做了很多笔记。为了方便自己能更好的温故知新，也为了防止自己的笔记丢失，遂搬到云上（手动狗头）。这是操作系统学习笔记的一个系列，这是第一篇笔记，主要是讲个操作系统的大概，以及它是个什么东西，能做什么，我们平时做开发是怎么和它打交道。 做开发要不要了解OS答案肯定是要的。其实这个问题和写程序要不要学算法一个道理。如果觉得没">
+<meta name="twitter:image" content="http://yoursite.com/images/os_user.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: 'Author'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2020/05/23/操作系统笔记-1-操作系统概述/"/>
+
+
+
+
+
+  <title>操作系统笔记-1-操作系统概述 | IkanのBolg</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="default">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">IkanのBolg</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">只想安安静静撸代码</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            Home
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            Tags
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            Categories
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            Archives
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2020/05/23/操作系统笔记-1-操作系统概述/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="ikan">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="IkanのBolg">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">操作系统笔记-1-操作系统概述</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2020-05-23T10:36:41+08:00">
+                2020-05-23
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/OS学习笔记/" itemprop="url" rel="index">
+                    <span itemprop="name">OS学习笔记</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h4 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h4><p>很早就看了《MODERN OPERATING SYSTEMS》这本书，当时也做了很多笔记。为了方便自己能更好的温故知新，也为了防止自己的笔记丢失，遂搬到云上（手动狗头）。这是操作系统学习笔记的一个系列，这是第一篇笔记，主要是讲个操作系统的大概，以及它是个什么东西，能做什么，我们平时做开发是怎么和它打交道。</p>
+<h5 id="做开发要不要了解OS"><a href="#做开发要不要了解OS" class="headerlink" title="做开发要不要了解OS"></a>做开发要不要了解OS</h5><p>答案肯定是要的。其实这个问题和写程序要不要学算法一个道理。如果觉得没用，只能说明你写的程序可能还停留在CRUD阶段（不要打我，没有贬低的意思）。我们都知道，但凡做的稍微深一点，必然涉及到操作系统的知识，比如当Java应用程序假死的时候需要分析线程调用栈，线程的状态其实就是内核线程的映射；又比如CPU占用高时要分析问题在哪儿，你可能要先找到占用cpu的进程或线程，多的就不扯了。</p>
+<a id="more"></a>
+<h4 id="操作系统是什么"><a href="#操作系统是什么" class="headerlink" title="操作系统是什么"></a>操作系统是什么</h4><p>我觉得操作系统是用户软件的容器，是用户和硬件的桥梁，如果让每个用户直接操作硬件，用户软件开发是个成本及其高的事，也是不显示的事，因为如果各个软件都可以直接控制硬件，那么也是一件非常危险的事。操作系统提供给软件一个栖身之所，也加快软件开发，因为软件开发只需要调用操作系统提供的接口，而任何的资源访问和调度都有操作系统统一调度，同时也给用户提供一个统一的交互系统。大概就是下面这样</p>
+<p><img src="/images/os_user.png" alt="img"></p>
+<h4 id="计算机模型"><a href="#计算机模型" class="headerlink" title="计算机模型"></a>计算机模型</h4><h5 id="计算机运行模型"><a href="#计算机运行模型" class="headerlink" title="计算机运行模型"></a>计算机运行模型</h5><p><img src="/images/computer_run.png" alt="img"></p>
+<h5 id="计算机组成"><a href="#计算机组成" class="headerlink" title="计算机组成"></a>计算机组成</h5><p><img src="/images/hardware.png" alt="img"></p>
+<ul>
+<li><p>硬件</p>
+<ol>
+<li><p>cpu</p>
+</li>
+<li><p>磁盘</p>
+</li>
+<li><p>I/O设备(网卡、显示器、键盘、鼠标…)</p>
+</li>
+<li><p>内存</p>
+</li>
+<li><p>buses(总线，连接各个硬件设备，使其能相互通信)</p>
+<p><img src="/images/bus.png" alt="img"></p>
+</li>
+<li><p>…</p>
+</li>
+</ol>
+</li>
+<li><p>操作系统(PC主流)</p>
+<ol>
+<li>unix</li>
+<li>linux</li>
+<li>win</li>
+</ol>
+</li>
+<li><p>软件(各种运行在操作系统之上的程序)</p>
+</li>
+</ul>
+<h4 id="操作系统"><a href="#操作系统" class="headerlink" title="操作系统"></a>操作系统</h4><h5 id="操作系统历史"><a href="#操作系统历史" class="headerlink" title="操作系统历史"></a>操作系统历史</h5><ul>
+<li>第一时代(1945-55)：真空管手工时代</li>
+<li>第二时代(1955-65)：晶体管批处理时代，批处理要执行下一个任务必须等待上一个任务执行完成，不能中途切换。</li>
+<li>第三时代(1965-80)：集成电路多道程序系统时代，多道程序系统可以并发执行多个任务</li>
+<li>第四时代(1980-至今)：个人电脑时代，个人电脑的系统强调的是实时交互，因此是抢占式系统，并且提供用户友好的GUI</li>
+<li>第五时代(1990-至今)：移动计算时代</li>
+</ul>
+<h5 id="操作系统大观园"><a href="#操作系统大观园" class="headerlink" title="操作系统大观园"></a>操作系统大观园</h5><ul>
+<li>大型机操作系统：主要提供三类服务，批处理，事务处理，分时系统。典型代表OS/390，逐渐被Linux取代</li>
+<li>服务器操作系统：为若干个用户提供服务，用户可以共享硬件和软件资源。提供打印服务、文件服务、web服务，这类系统代表Solaris、FreeBSD、Linux和Windows server</li>
+<li>多处理器操作系统：一种联合多个cpu来获得联合计算能力，现在的个人计算机也有多核cpu，通常windows和linux都可以运行在多核上</li>
+<li>个人计算机系统：FreeBSD、Linux和Windows和mac OS</li>
+<li>移动计算机系统：移动设备，手机、平板等，主要是Android和iOS</li>
+<li>嵌入式计算机系统：这类系统是用来控制设备，通常不允许用户安装软件，像DVD之类的。主要是Embedded  Linux,  QNX和VxWorks</li>
+<li>传感器操作系统：通常这类系统是基于事件驱动或者基于内部时钟周期性测量，系统小。代表是TinyOS</li>
+<li>实时操作系统：这类系统时间是关键参数，比如流水线对时间要求非常严格，实时系统多用于工业。代表是eCos</li>
+<li>智能卡操作系统：微小的操作系统，运行在智能卡上，有严格的运行能耗和存储空间限制，有些智能卡是面向Java的，其ROM上有JVM</li>
+</ul>
+<h5 id="操作系统概念"><a href="#操作系统概念" class="headerlink" title="操作系统概念"></a>操作系统概念</h5><ul>
+<li><p>进程：本质是一个正在执行的程序，它被分配了一个地址空间，可以对该地址空间进行读写。详细的介绍在之后的笔记中</p>
+</li>
+<li><p>地址空间：早期主存小，程序运行时独占主存，当正在运行A程序时，要运行B程序，则要将A移除，置换B进主存，后期可以多个程序共享主存，后来又发展了虚拟内存技术来解决程序运行需要的内存比主存大的问题。详细介绍在内存管理中介绍</p>
+<p><img src="/images/address_space.png" alt="img"></p>
+</li>
+<li><p>文件：即文件系统，封装了底层复杂的硬件操作，提供给开发人员简单的接口。在文件系统中详细介绍</p>
+</li>
+<li><p>Input/Ouput：I/O</p>
+</li>
+<li><p>保护：系统安全性</p>
+</li>
+<li><p>shell：操作系统的命令解释器</p>
+</li>
+</ul>
+<h5 id="系统调用"><a href="#系统调用" class="headerlink" title="系统调用"></a>系统调用</h5><p>操作系统就是封装了硬件的接口而为开发人员提供简单的接口调用，在上边的计算机运行模型图中可以看到，软件是运行在用户态的，而要真正执行硬件控制时是运行在内核态的，因为只要产生系统调用就会从用户态切换到内核态，也就是所说的陷入内核。一个read操作如下图所示</p>
+<p><img src="/images/system_call.png" alt="img"></p>
+<ul>
+<li><p>进程管理系统调用</p>
+<p><img src="/images/process_call.png" alt="img"></p>
+</li>
+<li><p>文件管理系统调用</p>
+<p><img src="/images/file_system_call.png" alt="img"></p>
+</li>
+<li><p>目录管理和文件系统系统调用</p>
+<p><img src="/images/file_mg_call.png" alt="img"></p>
+</li>
+<li><p>其他各种系统调用</p>
+<p><img src="/images/other_call.png" alt="img"></p>
+</li>
+</ul>
+<h4 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h4><p>操作系统是一个复杂的系统，其主要作用是建立一道用户通向硬件之间的桥梁。一方面管理和调度硬件资源，一方面提供给用户以友好的访问接口。</p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/OS/" rel="tag"># OS</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2020/05/11/Docker部署Azkaban-Solo模式调度Spark/" rel="next" title="Docker部署Azkaban Solo模式调度Spark">
+                <i class="fa fa-chevron-left"></i> Docker部署Azkaban Solo模式调度Spark
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Overview
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">ikan</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">12</span>
+                  <span class="site-state-item-name">posts</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">6</span>
+                  <span class="site-state-item-name">categories</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">12</span>
+                  <span class="site-state-item-name">tags</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-4"><a class="nav-link" href="#背景"><span class="nav-number">1.</span> <span class="nav-text">背景</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#做开发要不要了解OS"><span class="nav-number">1.1.</span> <span class="nav-text">做开发要不要了解OS</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#操作系统是什么"><span class="nav-number">2.</span> <span class="nav-text">操作系统是什么</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#计算机模型"><span class="nav-number">3.</span> <span class="nav-text">计算机模型</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#计算机运行模型"><span class="nav-number">3.1.</span> <span class="nav-text">计算机运行模型</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#计算机组成"><span class="nav-number">3.2.</span> <span class="nav-text">计算机组成</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#操作系统"><span class="nav-number">4.</span> <span class="nav-text">操作系统</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#操作系统历史"><span class="nav-number">4.1.</span> <span class="nav-text">操作系统历史</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#操作系统大观园"><span class="nav-number">4.2.</span> <span class="nav-text">操作系统大观园</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#操作系统概念"><span class="nav-number">4.3.</span> <span class="nav-text">操作系统概念</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#系统调用"><span class="nav-number">4.4.</span> <span class="nav-text">系统调用</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#总结"><span class="nav-number">5.</span> <span class="nav-text">总结</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">ikan</span>
+
+  
+</div>
+
+
+  <div class="powered-by">Powered by <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a></div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">Theme &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
