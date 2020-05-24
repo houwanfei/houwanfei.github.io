@@ -79,13 +79,13 @@
 
 
 
-<meta name="description" content="背景很早就看了《MODERN OPERATING SYSTEMS》这本书，当时也做了很多笔记。为了方便自己能更好的温故知新，也为了防止自己的笔记丢失，遂搬到云上（手动狗头）。这是操作系统学习笔记的一个系列，这是第一篇笔记，主要是讲个操作系统的大概，以及它是个什么东西，能做什么，我们平时做开发是怎么和它打交道。 做开发要不要了解OS答案肯定是要的。其实这个问题和写程序要不要学算法一个道理。如果觉得没">
+<meta name="description" content="背景很早就看了《MODERN OPERATING SYSTEMS》和《Operating System Concepts》这两本书本书，当时也做了很多笔记。为了方便自己能更好的温故知新，也为了防止自己的笔记丢失，遂搬到云上（手动狗头）。这是操作系统学习笔记的一个系列，这是第一篇笔记，主要是讲个操作系统的大概，以及它是个什么东西，能做什么，我们平时做开发是怎么和它打交道。 做开发要不要了解OS答案肯">
 <meta name="keywords" content="OS">
 <meta property="og:type" content="article">
 <meta property="og:title" content="操作系统笔记-1-操作系统概述">
 <meta property="og:url" content="http://yoursite.com/2020/05/23/操作系统笔记-1-操作系统概述/index.html">
 <meta property="og:site_name" content="IkanのBolg">
-<meta property="og:description" content="背景很早就看了《MODERN OPERATING SYSTEMS》这本书，当时也做了很多笔记。为了方便自己能更好的温故知新，也为了防止自己的笔记丢失，遂搬到云上（手动狗头）。这是操作系统学习笔记的一个系列，这是第一篇笔记，主要是讲个操作系统的大概，以及它是个什么东西，能做什么，我们平时做开发是怎么和它打交道。 做开发要不要了解OS答案肯定是要的。其实这个问题和写程序要不要学算法一个道理。如果觉得没">
+<meta property="og:description" content="背景很早就看了《MODERN OPERATING SYSTEMS》和《Operating System Concepts》这两本书本书，当时也做了很多笔记。为了方便自己能更好的温故知新，也为了防止自己的笔记丢失，遂搬到云上（手动狗头）。这是操作系统学习笔记的一个系列，这是第一篇笔记，主要是讲个操作系统的大概，以及它是个什么东西，能做什么，我们平时做开发是怎么和它打交道。 做开发要不要了解OS答案肯">
 <meta property="og:locale" content="default">
 <meta property="og:image" content="http://yoursite.com/images/os_user.png">
 <meta property="og:image" content="http://yoursite.com/images/computer_run.png">
@@ -97,10 +97,10 @@
 <meta property="og:image" content="http://yoursite.com/images/file_system_call.png">
 <meta property="og:image" content="http://yoursite.com/images/file_mg_call.png">
 <meta property="og:image" content="http://yoursite.com/images/other_call.png">
-<meta property="og:updated_time" content="2020-05-23T05:38:43.575Z">
+<meta property="og:updated_time" content="2020-05-23T14:13:08.144Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="操作系统笔记-1-操作系统概述">
-<meta name="twitter:description" content="背景很早就看了《MODERN OPERATING SYSTEMS》这本书，当时也做了很多笔记。为了方便自己能更好的温故知新，也为了防止自己的笔记丢失，遂搬到云上（手动狗头）。这是操作系统学习笔记的一个系列，这是第一篇笔记，主要是讲个操作系统的大概，以及它是个什么东西，能做什么，我们平时做开发是怎么和它打交道。 做开发要不要了解OS答案肯定是要的。其实这个问题和写程序要不要学算法一个道理。如果觉得没">
+<meta name="twitter:description" content="背景很早就看了《MODERN OPERATING SYSTEMS》和《Operating System Concepts》这两本书本书，当时也做了很多笔记。为了方便自己能更好的温故知新，也为了防止自己的笔记丢失，遂搬到云上（手动狗头）。这是操作系统学习笔记的一个系列，这是第一篇笔记，主要是讲个操作系统的大概，以及它是个什么东西，能做什么，我们平时做开发是怎么和它打交道。 做开发要不要了解OS答案肯">
 <meta name="twitter:image" content="http://yoursite.com/images/os_user.png">
 
 
@@ -353,7 +353,7 @@
       
 
       
-        <h4 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h4><p>很早就看了《MODERN OPERATING SYSTEMS》这本书，当时也做了很多笔记。为了方便自己能更好的温故知新，也为了防止自己的笔记丢失，遂搬到云上（手动狗头）。这是操作系统学习笔记的一个系列，这是第一篇笔记，主要是讲个操作系统的大概，以及它是个什么东西，能做什么，我们平时做开发是怎么和它打交道。</p>
+        <h4 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h4><p>很早就看了《MODERN OPERATING SYSTEMS》和《Operating System Concepts》这两本书本书，当时也做了很多笔记。为了方便自己能更好的温故知新，也为了防止自己的笔记丢失，遂搬到云上（手动狗头）。这是操作系统学习笔记的一个系列，这是第一篇笔记，主要是讲个操作系统的大概，以及它是个什么东西，能做什么，我们平时做开发是怎么和它打交道。</p>
 <h5 id="做开发要不要了解OS"><a href="#做开发要不要了解OS" class="headerlink" title="做开发要不要了解OS"></a>做开发要不要了解OS</h5><p>答案肯定是要的。其实这个问题和写程序要不要学算法一个道理。如果觉得没用，只能说明你写的程序可能还停留在CRUD阶段（不要打我，没有贬低的意思）。我们都知道，但凡做的稍微深一点，必然涉及到操作系统的知识，比如当Java应用程序假死的时候需要分析线程调用栈，线程的状态其实就是内核线程的映射；又比如CPU占用高时要分析问题在哪儿，你可能要先找到占用cpu的进程或线程，多的就不扯了。</p>
 <a id="more"></a>
 <h4 id="操作系统是什么"><a href="#操作系统是什么" class="headerlink" title="操作系统是什么"></a>操作系统是什么</h4><p>我觉得操作系统是用户软件的容器，是用户和硬件的桥梁，如果让每个用户直接操作硬件，用户软件开发是个成本及其高的事，也是不显示的事，因为如果各个软件都可以直接控制硬件，那么也是一件非常危险的事。操作系统提供给软件一个栖身之所，也加快软件开发，因为软件开发只需要调用操作系统提供的接口，而任何的资源访问和调度都有操作系统统一调度，同时也给用户提供一个统一的交互系统。大概就是下面这样</p>
@@ -478,6 +478,10 @@
 
           <div class="post-nav-prev post-nav-item">
             
+              <a href="/2020/05/24/操作系统笔记-2-进程-上/" rel="prev" title="操作系统笔记-2-进程(上)">
+                操作系统笔记-2-进程(上) <i class="fa fa-chevron-right"></i>
+              </a>
+            
           </div>
         </div>
       
@@ -553,7 +557,7 @@
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">12</span>
+                  <span class="site-state-item-count">13</span>
                   <span class="site-state-item-name">posts</span>
                 </a>
               </div>
