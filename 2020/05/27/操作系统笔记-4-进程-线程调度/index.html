@@ -1,0 +1,1099 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="OS," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="引言当我们在平时工作或学习中用电脑的时候，我想很多人都是一边听着音乐一边写代码、看文档、编辑Markdown写笔记或者Chrome看着网页，不知道你有没有好奇电脑为什么可以可以同时完成这些程序的运行，并且如果你细心可能发现了有时候程序的响应快，有时候响应慢。这些都是因为进程&amp;amp;线程调度的结果，哪怕你的电脑处理器只有一核，可同时同时执行多个应用程序。 为何需要调度并不是所有的程序都是cpu密集">
+<meta name="keywords" content="OS">
+<meta property="og:type" content="article">
+<meta property="og:title" content="操作系统笔记-4-进程&amp;线程调度">
+<meta property="og:url" content="http://yoursite.com/2020/05/27/操作系统笔记-4-进程-线程调度/index.html">
+<meta property="og:site_name" content="IkanのBolg">
+<meta property="og:description" content="引言当我们在平时工作或学习中用电脑的时候，我想很多人都是一边听着音乐一边写代码、看文档、编辑Markdown写笔记或者Chrome看着网页，不知道你有没有好奇电脑为什么可以可以同时完成这些程序的运行，并且如果你细心可能发现了有时候程序的响应快，有时候响应慢。这些都是因为进程&amp;amp;线程调度的结果，哪怕你的电脑处理器只有一核，可同时同时执行多个应用程序。 为何需要调度并不是所有的程序都是cpu密集">
+<meta property="og:locale" content="default">
+<meta property="og:image" content="http://yoursite.com/images/cpu_bound_io_bound.png">
+<meta property="og:image" content="http://yoursite.com/images/fcfs_p1.png">
+<meta property="og:image" content="http://yoursite.com/images/fcfs_p2.png">
+<meta property="og:image" content="http://yoursite.com/images/sjf_burst.png">
+<meta property="og:image" content="http://yoursite.com/images/sjf.png">
+<meta property="og:image" content="http://yoursite.com/images/srt_burst.png">
+<meta property="og:image" content="http://yoursite.com/images/srt.png">
+<meta property="og:image" content="http://yoursite.com/images/rr_queue.png">
+<meta property="og:image" content="http://yoursite.com/images/rr_diff_quantum.png">
+<meta property="og:image" content="http://yoursite.com/images/priority_burst.png">
+<meta property="og:image" content="http://yoursite.com/images/priority_scheduling.png">
+<meta property="og:image" content="http://yoursite.com/images/priority_rr_burst.png">
+<meta property="og:image" content="http://yoursite.com/images/priority_rr.png">
+<meta property="og:image" content="http://yoursite.com/images/multilevel_queue.png">
+<meta property="og:image" content="http://yoursite.com/images/multilevel_process.png">
+<meta property="og:image" content="http://yoursite.com/images/multilevel_feedback.png">
+<meta property="og:image" content="http://yoursite.com/images/interupte_lantency.png">
+<meta property="og:image" content="http://yoursite.com/images/dispatch_lantency.png">
+<meta property="og:image" content="http://yoursite.com/images/rate_monotonic_ex1.png">
+<meta property="og:image" content="http://yoursite.com/images/rate_monotonic_ex2.png">
+<meta property="og:image" content="http://yoursite.com/images/rate_monotonic_ex3.png">
+<meta property="og:image" content="http://yoursite.com/images/rate_monotonic_ex4.png">
+<meta property="og:image" content="http://yoursite.com/images/smp_queue.png">
+<meta property="og:image" content="http://yoursite.com/images/memory_stall.png">
+<meta property="og:image" content="http://yoursite.com/images/multithread_system.png">
+<meta property="og:image" content="http://yoursite.com/images/chip_multithreading.png">
+<meta property="og:image" content="http://yoursite.com/images/two_level_schedule.png">
+<meta property="og:image" content="http://yoursite.com/images/numa_scheduling.png">
+<meta property="og:image" content="http://yoursite.com/images/value_of_vruntime.png">
+<meta property="og:updated_time" content="2020-06-02T13:41:33.272Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="操作系统笔记-4-进程&amp;线程调度">
+<meta name="twitter:description" content="引言当我们在平时工作或学习中用电脑的时候，我想很多人都是一边听着音乐一边写代码、看文档、编辑Markdown写笔记或者Chrome看着网页，不知道你有没有好奇电脑为什么可以可以同时完成这些程序的运行，并且如果你细心可能发现了有时候程序的响应快，有时候响应慢。这些都是因为进程&amp;amp;线程调度的结果，哪怕你的电脑处理器只有一核，可同时同时执行多个应用程序。 为何需要调度并不是所有的程序都是cpu密集">
+<meta name="twitter:image" content="http://yoursite.com/images/cpu_bound_io_bound.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: 'Author'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2020/05/27/操作系统笔记-4-进程-线程调度/"/>
+
+
+
+
+
+  <title>操作系统笔记-4-进程&线程调度 | IkanのBolg</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="default">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">IkanのBolg</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">只想安安静静撸代码</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            Home
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            Tags
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            Categories
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            Archives
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2020/05/27/操作系统笔记-4-进程-线程调度/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="ikan">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="IkanのBolg">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">操作系统笔记-4-进程&线程调度</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2020-05-27T22:42:53+08:00">
+                2020-05-27
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/OS学习笔记/" itemprop="url" rel="index">
+                    <span itemprop="name">OS学习笔记</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h4 id="引言"><a href="#引言" class="headerlink" title="引言"></a>引言</h4><p>当我们在平时工作或学习中用电脑的时候，我想很多人都是一边听着音乐一边写代码、看文档、编辑Markdown写笔记或者Chrome看着网页，不知道你有没有好奇电脑为什么可以可以同时完成这些程序的运行，并且如果你细心可能发现了有时候程序的响应快，有时候响应慢。这些都是因为进程&amp;线程调度的结果，哪怕你的电脑处理器只有一核，可同时同时执行多个应用程序。</p>
+<h5 id="为何需要调度"><a href="#为何需要调度" class="headerlink" title="为何需要调度"></a>为何需要调度</h5><p>并不是所有的程序都是cpu密集型的，也有I/O密集型，如下图，a是cpu密集型任务，它有很长的cpu周期，而b则持有cpu的时间短但是却很频繁。如果你是系统的设计者你会让程序如果运行呢？如果每次都先执行完a再执行b，那么磁盘可能长期处于空闲状态，这里有一个简单的想法是，优先保证b进程执行，这样磁盘就可以长期保持忙碌的状态。所以，进程调度的目的一方面是让程序并发执行，一方面是为保持系统各个组件处于忙碌状态避免资源浪费。</p>
+<a id="more"></a>
+<p><img src="/images/cpu_bound_io_bound.png" alt="img"></p>
+<p>下面的笔记是探索进程&amp;线程调度的笔记，一步步揭开处理器调度神秘的面纱。本文的结果，先介绍一些调度的基本概念方便理解后边的内容，然后会介绍调度算法（以单核和进程为视角介绍，线程和进程差不多的），之后会介绍线程调度的特有特征，然后介绍多核心环境下调度，最后可能会简单的举个例子介绍实际OS采用的是什么调度策略。</p>
+<h4 id="基本概念"><a href="#基本概念" class="headerlink" title="基本概念"></a>基本概念</h4><h5 id="调度器"><a href="#调度器" class="headerlink" title="调度器"></a>调度器</h5><p>调度器是操作系统实现的，通过一定的算法从一堆就绪线程中选择一个，然后完成上下文切换，然后执行新调度线程的代码的一个线程，注意调度器也是一个线程，它是一个高优先级的内核线程。</p>
+<h5 id="抢占式与非抢占式"><a href="#抢占式与非抢占式" class="headerlink" title="抢占式与非抢占式"></a>抢占式与非抢占式</h5><ul>
+<li>非抢占式：挑选一个进程一直运行，直到进程阻塞（I/O或等待其他线程）或者自愿让出cpu</li>
+<li>抢占式：挑选一个进程执行固定的时间，当进程用完最大时间还在执行时会被挂起，然后切换另一个就绪的进程，并且当一个比当前运行进程更高优先级进程到达时，可以抢占当前进程的cpu</li>
+</ul>
+<h5 id="何时调度"><a href="#何时调度" class="headerlink" title="何时调度"></a>何时调度</h5><ul>
+<li>在创建新进程后，需要决策时运行父进程还是子进程</li>
+<li>在一个进程退出时</li>
+<li>当一个进程被阻塞在I/O、信号量或者其他原因阻塞时，必须选择另一个进程运行</li>
+<li>在一个I/O中断时</li>
+</ul>
+<h5 id="调度环境"><a href="#调度环境" class="headerlink" title="调度环境"></a>调度环境</h5><ul>
+<li>批处理：适合非抢占式算法，减少进程切换</li>
+<li>交互式：抢占是必须的，不能让一个进程一直霸占CPU</li>
+<li>实时：对deadline要求严格</li>
+</ul>
+<h5 id="调度算法的目标"><a href="#调度算法的目标" class="headerlink" title="调度算法的目标"></a>调度算法的目标</h5><ul>
+<li>公平：相似的进程应得到相应的服务</li>
+<li>策略强制执行</li>
+<li>平衡：保持系统各个部分尽可能忙碌</li>
+<li>批处理三个指标<ul>
+<li>吞吐量：最大化每小时运行工作数</li>
+<li>周转时间：任务提交到运行结束的平均统计时间，时间越小越好</li>
+<li>CPU利用率：保持cpu在所有时间内忙绿</li>
+</ul>
+</li>
+<li>交互式系统指标<ul>
+<li>响应时间：快速响应用户请求</li>
+<li>均衡：满足用户期望</li>
+</ul>
+</li>
+<li>实时系统<ul>
+<li>满足截止时间：避免错过数据</li>
+<li>可预测性：避免在多媒体系统中品质降低</li>
+</ul>
+</li>
+</ul>
+<h4 id="批处理系统调度算法"><a href="#批处理系统调度算法" class="headerlink" title="批处理系统调度算法"></a>批处理系统调度算法</h4><h5 id="Frist-Come-Frist-Served-FCFS"><a href="#Frist-Come-Frist-Served-FCFS" class="headerlink" title="Frist-Come Frist-Served(FCFS)"></a>Frist-Come Frist-Served(FCFS)</h5><ul>
+<li>原理：顾名思义，就是先到的进程先调度，假设进程到达的顺序是p1-&gt;p2-&gt;p3</li>
+</ul>
+<p><img src="/images/fcfs_p1.png" alt="img"></p>
+<p>p2等待时间是24ms，p3等待时间是27ms，所以平均等待时间17ms，现在假设进程到达的顺序是p2-&gt;p3-&gt;p1那么如下图，平均等待时间是3ms</p>
+<p><img src="/images/fcfs_p2.png" alt="img"></p>
+<ul>
+<li>缺点<ol>
+<li>平均等待时间长</li>
+<li>不能很好平衡CPU和I/O的利用率， 如果遇到计算密集型任务（会长期霸占cpu），可能导致I/O空闲</li>
+</ol>
+</li>
+</ul>
+<h5 id="最短作业优先-SJF"><a href="#最短作业优先-SJF" class="headerlink" title="最短作业优先(SJF)"></a>最短作业优先(SJF)</h5><ul>
+<li><p>原理：每次调度都选择下一次执行时间最短的作业执行，假设4个进程的需要的cpu突发时间如下图</p>
+<p><img src="/images/sjf_burst.png" alt="img"></p>
+<p>都是就绪状态那么调度顺序将如下图</p>
+<p><img src="/images/sjf.png" alt="img"></p>
+<p>平均等待时间为7ms，如果用FCFS算法，平均等待时间可能为10.25ms</p>
+</li>
+<li><p>缺点</p>
+<ol>
+<li><p>只有在进程可以同时就绪时，SJF才是最优的</p>
+</li>
+<li><p>无法获得下一次进程的cpu突发时间，可以利用一种指数平均方法来估计下一次cpu突发时间</p>
+<script type="math/tex; mode=display">\tau _{n+1} = \alpha t_n + (1-\alpha)\tau_n</script><p>$\tau_{n+1}$代表第n+1次的预测值，$t_n$代表第n次实际时间，$\alpha$代表历史实际突发时间权重，$0 \le \alpha \le 1$，通常取$\frac{1}{2}$</p>
+</li>
+</ol>
+</li>
+</ul>
+<h5 id="最短剩余时间优先"><a href="#最短剩余时间优先" class="headerlink" title="最短剩余时间优先"></a>最短剩余时间优先</h5><ul>
+<li><p>原理：基本思想和SJF相同，但是多了一点，最短剩余时间优先是可以抢占的，假设进程的到达时间和cpu突发时间如下图</p>
+<p><img src="/images/srt_burst.png" alt="img"></p>
+<p>实际调度顺序</p>
+<p><img src="/images/srt.png" alt="img"></p>
+<p>p1最先到达，但是p2在p1执行1时到达，因为p2的cpu突发时间比p1剩余的cpu突发时间更短，因此p2抢占p1的进程。平均等待时间是$[(10 − 1) + (1 − 1) + (17 − 2) + (5 − 3)]/4 = 26/4 = 6.5$。</p>
+</li>
+</ul>
+<h4 id="交互式系统调度算法"><a href="#交互式系统调度算法" class="headerlink" title="交互式系统调度算法"></a>交互式系统调度算法</h4><h5 id="轮转调度-Round-Robin-Scheduling-RR"><a href="#轮转调度-Round-Robin-Scheduling-RR" class="headerlink" title="轮转调度(Round-Robin Scheduling RR)"></a>轮转调度(Round-Robin Scheduling RR)</h5><ul>
+<li><p>原理：类似FCFS算法，添加了抢占和时间片概念。为每一个进程分配一个时间片运行，在时间片结束前阻塞或结束，则CPU立即进行切换，或者进程用完分配的时间片，进程被挂起，切换就绪队列的头运行。时间片长度一般从10-100ms。就绪队列可以看成是一个循环队列，每个用完时间片的进程又加入到队列尾部，结果如下图</p>
+<p><img src="/images/rr_queue.png" alt="img"></p>
+</li>
+<li><p>一个简单的例子，假设进程cpu突发时间为10，下图是时间片为1,6,12时，上下文切换的次数，可以看出时间片越短，上下文切换次数越多</p>
+<p><img src="/images/rr_diff_quantum.png" alt="img"></p>
+</li>
+<li><p>缺点</p>
+<ol>
+<li><p>时间片太长，RR算法可能会退化成FCFS</p>
+</li>
+<li><p>时间片太短，如上图，上下文切换的次数将增加，进程周转时间越大。</p>
+<p>$浪费时间 = 上下文切换时间 / 时间片$</p>
+</li>
+</ol>
+</li>
+</ul>
+<h5 id="优先级调度-Priority-Scheduling"><a href="#优先级调度-Priority-Scheduling" class="headerlink" title="优先级调度(Priority Scheduling)"></a>优先级调度(Priority Scheduling)</h5><ul>
+<li><p>原理：每个进程都被分配了一个优先级，cpu将会被分配给高优先级的进程，同等优先级的进程采用FCFS算法调度</p>
+<ol>
+<li>可抢占优先级调度：当一个新的进程到达且优先级比当前cpu执行的进程高时，新进程可以抢占当前进程的cpu</li>
+<li>非可抢占优先级调度：当一个新的进程到达且优先级比当前cpu执行的进程高时，只是简单的将新进程加入队列的头部</li>
+</ol>
+</li>
+<li><p>一个简单例子，假设一个p1,p2…p5集合在时间0到达，cpu突发时间和优先级如下</p>
+<p><img src="/images/priority_burst.png" alt="img"></p>
+<p>它们的调度顺序如下图</p>
+<p><img src="/images/priority_scheduling.png" alt="img"></p>
+</li>
+<li><p>缺点：饥饿，低优先级的进程可能无限期的等待，或者高优先级的进程一直霸占CPU，有几种解决方法</p>
+<ol>
+<li><p>对于低优先级进程可以引入老化，定期提升一直未获得cpu的低优先级进程的优先级。比如假设优先级范围为0-127，定时时间为1s，一个最低优先级127的进程，只需要2min左右的时间就可以提升0</p>
+</li>
+<li><p>结合轮转调度，同一优先级的进程会采用轮转调度，比如</p>
+<p><img src="/images/priority_rr_burst.png" alt="img"></p>
+<p>它们的调度顺序会是这样</p>
+<p><img src="/images/priority_rr.png" alt="img"></p>
+</li>
+</ol>
+</li>
+</ul>
+<h5 id="多级队列调度"><a href="#多级队列调度" class="headerlink" title="多级队列调度"></a>多级队列调度</h5><ul>
+<li><p>原理：按不同进程的特征，划分为不同的类别，然后不同类别的进程有不同的优先级，有独立的调度队列，采用不同的调度算法，比如</p>
+<p><img src="/images/multilevel_queue.png" alt="img"></p>
+<p>举个例子，首先实时任务的优先级最高，因为实时任务有deadline要求，其次是系统任务，然后是交互式任务，最低优先级为批处理。每个优先级有自己的调度算法，比如交互式任务可以用RR调度，而批处理任务可以用FCFS调度</p>
+<p><img src="/images/multilevel_process.png" alt="img"></p>
+</li>
+</ul>
+<h5 id="多级反馈队列调度"><a href="#多级反馈队列调度" class="headerlink" title="多级反馈队列调度"></a>多级反馈队列调度</h5><ul>
+<li><p>原理：多级反馈队列调度同样是对于不同优先级的进程有多个队列，进程在队列之间是可以移动的，它的核心思想是CPU密集的进程会逐渐移动到低优先级队列，而I/O密集和交互式进程可以在高优先级队列保持低延迟响应。为了防止饥饿，长时间等待的低优先级进程可以升级到高优先级队列。每级队列可以采用独立的调度算法。</p>
+</li>
+<li><p>简单举个例子，如下图，有三级队列，每个新来的进程会进入0级队列，假设此时有1级队列的进程正在执行，则会被新进程抢占cpu。0、1级队列都采用RR调度算法，2级采用FCFS调度算法，当0级的进程时间片用完后将降级加入1级队列</p>
+<p><img src="/images/multilevel_feedback.png" alt="img"></p>
+</li>
+<li><p>多级反馈队列调度关键参数</p>
+<ol>
+<li>队列数</li>
+<li>每级队列的调度算法</li>
+<li>决策提升优先级的方法</li>
+<li>决策降低优先级的方法</li>
+<li>决策进程进入哪级队列的方法</li>
+</ol>
+</li>
+</ul>
+<h4 id="实时系统调度算法"><a href="#实时系统调度算法" class="headerlink" title="实时系统调度算法"></a>实时系统调度算法</h4><p>实时系统和批处理和交互式系统不同，这里先列出一些实时系统的基本概念</p>
+<h5 id="基本概念-1"><a href="#基本概念-1" class="headerlink" title="基本概念"></a>基本概念</h5><ul>
+<li><p>实时系统分类</p>
+<ol>
+<li>软实时系统：虽然也有时限要求，但是并不保证在deadline执行，错过时限也不会导致严重的后果</li>
+<li>硬实时系统：硬实时系统，严格的时限要求，任务必须在deadline执行，错过了deadline意味着严重的后果</li>
+</ol>
+</li>
+<li><p>最小延迟</p>
+<ol>
+<li><p>事件延迟，从事件的发生到事件响应的事件</p>
+<ul>
+<li><p>中断延迟：cpu收到中断时，要做两件事，第一检查中断类型，第二上下文切换保存当前正在执行线程的状态，这段时间就是中断延迟。有一个重要因素是当内核数据结构更新时是禁止响应中断的，因此实时系统要求禁止响应中断的时间非常短</p>
+<p><img src="/images/interupte_lantency.png" alt="img"></p>
+</li>
+<li><p>分派延迟</p>
+<p><img src="/images/dispatch_lantency.png" alt="img"></p>
+<ul>
+<li><p>conflicts阶段</p>
+<ol>
+<li><p>抢占正在运行的进程</p>
+</li>
+<li><p>低优先级进程释放高优先级进程需要的资源</p>
+</li>
+</ol>
+</li>
+<li><p>dispatch阶段：调度高优先级进程到可用的cpu</p>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ol>
+</li>
+</ul>
+<h5 id="基于优先级的调度"><a href="#基于优先级的调度" class="headerlink" title="基于优先级的调度"></a>基于优先级的调度</h5><ul>
+<li>原理：给实时任务分批较高的优先级</li>
+<li>缺点：基于优先级的抢占式调度算法只能保证软实时</li>
+</ul>
+<h5 id="Rate-Monotonic-Scheduling-RMS"><a href="#Rate-Monotonic-Scheduling-RMS" class="headerlink" title="Rate-Monotonic Scheduling(RMS)"></a>Rate-Monotonic Scheduling(RMS)</h5><ul>
+<li><p>基本假设</p>
+<ol>
+<li>假设调度周期性任务</li>
+<li>假设每个任务进入系统会被分配一个固定优先级，周期越短优先级越高，周期越长优先级越低</li>
+<li>假设任务的deadline是下一次执行前</li>
+</ol>
+</li>
+<li><p>实际例子分析</p>
+<ol>
+<li><p>假设第一个进程P1周期为50，cpu时间为20，第二个进程P2周期为100，cpu时间为35</p>
+<ol>
+<li><p>计算cpu利用率</p>
+<p>​        $U_{cpu} = 20/50 + 35/100 = 0.75$</p>
+</li>
+<li><p>假设p2先运行，那么p1就无法在deadline50完成</p>
+<p><img src="/images/rate_monotonic_ex1.png" alt="img"></p>
+</li>
+<li><p>假设p1先运行</p>
+<p><img src="/images/rate_monotonic_ex2.png" alt="img"></p>
+</li>
+</ol>
+</li>
+<li><p>假设第一个进程P1周期为50，cpu时间为25，第二个进程P2周期80，cpu时间为35</p>
+<ol>
+<li><p>计算cpu利用率，cpu利用率96%感觉可以运行，接下来分析一下调度</p>
+<p>​              $U_{cpu} = 25/50 + 35/80 = 0.96$</p>
+</li>
+<li><p>无论如何调度，都无法满足</p>
+<p><img src="/images/rate_monotonic_ex3.png" alt="img"></p>
+</li>
+</ol>
+</li>
+</ol>
+</li>
+<li><p>结论：不能利用cpu最大利用率来确定是否能成功调度，应该取调度N个进程时最差的cpu利用率，当需要调度的任务cpu利用率超过该值时，无法调度，由此可见，RMS调度算法cpu利用率较低。N个进程最差的cpu利用率计算公式:  $U_{worstN} = N(2^{\frac{1}{N}}-1)$</p>
+</li>
+</ul>
+<h5 id="Earliest-Deadline-First-Scheduling-EDF"><a href="#Earliest-Deadline-First-Scheduling-EDF" class="headerlink" title="Earliest-Deadline-First Scheduling(EDF)"></a>Earliest-Deadline-First Scheduling(EDF)</h5><ul>
+<li><p>原理：根据任务的deadline动态调整进程的优先级。理论上是最优的算法，既能保证进程满足deadline又能保证cpu有很好的利用率</p>
+</li>
+<li><p>举个简单的例子，假设第一个进程P1周期为50，cpu时间为25，第二个进程P2周期80，cpu时间为35</p>
+<p><img src="/images/rate_monotonic_ex4.png" alt="img"></p>
+</li>
+<li><p>和RMS比较</p>
+<ol>
+<li>不需要任务是周期性任务</li>
+<li>不需要任务cpu执行时间是常数</li>
+</ol>
+</li>
+</ul>
+<h5 id="Proportional-Share-Scheduling-PSS"><a href="#Proportional-Share-Scheduling-PSS" class="headerlink" title="Proportional Share Scheduling(PSS)"></a>Proportional Share Scheduling(PSS)</h5><ul>
+<li>原理：按比例分享cpu时间，admission-control会接收一个请求如果有足够的比例份额，否则会拒绝请求，假设A需要50、B需要20、C需要15，当新来的D需要30，则会被拒绝</li>
+</ul>
+<h4 id="线程调度"><a href="#线程调度" class="headerlink" title="线程调度"></a>线程调度</h4><p>上面所有算法都是以进程为调度目标是为了简化，线程调度算法和进程的是一样的，其实现代操作系统调度的都是内核线程。下面是上边没有介绍到的线程调度的区别</p>
+<h5 id="竞争范围"><a href="#竞争范围" class="headerlink" title="竞争范围"></a>竞争范围</h5><ol>
+<li>PCS：进程竞争范围，在many-to-one和many-to-many线程模型中，用户级线程调度器调度用户线程运行在一个可用的LWP上，当用户线程获得可用LWP并不意味着该线程正运行在cpu上，还要取决于LWP的内核线程是否被调度获得物理CPU</li>
+<li>SCS：系统竞争范围，所有内核线程竞争cpu</li>
+</ol>
+<h4 id="多处理器调度"><a href="#多处理器调度" class="headerlink" title="多处理器调度"></a>多处理器调度</h4><h5 id="多处理器的种类"><a href="#多处理器的种类" class="headerlink" title="多处理器的种类"></a>多处理器的种类</h5><ul>
+<li>多核心</li>
+<li>多线程内核(Intel的超线程)</li>
+<li>NUMA系统</li>
+<li>异构多核处理器(ARM，多为移动设备芯片)</li>
+</ul>
+<h5 id="非对称多处理器"><a href="#非对称多处理器" class="headerlink" title="非对称多处理器"></a>非对称多处理器</h5><ul>
+<li>所有的调度、i/o和其他系统活动处理都在同一个处理器上（master），其他处理器负责执行用户代码。</li>
+<li>优点，只有master处理器访问系统数据，减少数据共享</li>
+<li>致命缺点：master处理器成为瓶颈</li>
+</ul>
+<h5 id="对称多处理器-SMP"><a href="#对称多处理器-SMP" class="headerlink" title="对称多处理器(SMP)"></a>对称多处理器(SMP)</h5><ul>
+<li><p>所有处理器自调度</p>
+</li>
+<li><p>调度队列</p>
+<p><img src="/images/smp_queue.png" alt="img"></p>
+<ol>
+<li>a共用一个队列，导致的问题是queue的竞态问题，需要同步操作，否则可能两个core取了同一个thread，那么queue的锁成了性能的瓶颈</li>
+<li>b最通用的方法，解决了通用queue锁的瓶颈问题，而且可以有效利用缓存。有一个问题是工作量均衡问题，可用通过一个平衡算法来均衡各个处理器的工作量</li>
+</ol>
+</li>
+</ul>
+<h5 id="多核心处理器memory-stall问题"><a href="#多核心处理器memory-stall问题" class="headerlink" title="多核心处理器memory stall问题"></a>多核心处理器memory stall问题</h5><ul>
+<li><p>当处理器执行代码需要访问主存时，因为访问主存很慢，导致会浪费很多cpu周期</p>
+<p><img src="/images/memory_stall.png" alt="img"></p>
+</li>
+<li><p>解决办法：芯片多线程技术(CMT)，例如Intel的超线程，也就是我们平时总看到的i5双核四线程，就是每个核心有两个hardware thread</p>
+<p><img src="/images/multithread_system.png" alt="img"></p>
+<p>CMT处理器的结构，hardware thread共享物理芯片资源，比如缓存和流水线</p>
+<p><img src="/images/chip_multithreading.png" alt="img"></p>
+<p>CMT实现</p>
+<ol>
+<li>粗粒度：发生高延迟时切换hardware thread，上下文切换需要刷新指令流水线，因此开销高</li>
+<li>细粒度：在更细的级别上，比如在指令周期的边界</li>
+</ol>
+<p>实际两级调度</p>
+<p><img src="/images/two_level_schedule.png" alt="img"></p>
+<ol>
+<li>简单轮转调度算法：Ultra SPARC</li>
+<li>urgency优先级，每次切换时比较哪个优先级更高：Intel Itanium</li>
+</ol>
+</li>
+</ul>
+<h5 id="负载均衡"><a href="#负载均衡" class="headerlink" title="负载均衡"></a>负载均衡</h5><ul>
+<li>Push migration:一个特殊任务定期检查，如果检查到不平衡，就会将线程从高负载的cpu移到空闲或低负载的cpu</li>
+<li>Pull migration：当cpu空闲时会主动从高负载的cpu拉去任务</li>
+<li>负载均衡会导致一个问题，当一个已经执行过的线程因为负载均衡被迁移到其他cpu时，其缓存将失效，需要的数据需要重新从主存加载</li>
+</ul>
+<h5 id="处理器亲和"><a href="#处理器亲和" class="headerlink" title="处理器亲和"></a>处理器亲和</h5><ul>
+<li><p>定义：处理器亲和指的是一个线程在一个处理器上运行，当处理器再次调度它时，有缓存的优势，如果它再次执行的时候被迁移到其他cpu执行，那么之前cpu的缓存将失效，并且当前cpu需要重新从主存中加载缓存,因此处理器亲和的优势可能会被负载均衡抵消</p>
+</li>
+<li><p>软亲和：系统试图保证现在在同一个cpu上调度，但是不能保证</p>
+</li>
+<li><p>硬亲和：系统提供了系统调用使进程可以指定一个cpu子集供进程的线程运行</p>
+</li>
+<li><p>处理器亲和在NUMA系统中非常重要，因为每个cpu芯片有自己本地主存，访问远程主存是很慢的</p>
+<p>  <img src="/images/numa_scheduling.png" alt="img"></p>
+</li>
+</ul>
+<h4 id="案例：Linux调度"><a href="#案例：Linux调度" class="headerlink" title="案例：Linux调度"></a>案例：Linux调度</h4><h5 id="分类调度"><a href="#分类调度" class="headerlink" title="分类调度"></a>分类调度</h5><ul>
+<li><p>默认的完全公平调度(CFS)（内核2.6.23）</p>
+<ul>
+<li><p>两个概念</p>
+<ol>
+<li>nice value：范围-20～+19，用来映射优先级，值越小优先级越高</li>
+<li>virtual run time：虚拟运行时间，当nice value为0，该时间为物理运行时间；当nice value越大，说明优先级越低，cpu时间比例越小，那么该时间大于真实运行时间；反之优先级越高，cpu时间比例越高，该时间小于真实运行时间</li>
+</ol>
+</li>
+<li><p>不采用固定时间片，而是采用比例，这个比例取决于nice value，值越小优先级越高，权重越高，调度周期内获得cpu时间比例越高，也就是连续执行的时间替代时间片</p>
+</li>
+<li><p>调度：      选择虚拟运行时间最小的调度，因此nice value越小，优先级越高，得到调度的机会越多，就绪队列实现是利用red-black Tree，当一个任务变成不可运行（例如阻塞）会从树中删除</p>
+<p><img src="/images/value_of_vruntime.png" alt="img"></p>
+</li>
+</ul>
+</li>
+<li><p>实时调度</p>
+<ul>
+<li>Linux分了两个独立的优先级范围分别给实时任务（0-99）和普通任务（100-139，映射nice value-20~100,19~139）</li>
+</ul>
+</li>
+</ul>
+<h5 id="负载均衡-1"><a href="#负载均衡-1" class="headerlink" title="负载均衡"></a>负载均衡</h5><ul>
+<li>在NUMA架构中，采用分层调度域（一个cpu核心集合），负载均衡不会迁移线程到其他域，防止线程远程访问主存</li>
+</ul>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/OS/" rel="tag"># OS</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2020/05/26/操作系统笔记-3-线程/" rel="next" title="操作系统笔记-3-线程">
+                <i class="fa fa-chevron-left"></i> 操作系统笔记-3-线程
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Overview
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">ikan</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">15</span>
+                  <span class="site-state-item-name">posts</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">6</span>
+                  <span class="site-state-item-name">categories</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">12</span>
+                  <span class="site-state-item-name">tags</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-4"><a class="nav-link" href="#引言"><span class="nav-number">1.</span> <span class="nav-text">引言</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#为何需要调度"><span class="nav-number">1.1.</span> <span class="nav-text">为何需要调度</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#基本概念"><span class="nav-number">2.</span> <span class="nav-text">基本概念</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#调度器"><span class="nav-number">2.1.</span> <span class="nav-text">调度器</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#抢占式与非抢占式"><span class="nav-number">2.2.</span> <span class="nav-text">抢占式与非抢占式</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#何时调度"><span class="nav-number">2.3.</span> <span class="nav-text">何时调度</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#调度环境"><span class="nav-number">2.4.</span> <span class="nav-text">调度环境</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#调度算法的目标"><span class="nav-number">2.5.</span> <span class="nav-text">调度算法的目标</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#批处理系统调度算法"><span class="nav-number">3.</span> <span class="nav-text">批处理系统调度算法</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#Frist-Come-Frist-Served-FCFS"><span class="nav-number">3.1.</span> <span class="nav-text">Frist-Come Frist-Served(FCFS)</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#最短作业优先-SJF"><span class="nav-number">3.2.</span> <span class="nav-text">最短作业优先(SJF)</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#最短剩余时间优先"><span class="nav-number">3.3.</span> <span class="nav-text">最短剩余时间优先</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#交互式系统调度算法"><span class="nav-number">4.</span> <span class="nav-text">交互式系统调度算法</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#轮转调度-Round-Robin-Scheduling-RR"><span class="nav-number">4.1.</span> <span class="nav-text">轮转调度(Round-Robin Scheduling RR)</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#优先级调度-Priority-Scheduling"><span class="nav-number">4.2.</span> <span class="nav-text">优先级调度(Priority Scheduling)</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#多级队列调度"><span class="nav-number">4.3.</span> <span class="nav-text">多级队列调度</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#多级反馈队列调度"><span class="nav-number">4.4.</span> <span class="nav-text">多级反馈队列调度</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#实时系统调度算法"><span class="nav-number">5.</span> <span class="nav-text">实时系统调度算法</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#基本概念-1"><span class="nav-number">5.1.</span> <span class="nav-text">基本概念</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#基于优先级的调度"><span class="nav-number">5.2.</span> <span class="nav-text">基于优先级的调度</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#Rate-Monotonic-Scheduling-RMS"><span class="nav-number">5.3.</span> <span class="nav-text">Rate-Monotonic Scheduling(RMS)</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#Earliest-Deadline-First-Scheduling-EDF"><span class="nav-number">5.4.</span> <span class="nav-text">Earliest-Deadline-First Scheduling(EDF)</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#Proportional-Share-Scheduling-PSS"><span class="nav-number">5.5.</span> <span class="nav-text">Proportional Share Scheduling(PSS)</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#线程调度"><span class="nav-number">6.</span> <span class="nav-text">线程调度</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#竞争范围"><span class="nav-number">6.1.</span> <span class="nav-text">竞争范围</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#多处理器调度"><span class="nav-number">7.</span> <span class="nav-text">多处理器调度</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#多处理器的种类"><span class="nav-number">7.1.</span> <span class="nav-text">多处理器的种类</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#非对称多处理器"><span class="nav-number">7.2.</span> <span class="nav-text">非对称多处理器</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#对称多处理器-SMP"><span class="nav-number">7.3.</span> <span class="nav-text">对称多处理器(SMP)</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#多核心处理器memory-stall问题"><span class="nav-number">7.4.</span> <span class="nav-text">多核心处理器memory stall问题</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#负载均衡"><span class="nav-number">7.5.</span> <span class="nav-text">负载均衡</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#处理器亲和"><span class="nav-number">7.6.</span> <span class="nav-text">处理器亲和</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#案例：Linux调度"><span class="nav-number">8.</span> <span class="nav-text">案例：Linux调度</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#分类调度"><span class="nav-number">8.1.</span> <span class="nav-text">分类调度</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#负载均衡-1"><span class="nav-number">8.2.</span> <span class="nav-text">负载均衡</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">ikan</span>
+
+  
+</div>
+
+
+  <div class="powered-by">Powered by <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a></div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">Theme &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+  
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+        tex2jax: {
+          inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+          processEscapes: true,
+          skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+        }
+      });
+    </script>
+
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for (i=0; i < all.length; i += 1) {
+          all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+      });
+    </script>
+    <script type="text/javascript" src="//cdn.bootcss.com/mathjax/2.7.1/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+  
+
+
+  
+
+  
+
+</body>
+</html>

@@ -368,7 +368,7 @@
 <h5 id="4-配置和启动"><a href="#4-配置和启动" class="headerlink" title="4. 配置和启动"></a>4. 配置和启动</h5><ol>
 <li><p>创建配置文件目录和数据目录</p>
 <p>我的环境是windows，所以在E盘下创建了docker文件夹，在docker文件夹下创建了config文件夹和data文件夹，data文件夹下创建data1和data2文件夹</p>
-<ol start="2">
+<ol>
 <li>配置ES配置文件<br>我们部署两台，因为第一步创建的子网为172.18.0.0/16，网关为172.18.0.1，现在把第一个节点ip固定设置为172.18.0.2，第二台设置为172.18.0.3，在config文件夹创建es1.yml和es2.yml</li>
 </ol>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br></pre></td><td class="code"><pre><span class="line">es1.yml</span><br><span class="line"></span><br><span class="line">#集群名称</span><br><span class="line">cluster.name: elasticsearch-cluster</span><br><span class="line"> </span><br><span class="line">#节点名称</span><br><span class="line">node.name: es-node1</span><br><span class="line"> </span><br><span class="line">#设置绑定的ip地址，可以使ipv4或者ipv6</span><br><span class="line">#绑定这台机器的任何一个ip</span><br><span class="line">network.bind_host: 172.18.0.2</span><br><span class="line"> </span><br><span class="line">#设置其他节点和该节点交互的ip地址，如果不设置它会自动判断，值必须是个真是的ip地址</span><br><span class="line">network.publish_host: 172.18.0.2</span><br><span class="line"> </span><br><span class="line">#设置对外服务的http端口，默认为9200</span><br><span class="line">http.port: 9200</span><br><span class="line"> </span><br><span class="line">#设置节点之间的tcp端口，默认是9300</span><br><span class="line">transport.tcp.port: 9300</span><br><span class="line"> </span><br><span class="line">#是否允许跨域REST请求</span><br><span class="line">http.cors.enabled: true</span><br><span class="line"> </span><br><span class="line">#允许REST请求来自何处</span><br><span class="line">http.cors.allow-origin: &quot;*&quot;</span><br><span class="line">#初始master节点</span><br><span class="line">cluster.initial_master_nodes: es-node1</span><br><span class="line"> </span><br><span class="line">#节点角色设置</span><br><span class="line">node.master: true </span><br><span class="line">node.data: true  </span><br><span class="line"> </span><br><span class="line">#集群的节点列表</span><br><span class="line">discovery.zen.ping.unicast.hosts: [&quot;172.18.0.2&quot;,&quot;172.18.0.3&quot;]</span><br><span class="line"> </span><br><span class="line">#集群中一直正常运行的，有成为master节点资格的最少节点数，默认为1</span><br><span class="line">#(total number of master-eligible nodes / 2 + 1)</span><br><span class="line">discovery.zen.minimum_master_nodes: 1</span><br></pre></td></tr></table></figure>
@@ -376,7 +376,7 @@
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><span class="line">#集群名称</span><br><span class="line">cluster.name: elasticsearch-cluster</span><br><span class="line"> </span><br><span class="line"># 节点名称</span><br><span class="line">node.name: es-node2</span><br><span class="line"> </span><br><span class="line"># 设置绑定的ip地址，可以使ipv4或者ipv6</span><br><span class="line"># 绑定这台机器的任何一个ip</span><br><span class="line">network.bind_host: 172.18.0.3</span><br><span class="line"> </span><br><span class="line"># 设置其他节点和该节点交互的ip地址，如果不设置它会自动判断，值必须是个真是的ip地址</span><br><span class="line">network.publish_host: 172.18.0.3</span><br><span class="line"> </span><br><span class="line"># 设置对外服务的http端口，默认为9200</span><br><span class="line">http.port: 9200</span><br><span class="line"> </span><br><span class="line"># 设置节点之间的tcp端口，默认是9300</span><br><span class="line">transport.tcp.port: 9300</span><br><span class="line"> </span><br><span class="line"># 是否允许跨域REST请求</span><br><span class="line">http.cors.enabled: true</span><br><span class="line"> </span><br><span class="line"># 允许REST请求来自何处</span><br><span class="line">http.cors.allow-origin: &quot;*&quot;</span><br><span class="line"> </span><br><span class="line"># 节点角色设置</span><br><span class="line">node.master: true </span><br><span class="line">node.data: true  </span><br><span class="line"> </span><br><span class="line"># 集群的节点列表</span><br><span class="line">discovery.zen.ping.unicast.hosts: [&quot;172.18.0.2&quot;,&quot;172.18.0.3&quot;]</span><br><span class="line"> </span><br><span class="line"># 集群中一直正常运行的，有成为master节点资格的最少节点数，默认为1</span><br><span class="line"># (total number of master-eligible nodes / 2 + 1)</span><br><span class="line">discovery.zen.minimum_master_nodes: 1</span><br></pre></td></tr></table></figure>
 </li>
 </ol>
-<ol start="3">
+<ol>
 <li><p>启动</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"># 启动第一台</span><br><span class="line">docker run -e ES_JAVA_OPTS=&quot;-Xms256m -Xmx256m&quot; -d -p 9200:9200 -p 9300:9300 -v E:/docker/config/es1.yml:/usr/share/elasticsearch/config/elasticsearch.yml  -v E:/docker/data/data1:/usr/share/elasticsearch/data --network=esnet --ip 172.18.0.2 --name ES01 elasticsearch:7.4.2</span><br><span class="line"></span><br><span class="line">#启动第二台</span><br><span class="line">docker run -e ES_JAVA_OPTS=&quot;-Xms256m -Xmx256m&quot; -d -p 9201:9200 -p 9301:9300 -v E:/docker/config/es2.yml:/usr/share/elasticsearch/config/elasticsearch.yml  -v E:/docker/data/data2:/usr/share/elasticsearch/data --network=esnet --ip 172.18.0.3 --name ES02 elasticsearch:7.4.2</span><br></pre></td></tr></table></figure>
 <p><strong>参数解释</strong></p>
@@ -385,9 +385,9 @@
 <li>-d: 后台运行</li>
 <li>-p: 9200:9200, 宿主机和容器端口映射，分别是 宿主机port:容器port</li>
 <li>-v: 目录挂载 -v E:/docker/config/es1.yml:/usr/share/elasticsearch/config/elasticsearch.yml 把宿主机的E:/docker/config/es1.yml挂载到容器的/usr/share/elasticsearch/config/elasticsearch.yml</li>
-<li>–network: 指定子网</li>
-<li>–ip: 指定静态ip</li>
-<li>–name: 指定容器名</li>
+<li>—network: 指定子网</li>
+<li>—ip: 指定静态ip</li>
+<li>—name: 指定容器名</li>
 </ul>
 <h5 id="5-验证"><a href="#5-验证" class="headerlink" title="5. 验证"></a>5. 验证</h5><p>启动之后<a href="http://127.0.0.1:9200/_cat/nodes?v" target="_blank" rel="noopener">http://127.0.0.1:9200/_cat/nodes?v</a> 链接可以查看节点信息</p>
 <p>我的是这样的,*代表master节点，如果你的信息是这样，那么恭喜你，成功了。<br><img src="https://www.aiknowledge.net/api/assets/springbok/img/52d59ff7-cde9-4f2f-8f7a-9cc776b1e451.png" alt="img"></p>
@@ -514,7 +514,7 @@
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">14</span>
+                  <span class="site-state-item-count">15</span>
                   <span class="site-state-item-name">posts</span>
                 </a>
               </div>
@@ -769,6 +769,28 @@
   
 
   
+  
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+        tex2jax: {
+          inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+          processEscapes: true,
+          skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+        }
+      });
+    </script>
+
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for (i=0; i < all.length; i += 1) {
+          all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+      });
+    </script>
+    <script type="text/javascript" src="//cdn.bootcss.com/mathjax/2.7.1/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+  
+
 
   
 
