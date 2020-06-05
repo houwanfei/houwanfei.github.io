@@ -93,7 +93,7 @@
 <meta property="og:image" content="http://yoursite.com/images/monitor.png">
 <meta property="og:image" content="http://yoursite.com/images/barriers.png">
 <meta property="og:image" content="http://yoursite.com/images/read_copy_update.png">
-<meta property="og:updated_time" content="2020-06-05T14:01:37.596Z">
+<meta property="og:updated_time" content="2020-06-05T14:04:06.968Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="操作系统笔记-5-进程&amp;线程同步">
 <meta name="twitter:description" content="引言前一篇介绍了进程和线程调度，知道线程和进程在系统中是并发执行，这将会引发出一些问题。接下来从一个简单的生产者和消费者例子说起，从前有两个进程，一个进程负责往一个buffer里写数据，我们把它叫做生产者；一个进程负责消费数据也就是取走buffer里的数据，我们把它叫做消费者。因为我们要记录写到哪里，所以需要一个变量in来记录，还需要一个变量记录消费到哪里了out，现在我们假设核心的生产者代码段。">
@@ -412,7 +412,7 @@
 </li>
 </ul>
 <h5 id="XCHG指令"><a href="#XCHG指令" class="headerlink" title="XCHG指令"></a>XCHG指令</h5><ul>
-<li><p>原理：交换两个操作数，是TSL的一种替代指令</p>
+<li><p>原理：原子交换两个操作数，是TSL的一种替代指令</p>
 <p><img src="/images/xchg.png" alt="img"></p>
 </li>
 </ul>
