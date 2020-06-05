@@ -68,7 +68,7 @@
 
 
 
-  <meta name="keywords" content="java,NIO," />
+  <meta name="keywords" content="OS," />
 
 
 
@@ -79,24 +79,23 @@
 
 
 
-<meta name="description" content="Buffer是什么和它的名字一样，Buffer是一个缓冲区，本质上是一块可以写入数据。可以读取数据的内存。在NIO中，Buffer用于和NIO中的各种channel交互。数据可以从channel中读入Buffer，然后从Buffer中写入另一个channel。 Buffer中几个重要的概念 capacity：容量，指定之后不可变动  limit：限制，第一个不应该读取或写入数据的索引，初始时和ca">
-<meta name="keywords" content="java,NIO">
+<meta name="description" content="最近整理以前的笔记，有人问关于操作系统的书籍。我有个爱好喜欢收集书籍，前后也收集了几百本高质量的书籍，这里给大家推荐基本关于操作系统的书籍 Operating System Concepts 10th edition 又称恐龙书，这本书已经出到第10版，可见其经典。作者是想从理论层面把问题的产生和解决思路阐述清楚，包含了操作系统各个方面，是一本非常不错的入门书籍。">
+<meta name="keywords" content="OS">
 <meta property="og:type" content="article">
-<meta property="og:title" content="Java NIO入门到放弃系列之Buffer">
-<meta property="og:url" content="http://yoursite.com/2018/05/25/Buffer详解/index.html">
+<meta property="og:title" content="操作系统笔记-番外-操作系统经典书籍推荐">
+<meta property="og:url" content="http://yoursite.com/2020/06/02/操作系统笔记-番外-书籍推荐/index.html">
 <meta property="og:site_name" content="IkanのBolg">
-<meta property="og:description" content="Buffer是什么和它的名字一样，Buffer是一个缓冲区，本质上是一块可以写入数据。可以读取数据的内存。在NIO中，Buffer用于和NIO中的各种channel交互。数据可以从channel中读入Buffer，然后从Buffer中写入另一个channel。 Buffer中几个重要的概念 capacity：容量，指定之后不可变动  limit：限制，第一个不应该读取或写入数据的索引，初始时和ca">
+<meta property="og:description" content="最近整理以前的笔记，有人问关于操作系统的书籍。我有个爱好喜欢收集书籍，前后也收集了几百本高质量的书籍，这里给大家推荐基本关于操作系统的书籍 Operating System Concepts 10th edition 又称恐龙书，这本书已经出到第10版，可见其经典。作者是想从理论层面把问题的产生和解决思路阐述清楚，包含了操作系统各个方面，是一本非常不错的入门书籍。">
 <meta property="og:locale" content="default">
-<meta property="og:image" content="http://yoursite.com/images/buffer1.png">
-<meta property="og:image" content="http://yoursite.com/images/buffer2.png">
-<meta property="og:image" content="http://yoursite.com/images/buffer3.png">
-<meta property="og:image" content="http://yoursite.com/images/buffer4.png">
-<meta property="og:image" content="http://yoursite.com/images/buffer5.png">
-<meta property="og:updated_time" content="2018-12-01T04:19:18.383Z">
+<meta property="og:image" content="http://yoursite.com/images/opration_book1.jpg">
+<meta property="og:image" content="http://yoursite.com/images/mos.jpg">
+<meta property="og:image" content="http://yoursite.com/images/osthp.jpg">
+<meta property="og:image" content="http://yoursite.com/images/csapp.jpg">
+<meta property="og:updated_time" content="2020-06-03T14:17:48.524Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="Java NIO入门到放弃系列之Buffer">
-<meta name="twitter:description" content="Buffer是什么和它的名字一样，Buffer是一个缓冲区，本质上是一块可以写入数据。可以读取数据的内存。在NIO中，Buffer用于和NIO中的各种channel交互。数据可以从channel中读入Buffer，然后从Buffer中写入另一个channel。 Buffer中几个重要的概念 capacity：容量，指定之后不可变动  limit：限制，第一个不应该读取或写入数据的索引，初始时和ca">
-<meta name="twitter:image" content="http://yoursite.com/images/buffer1.png">
+<meta name="twitter:title" content="操作系统笔记-番外-操作系统经典书籍推荐">
+<meta name="twitter:description" content="最近整理以前的笔记，有人问关于操作系统的书籍。我有个爱好喜欢收集书籍，前后也收集了几百本高质量的书籍，这里给大家推荐基本关于操作系统的书籍 Operating System Concepts 10th edition 又称恐龙书，这本书已经出到第10版，可见其经典。作者是想从理论层面把问题的产生和解决思路阐述清楚，包含了操作系统各个方面，是一本非常不错的入门书籍。">
+<meta name="twitter:image" content="http://yoursite.com/images/opration_book1.jpg">
 
 
 
@@ -126,13 +125,13 @@
 
 
 
-  <link rel="canonical" href="http://yoursite.com/2018/05/25/Buffer详解/"/>
+  <link rel="canonical" href="http://yoursite.com/2020/06/02/操作系统笔记-番外-书籍推荐/"/>
 
 
 
 
 
-  <title>Java NIO入门到放弃系列之Buffer | IkanのBolg</title>
+  <title>操作系统笔记-番外-操作系统经典书籍推荐 | IkanのBolg</title>
   
 
 
@@ -259,7 +258,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2018/05/25/Buffer详解/">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2020/06/02/操作系统笔记-番外-书籍推荐/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="ikan">
@@ -276,7 +275,7 @@
 
         
         
-          <h1 class="post-title" itemprop="name headline">Java NIO入门到放弃系列之Buffer</h1>
+          <h1 class="post-title" itemprop="name headline">操作系统笔记-番外-操作系统经典书籍推荐</h1>
         
 
         <div class="post-meta">
@@ -288,8 +287,8 @@
               
                 <span class="post-meta-item-text">Posted on</span>
               
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-05-25T21:28:29+08:00">
-                2018-05-25
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2020-06-02T22:45:06+08:00">
+                2020-06-02
               </time>
             
 
@@ -311,8 +310,8 @@
               
               
                 <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/Java学习笔记/" itemprop="url" rel="index">
-                    <span itemprop="name">Java学习笔记</span>
+                  <a href="/categories/OS学习笔记/" itemprop="url" rel="index">
+                    <span itemprop="name">OS学习笔记</span>
                   </a>
                 </span>
 
@@ -348,44 +347,31 @@
       
 
       
-        <h4 id="Buffer是什么"><a href="#Buffer是什么" class="headerlink" title="Buffer是什么"></a>Buffer是什么</h4><p>和它的名字一样，Buffer是一个缓冲区，本质上是一块可以写入数据。可以读取数据的内存。在NIO中，Buffer用于和NIO中的各种channel交互。数据可以从channel中读入Buffer，然后从Buffer中写入另一个channel。</p>
-<h4 id="Buffer中几个重要的概念"><a href="#Buffer中几个重要的概念" class="headerlink" title="Buffer中几个重要的概念"></a>Buffer中几个重要的概念</h4><ul>
-<li><p>capacity：容量，指定之后不可变动</p>
-</li>
-<li><p>limit：限制，第一个不应该读取或写入数据的索引，初始时和capacity在一个位置。</p>
-</li>
-<li><p>position：位置，下一个可读取或写入的位置，初始为0，不能为负，且不能大于limit</p>
+        <p>最近整理以前的笔记，有人问关于操作系统的书籍。我有个爱好喜欢收集书籍，前后也收集了几百本高质量的书籍，这里给大家推荐基本关于操作系统的书籍</p>
+<h5 id="Operating-System-Concepts-10th-edition"><a href="#Operating-System-Concepts-10th-edition" class="headerlink" title="Operating System Concepts 10th edition"></a>Operating System Concepts 10th edition</h5><p><img src="/images/opration_book1.jpg" alt="img"></p>
+<p>又称恐龙书，这本书已经出到第10版，可见其经典。作者是想从理论层面把问题的产生和解决思路阐述清楚，包含了操作系统各个方面，是一本非常不错的入门书籍。</p>
 <a id="more"></a>
-</li>
-</ul>
-<h4 id="举几个例子来说明Buffer运作方式"><a href="#举几个例子来说明Buffer运作方式" class="headerlink" title="举几个例子来说明Buffer运作方式"></a>举几个例子来说明Buffer运作方式</h4><ol>
-<li><p>初始时，即刚分配</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ByteBuffer byteBuffer = ByteBuffer.allocate(48);</span><br></pre></td></tr></table></figure>
-<p>其状态图如下：</p>
-</li>
-</ol>
-<p><img src="/images/buffer1.png" alt="Alt"></p>
-<ol>
-<li><p>当写入几个值时</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">byteBuffer.put((byte)1);</span><br><span class="line">byteBuffer.put((byte)2);</span><br><span class="line">byteBuffer.put((byte)3);</span><br><span class="line">byteBuffer.put((byte)4);</span><br></pre></td></tr></table></figure>
-<p>状态如下</p>
-<p><img src="/images/buffer2.png" alt="Alt"></p>
-</li>
-<li><p>当写入了数据进入缓冲区时，就可以读取数据，在上面说过，数据写入和读取的下一个位置是position，可是现在position在索引为4（数组下标从0开始，这里缓冲区是一个byte数组）如何读取呢。这里就要介绍一下Buffer缓冲区有两种状态，即读和写，在读的状态下，不能做写入操作，同样在写状态下也不能做读操作，否则缓冲区会数据会被破坏。在buffer中提供了flip()来切换读写状态。当调用flip()函数，缓冲区状态由写入变成读取。</p>
-<p><img src="/images/buffer3.png" alt="Alt"></p>
-<p>可以看到，limit移动到position位置，而position移动到索引0位置。可以从Buffer源码中看到这个操作。</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">public final Buffer flip() &#123;</span><br><span class="line">    limit = position;</span><br><span class="line">    position = 0;</span><br><span class="line">    mark = -1;</span><br><span class="line">    return this;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-</li>
-<li><p>此时进入读状态开始读取数据，如下图</p>
-<p><img src="/images/buffer4.png" alt="Alt"></p>
-</li>
-<li><p>当读取到一半时，这个时候想写数据怎么办，我们知道flip()函数可以切换读写状态，但是position会从0开始，也就是说我们没有读完的数据会被后来写入的数据覆盖。所以这个时候不能用flip()函数来切换，ByteBuffer提供了另外一个函数compact()，该函数会将未读完的数据复制到索引0位置开始，将position和limit之间的数据依次复制，然后limit移动到capacity位置。如下图</p>
-<p><img src="/images/buffer5.png" alt="Alt"></p>
-</li>
-</ol>
-<h4 id="以ByteBuffer为例写一个Demo"><a href="#以ByteBuffer为例写一个Demo" class="headerlink" title="以ByteBuffer为例写一个Demo"></a>以ByteBuffer为例写一个Demo</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">public class TestBuffer &#123;</span><br><span class="line">    public static void main(String[] args) &#123;</span><br><span class="line">        ByteBuffer byteBuffer = ByteBuffer.allocate(48);</span><br><span class="line">        byteBuffer.put((byte)1);</span><br><span class="line">        byteBuffer.put((byte)2);</span><br><span class="line">        byteBuffer.put((byte)3);</span><br><span class="line">        byteBuffer.put((byte)4);</span><br><span class="line">        byteBuffer.flip();	//写入四个值后切换为读取状态</span><br><span class="line">        System.out.println(&quot;第一次读取:&quot; + byteBuffer.get());</span><br><span class="line">        byteBuffer.compact();	//读了部分后调用compact整理缓冲区的数据</span><br><span class="line">        byteBuffer.put((byte)5);</span><br><span class="line">        //byteBuffer.put((byte)6);</span><br><span class="line">        byteBuffer.flip();</span><br><span class="line">        for (int i=0; i&lt; 4; i++) &#123;</span><br><span class="line">            System.out.println(&quot;第二次读取:&quot; + byteBuffer.get());</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>运行结果：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">第一次读取:1</span><br><span class="line">第二次读取:2</span><br><span class="line">第二次读取:3</span><br><span class="line">第二次读取:4</span><br><span class="line">第二次读取:5</span><br></pre></td></tr></table></figure>
+<p><a href="https://book.douban.com/subject/30272539/" target="_blank" rel="noopener">豆瓣书评</a></p>
+<p>下载地址：</p>
+<p><a href="https://github.com/woodliu/Operating.System.Concepts.10th.Edition/blob/master/Operating.System.Concepts.10th.Edition.2018.4.pdf" target="_blank" rel="noopener">https://github.com/woodliu/Operating.System.Concepts.10th.Edition/blob/master/Operating.System.Concepts.10th.Edition.2018.4.pdf</a></p>
+<h5 id="Modern-Operating-Systems-4th-Edition"><a href="#Modern-Operating-Systems-4th-Edition" class="headerlink" title="Modern Operating Systems 4th Edition"></a>Modern Operating Systems 4th Edition</h5><p><img src="/images/mos.jpg" alt="img"></p>
+<p>光看作者的名字Tanenbaum就知道这本书有点东西，MINIX最初的作者。写作语言通俗易懂，即使你英语不是很好。Processes and Threads, Memory Management, File Systems, Input/Output,DeadLocks这几章写得非常不错，建议多读几遍。</p>
+<p><a href="https://book.douban.com/subject/25864553/" target="_blank" rel="noopener">豆瓣书评</a></p>
+<p>下载地址：</p>
+<p>链接：<a href="https://pan.baidu.com/s/1UCyriXIWRC2-HXsd2DgaYw" target="_blank" rel="noopener">https://pan.baidu.com/s/1UCyriXIWRC2-HXsd2DgaYw</a></p>
+<p>提取码：7m8j</p>
+<h5 id="Operating-System-Three-easy-pieces"><a href="#Operating-System-Three-easy-pieces" class="headerlink" title="Operating System : Three easy pieces"></a>Operating System : Three easy pieces</h5><p><img src="/images/osthp.jpg" alt="img"></p>
+<p>这本书就是最好的入门教程, 所有细节讲的非常清楚, 非常的深入浅出, 强烈推荐操作系统入门玩家阅读。主要分为三部分，虚拟化、并发和持久化来讲。我当初最先读的是《Modern Operating Systems》，如果是我现在推荐你读，肯定是推荐你先看这本。</p>
+<p><a href="https://book.douban.com/subject/19973015/" target="_blank" rel="noopener">豆瓣书评</a></p>
+<p>下载地址：</p>
+<p>链接: <a href="https://pan.baidu.com/s/1YiB9WWGhJBmgmQgrNWPgXg" target="_blank" rel="noopener">https://pan.baidu.com/s/1YiB9WWGhJBmgmQgrNWPgXg</a> </p>
+<p>提取码: 477f</p>
+<h5 id="Computer-Systems-A-Programmer’s-Perspective-3rd-Edition"><a href="#Computer-Systems-A-Programmer’s-Perspective-3rd-Edition" class="headerlink" title="Computer Systems: A Programmer’s Perspective 3rd Edition"></a>Computer Systems: A Programmer’s Perspective 3rd Edition</h5><p><img src="/images/csapp.jpg" alt="img"></p>
+<p>以程序员的视角理解计算机系统，首先把高级语言转换成计算机能够理解的一种中间格式（如汇编）， 然后描述计算机如何解释和执行这些中间格式的程序，使系统的那一部分影响程序的执行效率。 总的来说，《深入理解计算机系统》艺术是一个桥梁，帮助程序员衔接了计算机系统各个领域的知识， 为程序员构造了一个概念性的框架。</p>
+<p><a href="https://book.douban.com/subject/26344642/" target="_blank" rel="noopener">豆瓣书评</a></p>
+<p>下载地址：</p>
+<p><a href="https://545c.com/file/15081096-306053388" target="_blank" rel="noopener">https://545c.com/file/15081096-306053388</a></p>
+<p>上面这些书籍都是英文版，如果需要中文版，可以自己搜索，但是不要完全看中文版。</p>
 
       
     </div>
@@ -403,9 +389,7 @@
       
         <div class="post-tags">
           
-            <a href="/tags/java/" rel="tag"># java</a>
-          
-            <a href="/tags/NIO/" rel="tag"># NIO</a>
+            <a href="/tags/OS/" rel="tag"># OS</a>
           
         </div>
       
@@ -418,15 +402,15 @@
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
+              <a href="/2020/06/02/操作系统笔记-5-进程-线程同步/" rel="next" title="操作系统笔记-5-进程&线程同步">
+                <i class="fa fa-chevron-left"></i> 操作系统笔记-5-进程&线程同步
+              </a>
+            
           </div>
 
           <span class="post-nav-divider"></span>
 
           <div class="post-nav-prev post-nav-item">
-            
-              <a href="/2018/05/26/IO总览/" rel="prev" title="Java 基础之IO总览">
-                Java 基础之IO总览 <i class="fa fa-chevron-right"></i>
-              </a>
             
           </div>
         </div>
@@ -558,7 +542,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-4"><a class="nav-link" href="#Buffer是什么"><span class="nav-number">1.</span> <span class="nav-text">Buffer是什么</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Buffer中几个重要的概念"><span class="nav-number">2.</span> <span class="nav-text">Buffer中几个重要的概念</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#举几个例子来说明Buffer运作方式"><span class="nav-number">3.</span> <span class="nav-text">举几个例子来说明Buffer运作方式</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#以ByteBuffer为例写一个Demo"><span class="nav-number">4.</span> <span class="nav-text">以ByteBuffer为例写一个Demo</span></a></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-5"><a class="nav-link" href="#Operating-System-Concepts-10th-edition"><span class="nav-number">1.</span> <span class="nav-text">Operating System Concepts 10th edition</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#Modern-Operating-Systems-4th-Edition"><span class="nav-number">2.</span> <span class="nav-text">Modern Operating Systems 4th Edition</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#Operating-System-Three-easy-pieces"><span class="nav-number">3.</span> <span class="nav-text">Operating System : Three easy pieces</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#Computer-Systems-A-Programmer’s-Perspective-3rd-Edition"><span class="nav-number">4.</span> <span class="nav-text">Computer Systems: A Programmer’s Perspective 3rd Edition</span></a></li></ol></div>
             
 
           </div>

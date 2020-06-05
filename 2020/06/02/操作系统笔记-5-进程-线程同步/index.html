@@ -1,0 +1,912 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="OS," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="引言前一篇介绍了进程和线程调度，知道线程和进程在系统中是并发执行，这将会引发出一些问题。接下来从一个简单的生产者和消费者例子说起，从前有两个进程，一个进程负责往一个buffer里写数据，我们把它叫做生产者；一个进程负责消费数据也就是取走buffer里的数据，我们把它叫做消费者。因为我们要记录写到哪里，所以需要一个变量in来记录，还需要一个变量记录消费到哪里了out，现在我们假设核心的生产者代码段。">
+<meta name="keywords" content="OS">
+<meta property="og:type" content="article">
+<meta property="og:title" content="操作系统笔记-5-进程&amp;线程同步">
+<meta property="og:url" content="http://yoursite.com/2020/06/02/操作系统笔记-5-进程-线程同步/index.html">
+<meta property="og:site_name" content="IkanのBolg">
+<meta property="og:description" content="引言前一篇介绍了进程和线程调度，知道线程和进程在系统中是并发执行，这将会引发出一些问题。接下来从一个简单的生产者和消费者例子说起，从前有两个进程，一个进程负责往一个buffer里写数据，我们把它叫做生产者；一个进程负责消费数据也就是取走buffer里的数据，我们把它叫做消费者。因为我们要记录写到哪里，所以需要一个变量in来记录，还需要一个变量记录消费到哪里了out，现在我们假设核心的生产者代码段。">
+<meta property="og:locale" content="default">
+<meta property="og:image" content="http://yoursite.com/images/critical_regions.png">
+<meta property="og:image" content="http://yoursite.com/images/tsl.png">
+<meta property="og:image" content="http://yoursite.com/images/xchg.png">
+<meta property="og:image" content="http://yoursite.com/images/monitor.png">
+<meta property="og:image" content="http://yoursite.com/images/barriers.png">
+<meta property="og:image" content="http://yoursite.com/images/read_copy_update.png">
+<meta property="og:updated_time" content="2020-06-05T14:01:37.596Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="操作系统笔记-5-进程&amp;线程同步">
+<meta name="twitter:description" content="引言前一篇介绍了进程和线程调度，知道线程和进程在系统中是并发执行，这将会引发出一些问题。接下来从一个简单的生产者和消费者例子说起，从前有两个进程，一个进程负责往一个buffer里写数据，我们把它叫做生产者；一个进程负责消费数据也就是取走buffer里的数据，我们把它叫做消费者。因为我们要记录写到哪里，所以需要一个变量in来记录，还需要一个变量记录消费到哪里了out，现在我们假设核心的生产者代码段。">
+<meta name="twitter:image" content="http://yoursite.com/images/critical_regions.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: 'Author'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2020/06/02/操作系统笔记-5-进程-线程同步/"/>
+
+
+
+
+
+  <title>操作系统笔记-5-进程&线程同步 | IkanのBolg</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="default">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">IkanのBolg</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">只想安安静静撸代码</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            Home
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            Tags
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            Categories
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            Archives
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2020/06/02/操作系统笔记-5-进程-线程同步/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="ikan">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="IkanのBolg">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">操作系统笔记-5-进程&线程同步</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2020-06-02T22:23:02+08:00">
+                2020-06-02
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/OS学习笔记/" itemprop="url" rel="index">
+                    <span itemprop="name">OS学习笔记</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h4 id="引言"><a href="#引言" class="headerlink" title="引言"></a>引言</h4><p>前一篇介绍了进程和线程调度，知道线程和进程在系统中是并发执行，这将会引发出一些问题。接下来从一个简单的生产者和消费者例子说起，从前有两个进程，一个进程负责往一个buffer里写数据，我们把它叫做生产者；一个进程负责消费数据也就是取走buffer里的数据，我们把它叫做消费者。因为我们要记录写到哪里，所以需要一个变量in来记录，还需要一个变量记录消费到哪里了out，现在我们假设核心的生产者代码段。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">while</span> (<span class="keyword">true</span>) &#123;</span><br><span class="line">    <span class="keyword">while</span> (count == BUFFER SIZE)</span><br><span class="line">    ; <span class="comment">/* 忙等待，等到buffer有空间写入 */</span></span><br><span class="line">    buffer[in] = next produced;</span><br><span class="line">    in = (in + <span class="number">1</span>) % BUFFER SIZE; <span class="comment">//构建一个环形数组</span></span><br><span class="line">    count++;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>消费者核心代码</p>
+<a id="more"></a>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">while</span> (<span class="keyword">true</span>) &#123;</span><br><span class="line">    <span class="keyword">while</span> (count == <span class="number">0</span>)</span><br><span class="line">    ; <span class="comment">/* 忙等待,等到buffer有数据消费 */</span></span><br><span class="line">    next consumed = buffer[out];</span><br><span class="line">    out = (out + <span class="number">1</span>) % BUFFER SIZE;</span><br><span class="line">    count--;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>如果并发执行这个代码，肯定会有问题？因为cpu在修改count时，要先将count读入寄存器，然后在写入内存。假设count此时为4，生产者和消费者分别并发写入和消费，count的结果可能会为3、4、5，如果生产者和消费者分别将4读入寄存器，那么count的值将取决于谁后写回内存覆盖之前的值，所以值可能为3、5，这个结果显然是有问题的。将接下来将学习解决之道。</p>
+<h4 id="竞态条件-amp-临界区"><a href="#竞态条件-amp-临界区" class="headerlink" title="竞态条件&amp;临界区"></a>竞态条件&amp;临界区</h4><p>在学习进程&amp;线程同步之前得先理解竞态条件和临界区的概念。</p>
+<h5 id="竞态条件"><a href="#竞态条件" class="headerlink" title="竞态条件"></a>竞态条件</h5><p>多个进程或线程并发访问或操作同一数据，其运行结果依赖于其访问发生的特定顺序</p>
+<h5 id="临界区"><a href="#临界区" class="headerlink" title="临界区"></a>临界区</h5><ul>
+<li><p>定义：对共享内存访问的程序片段被称为临界区，就像引言例子中外层while循环中的代码片段</p>
+</li>
+<li><p>临界区互斥性示意图</p>
+<p><img src="/images/critical_regions.png" alt="img"></p>
+</li>
+</ul>
+<h5 id="解决竞态条件方法满足的条件"><a href="#解决竞态条件方法满足的条件" class="headerlink" title="解决竞态条件方法满足的条件"></a>解决竞态条件方法满足的条件</h5><ul>
+<li>互斥性，任何两个进程不能同时处于临界区</li>
+<li>不应对CPU的速度和数量做任何假设</li>
+<li>临界区外的进程不能阻塞其他进程</li>
+<li>不得使进程无限期的等待进入临界区</li>
+</ul>
+<h5 id="简单解决办法"><a href="#简单解决办法" class="headerlink" title="简单解决办法"></a>简单解决办法</h5><ul>
+<li><p>屏蔽中断</p>
+<ul>
+<li>实现：在进入临界区后立即屏蔽中断，在快要离开时开启中断。</li>
+<li>缺点<ol>
+<li>把屏蔽中断的权利交给用户进程是不明智的</li>
+<li>如果是多CPU，只会屏蔽当前CPU有效</li>
+</ol>
+</li>
+</ul>
+</li>
+<li><p>Peterson解法</p>
+<ul>
+<li><p>实现</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">define</span> FALSE 0</span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> TRUE 1</span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> N 2 <span class="comment">/* 进程数 */</span></span></span><br><span class="line"></span><br><span class="line"><span class="keyword">int</span> turn; <span class="comment">/* whose turn is it? */</span></span><br><span class="line"><span class="keyword">int</span> interested[N]; <span class="comment">/* 哪个进程对条件感兴趣，初始化为0 */</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">void</span> enter <span class="title">region</span><span class="params">(<span class="keyword">int</span> process)</span></span>; <span class="comment">/* 因为只有两个进程，所以process为0或者1 */</span></span><br><span class="line">&#123;</span><br><span class="line">    <span class="keyword">int</span> other; <span class="comment">/* 另一个进程编号 */</span></span><br><span class="line">    other = <span class="number">1</span> −process; <span class="comment">/* 另一个进程编号 */</span></span><br><span class="line">    interested[process] = TRUE; <span class="comment">/* 表示当前进程对该条件感兴趣 */</span></span><br><span class="line">    turn =process; <span class="comment">/* 设值，注意这里哪个进程后设置，该值为它的进程编号 */</span></span><br><span class="line">    <span class="keyword">while</span> (turn == process &amp;&amp; interested[other] == TRUE) <span class="comment">/* 空语句 */</span> ;</span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="keyword">void</span> leave <span class="title">region</span><span class="params">(<span class="keyword">int</span> process)</span> <span class="comment">/* 进程离开临界区 */</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    interested[process] = FALSE; <span class="comment">/* 将进程对条件感兴趣的标志设置为false */</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><strong>while判断分析</strong>：如果turn的值为当前进程号，并且interested[other]为true，说明此时两个进程都对该条件感兴趣，并且另一个进程先来，所以turn的值才会为当前进程的值，它覆盖了另一个进程写入的值，所以另一个进程已经进入临界区，所以当前进程需要等待另一个进程离开临界区。</p>
+</li>
+<li><p>缺点：为了提高性能，现代处理器或者编译器有指令重排序，可能是导致该算法无法保证有效。<strong>虽然Peterson的解法在指令重排序下有问题，但是它却提供了同步解决的基础。</strong></p>
+</li>
+</ul>
+</li>
+</ul>
+<h4 id="同步工具的硬件支持"><a href="#同步工具的硬件支持" class="headerlink" title="同步工具的硬件支持"></a>同步工具的硬件支持</h4><p>在介绍同步工具之前，先讲一下硬件支持，比如内存屏障、CAS。</p>
+<h5 id="内存屏障"><a href="#内存屏障" class="headerlink" title="内存屏障"></a>内存屏障</h5><ul>
+<li>内存模型<ul>
+<li>Strongly ordered：一个处理器对内存的修改立刻对其他处理器可见</li>
+<li>Weakly ordered：一个处理器的内存的修改不能保证立刻对其他处理器可见</li>
+</ul>
+</li>
+<li>原理：硬件提供的指令，通过强制将对内存的修改传播到其他处理器，从而确保其他处理器对内存的修改可见，在之后讲内存管理的时候细说</li>
+</ul>
+<h5 id="TSL指令"><a href="#TSL指令" class="headerlink" title="TSL指令"></a>TSL指令</h5><ul>
+<li><p>原理：设置存储器某个地址，测试并上锁。</p>
+<figure class="highlight haskell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">TSL</span> <span class="type">RX</span>,<span class="type">LOCK</span></span><br></pre></td></tr></table></figure>
+<ol>
+<li>内存字LOCK读入寄存器RX，读字和写字硬件保证原子的</li>
+<li>执行TSL指令锁住内存总线，禁止其他CPU在该指令结束前访问内存</li>
+</ol>
+<p><img src="/images/tsl.png" alt="img"></p>
+</li>
+</ul>
+<h5 id="XCHG指令"><a href="#XCHG指令" class="headerlink" title="XCHG指令"></a>XCHG指令</h5><ul>
+<li><p>原理：交换两个操作数，是TSL的一种替代指令</p>
+<p><img src="/images/xchg.png" alt="img"></p>
+</li>
+</ul>
+<h5 id="原子操作CAS-比较并交换"><a href="#原子操作CAS-比较并交换" class="headerlink" title="原子操作CAS(比较并交换)"></a>原子操作CAS(比较并交换)</h5><ul>
+<li>原理：原理接受三个参数(old,ptr,new)，底层是依赖CPMXCHG，注意CPMXCHG本身并不是atomic的，它的实现是在单处理器系统上通过禁止中断来达到原子性，如果是多处理器，则需要在CPMXCHG加前缀LOCK。ptr是该值存储地址，指令会将old加载到寄存器EAX，将ptr的值加载到EBX，将new加载到ECX，如果EAX等于EBX，将ECX存入EBX并且标志寄存器FZ位置为1；否则EBX存入EAX，将FZ位清0</li>
+</ul>
+<h4 id="同步工具"><a href="#同步工具" class="headerlink" title="同步工具"></a>同步工具</h4><h5 id="原子变量-Atomic"><a href="#原子变量-Atomic" class="headerlink" title="原子变量(Atomic)"></a>原子变量(Atomic)</h5><ul>
+<li>原理：利用CAS实现的</li>
+</ul>
+<h5 id="信号量-Semaphore"><a href="#信号量-Semaphore" class="headerlink" title="信号量(Semaphore)"></a>信号量(Semaphore)</h5><ul>
+<li><p>原理：提供了一对操作wait(Dijkstra的P)、signal(Dijkstra的V)原子操作。内部提供一个计数器和一个等待队列，这个队列可以是FIFO或者优先级队列。wait操作申请锁，初始定义资源数（当资源只有一个时，其实作用是一个互斥量），wait申请资源时，假设资源数还有剩余，那么扣减资源数，进程进入临界区，执行完临界区代码后，递增资源数，并且唤醒一个进程；如果没有资源可用，那么进程加入信号量的等待队列。当然具体细节各个操作系统实现可能不一样</p>
+</li>
+<li><p>如何保证wait、signal的原子性</p>
+<ol>
+<li>单核处理器：禁用中断，禁止抢占</li>
+<li>多核处理器：可以在信号量中定义一个互斥量，通过CAS和自旋来互斥进入wait和signal的临界区</li>
+</ol>
+</li>
+<li><p>linux实现，linux实现没有叫wait和signal，它们叫down和up分别对应wait、signal，只是名字不同它们的语义是一样的</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"> <span class="class"><span class="keyword">struct</span> <span class="title">semaphore</span> &#123;</span><span class="comment">//数据结构</span></span><br><span class="line">     <span class="keyword">spinlock_t</span> lock; </span><br><span class="line">     <span class="keyword">unsigned</span> <span class="keyword">int</span> count; </span><br><span class="line">     <span class="class"><span class="keyword">struct</span> <span class="title">list_head</span> <span class="title">wait_list</span>;</span> </span><br><span class="line"> &#125;;</span><br><span class="line"><span class="comment">//Dijkstra的P</span></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">down</span><span class="params">(struct semaphore *sem)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="keyword">unsigned</span> <span class="keyword">long</span> flags;</span><br><span class="line"></span><br><span class="line">    raw_spin_lock_irqsave(&amp;sem-&gt;lock, flags); <span class="comment">// 这里面禁止了抢占</span></span><br><span class="line">    <span class="keyword">if</span> (likely(sem-&gt;count &gt; <span class="number">0</span>))</span><br><span class="line">        sem-&gt;count--;</span><br><span class="line">    <span class="keyword">else</span></span><br><span class="line">        __down(sem);   <span class="comment">// 这里睡眠，重新调度</span></span><br><span class="line">    raw_spin_unlock_irqrestore(&amp;sem-&gt;lock, flags);</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">//Dijkstra的V</span></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">up</span><span class="params">(struct semaphore *sem)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="keyword">unsigned</span> <span class="keyword">long</span> flags;</span><br><span class="line"></span><br><span class="line">    spin_lock_irqsave(&amp;sem-&gt;lock, flags);</span><br><span class="line">    <span class="keyword">if</span> (likely(list_empty(&amp;sem-&gt;wait_list)))</span><br><span class="line">        sem-&gt;count++;</span><br><span class="line">    <span class="keyword">else</span></span><br><span class="line">        __up(sem);</span><br><span class="line">    spin_unlock_irqrestore(&amp;sem-&gt;lock, flags);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<h5 id="互斥量-mutex"><a href="#互斥量-mutex" class="headerlink" title="互斥量(mutex)"></a>互斥量(mutex)</h5><ul>
+<li>原理：定义一个变量作为锁，利用处理器提供CAS原子修改变量的值来加锁和释放锁，如果锁不可用，进程自旋等待</li>
+<li>futex(快速用户区互斥量)<ul>
+<li>原理：实现了基本的锁，但是避免了陷入内核，除非不得不为之。包含两部分：一个内核服务和一个用户库，内核服务提供一个等待队列，没有竞争时，futex完全在用户空间工作。用户态定义一个共享原子变量来标识当前锁是否被其他进程持有，初始值为1表示锁可用，当进程申请锁时，先原子递减该值，如果结果为0，说明没有其他进程持有锁，进程可以进入临界区，否则，进程不会自旋，而是调用系统调用加入内核的等待队列</li>
+</ul>
+</li>
+</ul>
+<h5 id="管程-Mointor"><a href="#管程-Mointor" class="headerlink" title="管程(Mointor)"></a>管程(Mointor)</h5><ul>
+<li><p>信号量存在的问题：信号量能正确运行的前提条件是wait、signal严格的执行顺序，如果这啷个操作执行顺序有问题，那么可能会导致2个进程同时进入临界区</p>
+<ol>
+<li><p>假设wait、signal顺序反了，可能会有多个进程进入临界区</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">signal(mutex);</span><br><span class="line">...</span><br><span class="line">critical section</span><br><span class="line">...</span><br><span class="line">wait(mutex);</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>假设signal被错误写成wait，这种情况，进程会永久阻塞</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">wait(mutex);</span><br><span class="line">...</span><br><span class="line">critical section</span><br><span class="line">...</span><br><span class="line">wait(mutex);</span><br></pre></td></tr></table></figure>
+</li>
+</ol>
+</li>
+<li><p>Monitor出现的背景只是为了方便开发人员使用，减少直接使用信号量、互斥量容易带来的各种问题（信号量和互斥量本身没有任何问题，是使用过程中开发人员不正确使用带来的），因此对信号量、互斥量做了一层封装</p>
+</li>
+<li><p>Monitor语义结构</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">monitor monitor name</span><br><span class="line">&#123;</span><br><span class="line">    <span class="comment">/* shared variable declarations */</span></span><br><span class="line">    <span class="function">function <span class="title">P1</span> <span class="params">( . . . )</span> </span>&#123;</span><br><span class="line">    . . .</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="function">function <span class="title">P2</span> <span class="params">( . . . )</span> </span>&#123;</span><br><span class="line">    . . .</span><br><span class="line">    &#125;</span><br><span class="line">    .</span><br><span class="line">    .</span><br><span class="line">    .</span><br><span class="line">    <span class="function">function <span class="title">Pn</span> <span class="params">( . . . )</span> </span>&#123;</span><br><span class="line">    . . .</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="function">initialization <span class="title">code</span> <span class="params">( . . . )</span> </span>&#123;</span><br><span class="line">    . . .</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>Monitor的结构</p>
+<p><img src="/images/monitor.png" alt="img"></p>
+</li>
+<li><p>Monitor特性</p>
+<ol>
+<li>同一时刻，只能有一个活跃进程。</li>
+<li>只是一种编程语言概念，具体实现依靠特定语言，其内部可能是用互斥量实现</li>
+<li>依靠编译器识别管程，进入管程的互斥依靠编译器</li>
+</ol>
+</li>
+<li><p>Monitor中有条件变量时，等待在条件变量的线程Q被线程P唤醒时，P的行为</p>
+<ol>
+<li>唤醒并等待：P将等待Q离开Monitor或者等待在其他条件上</li>
+<li>唤醒并继续：Q将等待P离开Monitor或者等待在其他条件上，这种看起来更合理，但是当P离开Monitor时，可能Q等待的条件已经变得不满足</li>
+</ol>
+</li>
+<li><p>用信号量实现Monitor</p>
+<ol>
+<li><p>首先需要一个互斥量来控制能否进入Monitor，然后需要一个信号量来控制当线程唤醒等待条件变量的线程时，需要自己挂起，Monitor中的F函数被封装。mutex是进入Monitor的互斥量，next是线程唤醒等待条件变量时，因为采用的是唤醒并等待，所以需要等待被唤醒线程执行，而自己却要挂起，next_count是挂起的线程数</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">wait(mutex);</span><br><span class="line">		...</span><br><span class="line">	body of F</span><br><span class="line">		...</span><br><span class="line"><span class="keyword">if</span> (next count &gt; <span class="number">0</span>)</span><br><span class="line">	signal(next);</span><br><span class="line"><span class="keyword">else</span></span><br><span class="line">	signal(mutex);</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>Monitor中条件变量实现,x_sem是信号量，x_count是等待的线程数</p>
+<ol>
+<li><p>wait方法实现</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">x count++;</span><br><span class="line"><span class="keyword">if</span> (next count &gt; <span class="number">0</span>)</span><br><span class="line">	signal(next);</span><br><span class="line"><span class="keyword">else</span></span><br><span class="line">	signal(mutex);</span><br><span class="line">wait(x sem);</span><br><span class="line">x count--;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>signal方法实现</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> (x count &gt; <span class="number">0</span>) &#123;</span><br><span class="line">    next count++;</span><br><span class="line">    signal(x sem);</span><br><span class="line">    wait(next);</span><br><span class="line">    next count--;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+</li>
+</ol>
+</li>
+</ol>
+</li>
+</ul>
+<h5 id="屏障-Barrier"><a href="#屏障-Barrier" class="headerlink" title="屏障(Barrier)"></a>屏障(Barrier)</h5><ul>
+<li><p>原理：屏障像一道大门，当所有人都到了的时候，门就开了。进程运行到一个点时，会阻塞等待所有的进程都到达这个点，当所有进程都达到这个点时，所有的进程都将被唤醒，如下图所示</p>
+<p><img src="/images/barriers.png" alt="img"></p>
+</li>
+<li><p>解决的问题：主要是解决一些程序，程序是分阶段运行，要求所有的进程到处于ready状态时才能进行下一阶段。打个比方，LOL这种竞技游戏，要等待大家都加载好了才能进游戏。</p>
+</li>
+</ul>
+<h5 id="写时复制-Read-Copy-Update"><a href="#写时复制-Read-Copy-Update" class="headerlink" title="写时复制(Read-Copy-Update)"></a>写时复制(Read-Copy-Update)</h5><ul>
+<li><p>原理：最快的锁就是不用锁，为了找到一种办法对共享数据读和写可以并发执行，通常情况下是不可能的。但是在某些情况下，一些数据结构可以提供一种对读操作的保证，就是读操作要么读取旧数据，要么读取最新数据，但是不会读取新旧数组的组合。当新增和删除节点时，会先初始化需要操作的节点，这时候是不影响读的，读的还是旧的数据，当更改已经初始化完毕时通过CAS原子操作，修改为新的，这样就可以避免在写数据时加锁影响读</p>
+<p><img src="/images/read_copy_update.png" alt="img"></p>
+</li>
+<li><p>存在问题：比如上图的d中，删除了B,D节点，但是不知道是否有读在使用B、D节点，因此无法确定何时释放B、D节点。RCU设置了一个读持有引用的最大时间</p>
+</li>
+</ul>
+<h4 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h4><p>笔记很多地方没有详细的说明，如果要了解详细的细节东西，推荐看看《MODERN OPERATING SYSTEMS》和《Operating System Concepts》。</p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/OS/" rel="tag"># OS</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2020/05/27/操作系统笔记-4-进程-线程调度/" rel="next" title="操作系统笔记-4-进程&线程调度">
+                <i class="fa fa-chevron-left"></i> 操作系统笔记-4-进程&线程调度
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2020/06/02/操作系统笔记-番外-书籍推荐/" rel="prev" title="操作系统笔记-番外-操作系统经典书籍推荐">
+                操作系统笔记-番外-操作系统经典书籍推荐 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Overview
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">ikan</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">17</span>
+                  <span class="site-state-item-name">posts</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">6</span>
+                  <span class="site-state-item-name">categories</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">12</span>
+                  <span class="site-state-item-name">tags</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-4"><a class="nav-link" href="#引言"><span class="nav-number">1.</span> <span class="nav-text">引言</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#竞态条件-amp-临界区"><span class="nav-number">2.</span> <span class="nav-text">竞态条件&amp;临界区</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#竞态条件"><span class="nav-number">2.1.</span> <span class="nav-text">竞态条件</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#临界区"><span class="nav-number">2.2.</span> <span class="nav-text">临界区</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#解决竞态条件方法满足的条件"><span class="nav-number">2.3.</span> <span class="nav-text">解决竞态条件方法满足的条件</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#简单解决办法"><span class="nav-number">2.4.</span> <span class="nav-text">简单解决办法</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#同步工具的硬件支持"><span class="nav-number">3.</span> <span class="nav-text">同步工具的硬件支持</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#内存屏障"><span class="nav-number">3.1.</span> <span class="nav-text">内存屏障</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#TSL指令"><span class="nav-number">3.2.</span> <span class="nav-text">TSL指令</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#XCHG指令"><span class="nav-number">3.3.</span> <span class="nav-text">XCHG指令</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#原子操作CAS-比较并交换"><span class="nav-number">3.4.</span> <span class="nav-text">原子操作CAS(比较并交换)</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#同步工具"><span class="nav-number">4.</span> <span class="nav-text">同步工具</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#原子变量-Atomic"><span class="nav-number">4.1.</span> <span class="nav-text">原子变量(Atomic)</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#信号量-Semaphore"><span class="nav-number">4.2.</span> <span class="nav-text">信号量(Semaphore)</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#互斥量-mutex"><span class="nav-number">4.3.</span> <span class="nav-text">互斥量(mutex)</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#管程-Mointor"><span class="nav-number">4.4.</span> <span class="nav-text">管程(Mointor)</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#屏障-Barrier"><span class="nav-number">4.5.</span> <span class="nav-text">屏障(Barrier)</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#写时复制-Read-Copy-Update"><span class="nav-number">4.6.</span> <span class="nav-text">写时复制(Read-Copy-Update)</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#总结"><span class="nav-number">5.</span> <span class="nav-text">总结</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">ikan</span>
+
+  
+</div>
+
+
+  <div class="powered-by">Powered by <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a></div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">Theme &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+  
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+        tex2jax: {
+          inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+          processEscapes: true,
+          skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+        }
+      });
+    </script>
+
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for (i=0; i < all.length; i += 1) {
+          all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+      });
+    </script>
+    <script type="text/javascript" src="//cdn.bootcss.com/mathjax/2.7.1/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+  
+
+
+  
+
+  
+
+</body>
+</html>
