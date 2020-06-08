@@ -1,0 +1,889 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="OS," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="引言花了一段时间才把之前的笔记整理了一部分，平时太忙也没啥时间。今天开始整理内存管理部分的，内存管理部分大致分为三部分笔记，第一部分就是本篇内存管理基础，第二部分是虚拟内存，第三部分高速缓存。 一个程序在运行前，只是一个存储在磁盘上的可执行的二进制文件，包括可执行指令和数据。当程序运行时，这个二进制文件会被加载到内存中，指令和数据在执行时会被cpu从内存中加载到寄存器中，然后执行，可能会把执行结果">
+<meta name="keywords" content="OS">
+<meta property="og:type" content="article">
+<meta property="og:title" content="操作系统笔记-6-内存管理基础">
+<meta property="og:url" content="http://yoursite.com/2020/06/07/操作系统笔记-6-内存管理基础/index.html">
+<meta property="og:site_name" content="IkanのBolg">
+<meta property="og:description" content="引言花了一段时间才把之前的笔记整理了一部分，平时太忙也没啥时间。今天开始整理内存管理部分的，内存管理部分大致分为三部分笔记，第一部分就是本篇内存管理基础，第二部分是虚拟内存，第三部分高速缓存。 一个程序在运行前，只是一个存储在磁盘上的可执行的二进制文件，包括可执行指令和数据。当程序运行时，这个二进制文件会被加载到内存中，指令和数据在执行时会被cpu从内存中加载到寄存器中，然后执行，可能会把执行结果">
+<meta property="og:locale" content="default">
+<meta property="og:image" content="http://yoursite.com/images/physical_mem_model.png">
+<meta property="og:image" content="http://yoursite.com/images/memory_stru.png">
+<meta property="og:image" content="http://yoursite.com/images/relocation_problem.png">
+<meta property="og:image" content="http://yoursite.com/images/process_memory.png">
+<meta property="og:image" content="http://yoursite.com/images/base_limit_register.png">
+<meta property="og:image" content="http://yoursite.com/images/swapping_ex1.png">
+<meta property="og:image" content="http://yoursite.com/images/grow_mem.png">
+<meta property="og:image" content="http://yoursite.com/images/bitmap_free_mem.png">
+<meta property="og:image" content="http://yoursite.com/images/list_free_mem.png">
+<meta property="og:image" content="http://yoursite.com/images/list_free_mem_ex.png">
+<meta property="og:image" content="http://yoursite.com/images/mem_alloc.png">
+<meta property="og:updated_time" content="2020-06-08T14:22:57.205Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="操作系统笔记-6-内存管理基础">
+<meta name="twitter:description" content="引言花了一段时间才把之前的笔记整理了一部分，平时太忙也没啥时间。今天开始整理内存管理部分的，内存管理部分大致分为三部分笔记，第一部分就是本篇内存管理基础，第二部分是虚拟内存，第三部分高速缓存。 一个程序在运行前，只是一个存储在磁盘上的可执行的二进制文件，包括可执行指令和数据。当程序运行时，这个二进制文件会被加载到内存中，指令和数据在执行时会被cpu从内存中加载到寄存器中，然后执行，可能会把执行结果">
+<meta name="twitter:image" content="http://yoursite.com/images/physical_mem_model.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: 'Author'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2020/06/07/操作系统笔记-6-内存管理基础/"/>
+
+
+
+
+
+  <title>操作系统笔记-6-内存管理基础 | IkanのBolg</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="default">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">IkanのBolg</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">只想安安静静撸代码</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            Home
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            Tags
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            Categories
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            Archives
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2020/06/07/操作系统笔记-6-内存管理基础/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="ikan">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="IkanのBolg">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">操作系统笔记-6-内存管理基础</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2020-06-07T12:32:49+08:00">
+                2020-06-07
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/OS学习笔记/" itemprop="url" rel="index">
+                    <span itemprop="name">OS学习笔记</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h4 id="引言"><a href="#引言" class="headerlink" title="引言"></a>引言</h4><p>花了一段时间才把之前的笔记整理了一部分，平时太忙也没啥时间。今天开始整理内存管理部分的，内存管理部分大致分为三部分笔记，第一部分就是本篇内存管理基础，第二部分是虚拟内存，第三部分高速缓存。</p>
+<p>一个程序在运行前，只是一个存储在磁盘上的可执行的二进制文件，包括可执行指令和数据。当程序运行时，这个二进制文件会被加载到内存中，指令和数据在执行时会被cpu从内存中加载到寄存器中，然后执行，可能会把执行结果再次存入内存中。数据以何种形式存在内存，如果为进程分配内存，进程退出如何回收，这个过程叫内存管理，接下来就详细介绍这个过程</p>
+<h4 id="早期无存储器抽象"><a href="#早期无存储器抽象" class="headerlink" title="早期无存储器抽象"></a>早期无存储器抽象</h4><h5 id="无存储器抽象内存访问"><a href="#无存储器抽象内存访问" class="headerlink" title="无存储器抽象内存访问"></a>无存储器抽象内存访问</h5><p>用户程序直接操作物理内存的地址，比如将位置为1000的物理内存中的内容复制到REGISTER1</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">MOV REGISTER1,1000</span><br></pre></td></tr></table></figure>
+<h5 id="物理内存模型"><a href="#物理内存模型" class="headerlink" title="物理内存模型"></a>物理内存模型</h5><a id="more"></a>
+<p><img src="/images/physical_mem_model.png" alt="img"></p>
+<ul>
+<li><p>a模型早期的主机和微机，很少使用</p>
+</li>
+<li><p>b模型多用于嵌入式系统</p>
+</li>
+<li><p>c模型早期用于个人计算机</p>
+<p><strong>a、c模型有一个bug，用户程序可能擦除操作系统内存，如果是这种无抽象的物理内存，同一时间只能运行一个进程。</strong></p>
+</li>
+</ul>
+<h5 id="多个程序运行-物理分块内存"><a href="#多个程序运行-物理分块内存" class="headerlink" title="多个程序运行-物理分块内存"></a>多个程序运行-物理分块内存</h5><ul>
+<li><p>原理：内存被分块例如2kb一个块，在CPU内部有特殊寄存器来记录内存块的保护key，当程序运行时，会有一个PSW与寄存器中的对应，当不属于该内存块的程序访问时，PSW和寄存器中存的key将不一致，避免了程序访问别的程序的内存。简要示意图如下</p>
+<p><img src="/images/memory_stru.png" alt="img"></p>
+</li>
+<li><p>存在问题</p>
+<p>因为程序还是利用绝对路径访问内存，所以存在不同应用程序访问同一个内存块的问题，导致程序崩溃，下图的a和b加载到内存后内存结构为c，但是a的第一句跳转到24是没问题，但是b第一句跳转到28，但是内存地址28是程序a的。</p>
+<p><img src="/images/relocation_problem.png" alt="img"></p>
+<ul>
+<li><p>IBM解决方案：静态重定位  </p>
+<p>当加载b程序到16384时，所有访问地址都加上16384，比如JMP 28变成了JMP 16412，但是该方法不是一个通用的解决办法。此外，还需要程序提供额外的信息来标识哪些是地址。</p>
+</li>
+</ul>
+</li>
+</ul>
+<h4 id="存储抽象-地址空间"><a href="#存储抽象-地址空间" class="headerlink" title="存储抽象-地址空间"></a>存储抽象-地址空间</h4><p>前边已经知道了无存储抽象，也就是直接使用物理内存的两个缺点</p>
+<ol>
+<li>哪怕只有一个应用程序运行，操作系统内存也可能会被偶然或恶意破坏</li>
+<li>多应用程序并发运行困难</li>
+</ol>
+<h5 id="地址空间概念"><a href="#地址空间概念" class="headerlink" title="地址空间概念"></a>地址空间概念</h5><ul>
+<li><p>概念：地址空间并不局限于存储，它是一个抽象的概念，电话号码是一个地址空间，ip也是，域名也是</p>
+</li>
+<li><p>基地址和界限寄存器（动态重定位）</p>
+<ul>
+<li><p>使用基地址和界限寄存器时内存中进程的内存结构</p>
+<p><img src="/images/process_memory.png" alt="img"></p>
+</li>
+<li><p>cpu访问内存时，硬件会利用要访问的地址+base，然后判断是否大于base+limit的地址，如果大于那么访问就是越界的，产生错误并终止访问。</p>
+<p><img src="/images/base_limit_register.png" alt="img"></p>
+</li>
+</ul>
+</li>
+</ul>
+<h5 id="Swapping"><a href="#Swapping" class="headerlink" title="Swapping"></a>Swapping</h5><p>如果内存足够大到可以容纳所有进程的代码和数据，那么地址空间加上硬件提供的动态重定位的方案或许已经可行，但是通常所有进程需要的内存超过存储可以提供的范围。</p>
+<ul>
+<li><p>标准Swapping</p>
+<ul>
+<li><p>原理：标准Swapping是通过换进程来重复利用内存空间，如下图首先内存只有A进程，接着B、C进程被创建或者换入内存，紧接着D进程需要运行，A被换出；当A再次被调度时，将B换出给A腾空间，A再次进入内存。</p>
+<p><img src="/images/swapping_ex1.png" alt="img"></p>
+<p>但是A再次进入内存的时候，地址空间已经发生变化。所以，Swapping换入之后需要重新重定位，有两种方式：</p>
+<ol>
+<li>通过软件在载入的时候重定位</li>
+<li>通过硬件在运行的时候重定位（比较常用），基地址和界限寄存器就适用这种情况</li>
+</ol>
+</li>
+<li><p>内存压缩</p>
+<p>内存因为进程的换入换出会产生一些内存空洞，这些内存空洞会导致内存浪费，因为这些空洞连续内存空间大小不足以容纳一个进程所需的空间。因此通过将所有进程占用的空间全部向下移动，就有可能将小的空洞连成一大块空闲内存。这种技术就叫内存压缩</p>
+</li>
+<li><p>进程内存大小分配问题</p>
+<ol>
+<li>固定大小，如果进程大小是固定不会改变，操作系统只需简单分配进程需要的大小</li>
+<li>数据段可能增长，此时有四种解决方法<ol>
+<li>如果进程邻近有空闲内存，分配给进程</li>
+<li>如果进程邻近是其他进程，那么寻找一块更大的空闲内存，将进程迁移过去</li>
+<li>如果没有更大的空闲内存，那么尝试将邻近的进程交换出去</li>
+<li>如果进程无法增长内存并且交换区已经满了，那就挂起该进程直到有空闲内存（或者kill该进程）</li>
+</ol>
+</li>
+</ol>
+<ul>
+<li><p>为了提高内存分配的效率，满足大部分进程内存都会增长的场景。(a)系统在分配内存时为进程预留增长所需的空间；(b)如果进程有连个可增长的段，比如数据段和栈段，可以数据段从下往上分配，栈从上往下分配，如果内存不足时再增长内存。</p>
+<p><img src="/images/grow_mem.png" alt="img"></p>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>页面Swapping</p>
+<p>针对虚拟内存的，在下一部分详细介绍</p>
+</li>
+</ul>
+<h5 id="空闲内存管理"><a href="#空闲内存管理" class="headerlink" title="空闲内存管理"></a>空闲内存管理</h5><ul>
+<li><p>Bitmaps</p>
+<ul>
+<li><p>原理：将内存分块成小的分配单元(可以是小到几个字或者大到几kb)，然后用一个bitmap来记录哪些块已被使用，1代表使用，0代表空闲</p>
+<p><img src="/images/bitmap_free_mem.png" alt="img"></p>
+</li>
+<li><p>关键：内存单元大小的选择很关键，太小，bitmap太大，太大，会浪费有些空间</p>
+</li>
+<li><p>缺点：当需要为进程分配内存时，内存管理系统需要遍历bitmap找出一段连续的空间，这个操作是很费时的</p>
+</li>
+</ul>
+</li>
+<li><p>空闲链表</p>
+<ul>
+<li><p>原理：用链表将以使用和未使用的内存连接起来，每个节点说明该节点是空闲的(H)还是已经使用(P)，以及内存的起始位置和长度。</p>
+<p><img src="/images/list_free_mem.png" alt="img"></p>
+</li>
+<li><p>例子，X代表要释放的进程，阴影部分代表空闲</p>
+<p><img src="/images/list_free_mem_ex.png" alt="img"></p>
+<ol>
+<li>a中x释放后，空闲链表P替换为H，该空间空闲</li>
+<li>b和c的X释放后，两个相邻的空闲区域合并成一个区域，链表变短</li>
+<li>d中X释放后三个链表节点合并成一个</li>
+</ol>
+</li>
+</ul>
+</li>
+</ul>
+<h5 id="连续内存分配算法"><a href="#连续内存分配算法" class="headerlink" title="连续内存分配算法"></a>连续内存分配算法</h5><p>截止目前我们讨论的内存都是将内存作为连续内存为基础的，连续内存指的是我们分配给进程的内存在空间上是连续的，在下一部分中会介绍虚拟内存，将会看到，进程是可以被分配不连续的内存。拿上边图中的空闲链表做例子</p>
+<p><img src="/images/mem_alloc.png" alt="img"></p>
+<ul>
+<li><p>首次适配算法(first fit)</p>
+<p>内存管理器沿着链表搜索，直到找到一块足够大的空闲内存，假设现在要分配的内存为2，该算法将扫描链表，然后选择编号2的空闲块</p>
+</li>
+<li><p>下次适配算法(next fit)</p>
+<p>和首次适配算法类似，只是搜索起始位置不同，首次适配算法是从头开始，而下次适配算法是从上一次分配的位置开始</p>
+</li>
+<li><p>最佳适配算法(best fit)</p>
+<p>最佳适配算法从头开始搜索到结尾，找出最小的能容纳进程的空闲块，比首次适配算法慢。假设分配内存为2，则扫描全表发现编号5的空闲块最适合</p>
+</li>
+<li><p>最差适配算法</p>
+<p>每次搜索最大的空闲内存块，来减少内存碎片，扫描全表，发现编号2的空闲块最大</p>
+</li>
+<li><p>快速适配算法</p>
+<p>为常用分配内存大小建立不同的项，分项存储。和所有按空闲内存大小排序的算法一样，当进程内存释放或者换出时，查找相邻块判断是否可以合并是非常耗时的。</p>
+</li>
+</ul>
+<h4 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h4><p>上述总结了通过无存储器抽象到利用地址空间的抽象一步步解决从单进程到多进程问题、从进程需要小内存到内存无法容纳进程的问题。虽然现代计算机有更高级的虚拟内存技术，学习一个技术很好的方式是了解其发展历史，了解了历史，对理解一个技术的诞生有很好的帮助，因为可以知道为什么需要这个技术以及它解决的问题。在下一篇中将介绍虚拟内存技术。</p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/OS/" rel="tag"># OS</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2020/06/02/操作系统笔记-番外-书籍推荐/" rel="next" title="操作系统笔记-番外-操作系统经典书籍推荐">
+                <i class="fa fa-chevron-left"></i> 操作系统笔记-番外-操作系统经典书籍推荐
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Overview
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">ikan</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">18</span>
+                  <span class="site-state-item-name">posts</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">6</span>
+                  <span class="site-state-item-name">categories</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">12</span>
+                  <span class="site-state-item-name">tags</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-4"><a class="nav-link" href="#引言"><span class="nav-number">1.</span> <span class="nav-text">引言</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#早期无存储器抽象"><span class="nav-number">2.</span> <span class="nav-text">早期无存储器抽象</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#无存储器抽象内存访问"><span class="nav-number">2.1.</span> <span class="nav-text">无存储器抽象内存访问</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#物理内存模型"><span class="nav-number">2.2.</span> <span class="nav-text">物理内存模型</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#多个程序运行-物理分块内存"><span class="nav-number">2.3.</span> <span class="nav-text">多个程序运行-物理分块内存</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#存储抽象-地址空间"><span class="nav-number">3.</span> <span class="nav-text">存储抽象-地址空间</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#地址空间概念"><span class="nav-number">3.1.</span> <span class="nav-text">地址空间概念</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#Swapping"><span class="nav-number">3.2.</span> <span class="nav-text">Swapping</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#空闲内存管理"><span class="nav-number">3.3.</span> <span class="nav-text">空闲内存管理</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#连续内存分配算法"><span class="nav-number">3.4.</span> <span class="nav-text">连续内存分配算法</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#总结"><span class="nav-number">4.</span> <span class="nav-text">总结</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">ikan</span>
+
+  
+</div>
+
+
+  <div class="powered-by">Powered by <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a></div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">Theme &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+  
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+        tex2jax: {
+          inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+          processEscapes: true,
+          skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+        }
+      });
+    </script>
+
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for (i=0; i < all.length; i += 1) {
+          all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+      });
+    </script>
+    <script type="text/javascript" src="//cdn.bootcss.com/mathjax/2.7.1/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+  
+
+
+  
+
+  
+
+</body>
+</html>
