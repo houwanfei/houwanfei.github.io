@@ -1,0 +1,996 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="OS," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="引言上一篇笔记讲述了内存的地址空间抽象，但是还留下了问题，那就是当软件很大的时候虽然利用Swapping技术可以运行，但是每次交换整个进程的空间开销不容忽视，虽然近年来内存也有增长，但是软件大小增长的速度远大于内存增长的速度。 一个解决方法是Overlays(覆盖)，Overlays将程序分割为多个片段，称为覆盖，当程序开始时，覆盖管理器加载覆盖0，执行完成后，通知覆盖管理器加载覆盖1，然后覆盖1">
+<meta name="keywords" content="OS">
+<meta property="og:type" content="article">
+<meta property="og:title" content="操作系统笔记-7-虚拟内存">
+<meta property="og:url" content="http://yoursite.com/2020/06/08/操作系统笔记-7-虚拟内存/index.html">
+<meta property="og:site_name" content="IkanのBolg">
+<meta property="og:description" content="引言上一篇笔记讲述了内存的地址空间抽象，但是还留下了问题，那就是当软件很大的时候虽然利用Swapping技术可以运行，但是每次交换整个进程的空间开销不容忽视，虽然近年来内存也有增长，但是软件大小增长的速度远大于内存增长的速度。 一个解决方法是Overlays(覆盖)，Overlays将程序分割为多个片段，称为覆盖，当程序开始时，覆盖管理器加载覆盖0，执行完成后，通知覆盖管理器加载覆盖1，然后覆盖1">
+<meta property="og:locale" content="default">
+<meta property="og:image" content="http://yoursite.com/images/virtual_address.png">
+<meta property="og:image" content="http://yoursite.com/images/page_table_entry.png">
+<meta property="og:image" content="http://yoursite.com/images/mmu_function.png">
+<meta property="og:image" content="http://yoursite.com/images/va_pa.png">
+<meta property="og:image" content="http://yoursite.com/images/mmu_operation.png">
+<meta property="og:image" content="http://yoursite.com/images/tlb.png">
+<meta property="og:image" content="http://yoursite.com/images/tlb_work.png">
+<meta property="og:image" content="http://yoursite.com/images/two_level_page_tables.png">
+<meta property="og:image" content="http://yoursite.com/images/inverted_page_table.png">
+<meta property="og:image" content="http://yoursite.com/images/inverted_page_work.png">
+<meta property="og:image" content="http://yoursite.com/images/optimal_page_algorithm.png">
+<meta property="og:image" content="http://yoursite.com/images/fifo_page_algorithms_ex.png">
+<meta property="og:image" content="http://yoursite.com/images/second_choice_algorithms.png">
+<meta property="og:image" content="http://yoursite.com/images/clock_algorithms.png">
+<meta property="og:image" content="http://yoursite.com/images/lru_algorithms_ex.png">
+<meta property="og:image" content="http://yoursite.com/images/nfu_algorithms_ex.png">
+<meta property="og:image" content="http://yoursite.com/images/working_set.png">
+<meta property="og:image" content="http://yoursite.com/images/work_set_algorithms.png">
+<meta property="og:image" content="http://yoursite.com/images/wsclock_algorithms.png">
+<meta property="og:updated_time" content="2020-06-10T15:15:07.426Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="操作系统笔记-7-虚拟内存">
+<meta name="twitter:description" content="引言上一篇笔记讲述了内存的地址空间抽象，但是还留下了问题，那就是当软件很大的时候虽然利用Swapping技术可以运行，但是每次交换整个进程的空间开销不容忽视，虽然近年来内存也有增长，但是软件大小增长的速度远大于内存增长的速度。 一个解决方法是Overlays(覆盖)，Overlays将程序分割为多个片段，称为覆盖，当程序开始时，覆盖管理器加载覆盖0，执行完成后，通知覆盖管理器加载覆盖1，然后覆盖1">
+<meta name="twitter:image" content="http://yoursite.com/images/virtual_address.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: 'Author'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2020/06/08/操作系统笔记-7-虚拟内存/"/>
+
+
+
+
+
+  <title>操作系统笔记-7-虚拟内存 | IkanのBolg</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="default">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">IkanのBolg</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">只想安安静静撸代码</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            Home
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            Tags
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            Categories
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            Archives
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2020/06/08/操作系统笔记-7-虚拟内存/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="ikan">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="IkanのBolg">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">操作系统笔记-7-虚拟内存</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2020-06-08T22:45:32+08:00">
+                2020-06-08
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/OS学习笔记/" itemprop="url" rel="index">
+                    <span itemprop="name">OS学习笔记</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h4 id="引言"><a href="#引言" class="headerlink" title="引言"></a>引言</h4><p>上一篇笔记讲述了内存的地址空间抽象，但是还留下了问题，那就是当软件很大的时候虽然利用Swapping技术可以运行，但是每次交换整个进程的空间开销不容忽视，虽然近年来内存也有增长，但是软件大小增长的速度远大于内存增长的速度。</p>
+<p>一个解决方法是Overlays(覆盖)，Overlays将程序分割为多个片段，称为覆盖，当程序开始时，覆盖管理器加载覆盖0，执行完成后，通知覆盖管理器加载覆盖1，然后覆盖1会在覆盖0top上（如果有空间），或者直接在覆盖0（如果没空间）。虽然，换入换出覆盖块由操作系统完成，但是需要程序员将程序分块，这是一个复杂的工作，并且非常容易出错。因此这种技术无法普及，因此人们又提出了新的解决方案，这次是完全交给系统完成，那就是今天要学习的一个技术-虚拟内存。</p>
+<h4 id="基本概念"><a href="#基本概念" class="headerlink" title="基本概念"></a>基本概念</h4><h5 id="原理"><a href="#原理" class="headerlink" title="原理"></a>原理</h5><p>每个程序都有自己独立的空间，并且这个空间分了多个固定大小的块，这些块通常叫做<strong>页</strong>，每一个页都有一个连续的地址范围，每一个页都映射一个物理范围叫<strong>页框</strong>（页框的大小通常和页是一样），程序运行不需要所有的页都在内存中，当程序引用到在物理内存中的地址空间时，由硬件（MMU）完成映射；如果不在内存中，由操作系统载入内存并重新执行失败的指令。</p>
+<a id="more"></a>
+<h5 id="页框"><a href="#页框" class="headerlink" title="页框"></a>页框</h5><p>物理内存中对应虚拟内存的页叫页框，大小和虚拟内存页大小一致。（RAM和磁盘交换数据是以页为单位的。有不同页面大小混合使用的）</p>
+<h5 id="虚拟地址"><a href="#虚拟地址" class="headerlink" title="虚拟地址"></a>虚拟地址</h5><ul>
+<li><p>虚拟地址是程序在虚拟空间生成的地址，类似于上一篇讲的逻辑地址，它不是真实的物理地址，需要通过一定的转换才能得到物理地址。</p>
+</li>
+<li><p>简单虚拟地址结构，分为两部分，前n位表示页编号，后m位表示偏移量</p>
+<p><img src="/images/virtual_address.png" alt="img"></p>
+</li>
+<li><p>一个例子：假设一个系统页大小为4Kb，而应用程序需要的空间为64Kb，虚拟页有16个，因此页编号需要4位，而偏移量需要12位，总共16位就可以表示虚拟地址</p>
+</li>
+</ul>
+<h5 id="页表"><a href="#页表" class="headerlink" title="页表"></a>页表</h5><ul>
+<li><p>页表是一个列表项的集合，最简单的虚拟地址分为两部分，前n位表示的页编号便是页表的索引（这里的页表是很简单的页表，后边在讲如何解决大虚拟内存时会讲到多级页表）</p>
+</li>
+<li><p>页表项示意图</p>
+<p><img src="/images/page_table_entry.png" alt="img"></p>
+<ul>
+<li><p>Present/absent位，表示虚拟页是否在内存中</p>
+</li>
+<li><p>保护位，简单用一个位0-r/w，1-只读。或者用3个位，分别表示可读、可写和可执行</p>
+</li>
+<li>修改位，当一个页面被写入时该位会自动修改，表示该页是脏的</li>
+<li>引用位，当一个页面被访问时，该位会被设置，它的值可以用来帮助OS在缺页时选择被淘汰的页面</li>
+<li>禁止缓存位，设置该位代表该位禁止被缓存，用于I/O设备，如果I/O设备有独立的内存空间，该位不需要使用</li>
+</ul>
+</li>
+<li><p>不同计算机的页表项大小可能不同</p>
+</li>
+</ul>
+<h5 id="内存管理单元-MMU"><a href="#内存管理单元-MMU" class="headerlink" title="内存管理单元(MMU)"></a>内存管理单元(MMU)</h5><ul>
+<li><p>作用： 解析虚拟地址映射的物理地址，数学形式：$F(VA) = PV$</p>
+</li>
+<li><p>MMU工作示意图</p>
+<p><img src="/images/mmu_function.png" alt="img"></p>
+</li>
+<li><p>虚拟内存映射物理内存示意图</p>
+<p><img src="/images/va_pa.png" alt="img"></p>
+<p>上图是程序的虚拟空间64K，内存是32K，页和页框为4K，可以看到0-4095映射到8192-12287</p>
+</li>
+<li><p>MMU映射过程</p>
+<p><img src="/images/mmu_operation.png" alt="img"></p>
+<ul>
+<li>MMU内部处理流程<ol>
+<li>虚拟地址8196取出高4位计算页表索引，0010表示2，因为找到索引为2的页表项</li>
+<li>通过Present/absent位判断虚拟页是否在内存中，此处的值为1，说明在内存中，找到页框号110；否则MMU发现虚拟地址找不到映射的物理地址，使CPU陷入操作系统(<strong>缺页中断)</strong>，OS会选择一个很少使用的页框交换出去，重新执行陷入OS的指令</li>
+<li>将页框号+上偏移量就是物理内存地址，放到bus上</li>
+</ol>
+</li>
+</ul>
+</li>
+</ul>
+<h4 id="分页问题"><a href="#分页问题" class="headerlink" title="分页问题"></a>分页问题</h4><h5 id="加速分页-TLB"><a href="#加速分页-TLB" class="headerlink" title="加速分页-TLB"></a>加速分页-TLB</h5><ul>
+<li><p>分页系统面临的两个问题</p>
+<ol>
+<li>虚拟内存地址映射为物理内存地址必须快</li>
+<li>如果虚拟地址空间很大，那么页表空间也要很大</li>
+</ol>
+</li>
+<li><p>解决方案-TLB(转换检测缓冲区)</p>
+<ul>
+<li><p>原理：通过观察，大部分的程序多数情况都是反复访问很少的的页，也就是说，只有很少的页被反复访问，大多数页很少访问，TLB硬件一般在MMU里。TLB示意图</p>
+<p><img src="/images/tlb.png" alt="img"></p>
+</li>
+</ul>
+</li>
+<li><p>MMU硬件TLB管理</p>
+<p>当TLB失效时，有MMU硬件负责查找并且装载，主要的好处是一个简单的MMU可以节省芯片的很多空间让给缓存和其他可以提升性能的组件，TLB工作原理图</p>
+<p><img src="/images/tlb_work.png" alt="img"></p>
+</li>
+<li><p>软件TLB管理</p>
+<p>当TLB失效时，会生成一个TLB失效并将问题交给OS解决，查找和装载TLB由OS完成</p>
+<ul>
+<li>减少TLBmiss：OS会预加载，系统推断接下来需要使用的页</li>
+<li>降低TLB miss时的开销<ul>
+<li>存在问题：如果用软件管理TLB，当TLB实现时，会通过搜索页表索引页，假如此时存放页表的页不在TLB中，就会引起二次TLB失效</li>
+<li>解决办法：在内存上固定区域维护一个大（比如4KB）的TLB表项的缓存，该固定区域的页一直在存在TLB中，当TLB实现时，先查找TLB的缓存</li>
+</ul>
+</li>
+<li>TLB miss类型<ul>
+<li>soft miss(软失效)：TLB未命中，但是页在内存中</li>
+<li>hard miss(硬失效)：TLB未命中，且页不在内存中，开销将非常高</li>
+<li>minor page fault(次要缺页错误)：页不在该进程的页表中，但是在内存中，在其他进程的页表中，这一种只需要在进程的页表中简单的更新映射</li>
+<li>major page fault(严重缺页错误)：页需要从磁盘调入</li>
+<li>segmentation fault(段错误)：程序访问非法地址</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h5 id="大内存页表问题"><a href="#大内存页表问题" class="headerlink" title="大内存页表问题"></a>大内存页表问题</h5><ul>
+<li><p>问题：如果内存非常大，那么页表也很大，比如4G的内存，采用4KB的页大小，那么页表将有100w个页表项，因为页可能分散在内存的各个页框，所以需要维护这个包含100w个页表项的页表，并且有多少个进程就有多少个这种页表，非常浪费空间。</p>
+</li>
+<li><p>分级页表</p>
+<ul>
+<li><p>原理：采用多级的设置，可以避免始终保持所有的页表在内存中。比如一个进程所需空间进程上下文4M，Data段4M，Stack段4M，总共需要12M，因此虽然虚拟页表还是很大，但是很多都是没有用到的，这些没有用到的页表不应该保存在内存中，而采用两级页表时，只需要保存4个页表，一个顶级页表，一个0-4M、一个4-8M，一个8-12M3个2级页表。顶级页表除了0，其他的页表项Present/absent都会设置为0，每个进程的页表都是独立的</p>
+<p><img src="/images/two_level_page_tables.png" alt="img"></p>
+<p>上图a中PT1、PT2分别表示一级页表索引和二级页表索引。上图中一个进程只用3个顶级页表，而其他页表在/不在位被设置为0，当这些不在页表被访问时，会产生一个缺页中断，OS会做处理，这时访问了不该访问的内存。  </p>
+</li>
+<li><p>4级页表，4k的页，每级页表用9位索引，最大支持256TB内存</p>
+<p><script type="math/tex">2^9 * 2^9 * 2^9 * 2^9 * 2^{12} = 2^{48}</script>bytes</p>
+</li>
+</ul>
+</li>
+<li><p>倒序页表</p>
+<ul>
+<li><p>解决的问题：64位地址下的页表会非常大，并且每个进程还有自己独立的页表</p>
+</li>
+<li><p>原理：传统的页表是通过虚拟地址查找对应物理页，但是每个物理页同一时间只能对应一个进程。所以，可以将传统的页表的表项由虚拟页换成页框，这样页表就会小了很多，当搜索的时候利用进程+虚拟页来查找。搜索需要软件实现，可以借助hash结构，倒序页表示意图</p>
+<p><img src="/images/inverted_page_table.png" alt="img"></p>
+</li>
+<li><p>倒序页表工作示意图</p>
+<p><img src="/images/inverted_page_work.png" alt="img"></p>
+</li>
+</ul>
+</li>
+</ul>
+<h4 id="页面置换算法"><a href="#页面置换算法" class="headerlink" title="页面置换算法"></a>页面置换算法</h4><p>页面置换算法其实就是缓存淘汰算法，因为可以将高速容量小的存储设备看成低速容量大的存储设备的缓存，那么其实主存就是磁盘的缓存，所以这些页面置换算法都是通用的缓存淘汰算法</p>
+<h5 id="最优页面置换算法"><a href="#最优页面置换算法" class="headerlink" title="最优页面置换算法"></a>最优页面置换算法</h5><ul>
+<li><p>原理：用页面需要访问前执行的指令数来标记，置换标记数大的。将缺页中断尽可能推迟</p>
+</li>
+<li><p>缺点：不可实现，因为OS不知道各个页面将在什么时候被访问</p>
+</li>
+<li><p>一个例子，当页框为7-0-1要载入2时，选择7置换出去，因为后续页的访问顺序 0-&gt;1-&gt;7，7在更远的时间线上才会使用</p>
+<p><img src="/images/optimal_page_algorithm.png" alt="img"></p>
+</li>
+</ul>
+<h5 id="最近未使用页面置换算法（NRU）"><a href="#最近未使用页面置换算法（NRU）" class="headerlink" title="最近未使用页面置换算法（NRU）"></a>最近未使用页面置换算法（NRU）</h5><ul>
+<li><p>原理：为了统计虚拟页面使用信息，用两个状态位R和M来标识，页面被访问时R（读/写）会被设置，页面被写入（修改）时M会被设置。周期性将R位重置，M位不会被重置，因为不知道该修改的页是否写回了磁盘。将会有以下几种情况</p>
+<ol>
+<li>class 0: 没有访问，没有修改</li>
+<li>class 1: 没有访问，已修改</li>
+<li>class 2: 被访问，没有修改</li>
+<li>class 3: 被访问，已修改</li>
+</ol>
+<p>NRU算法随机从类编号（class 0-3）最小的非空类中挑选一个页面置换，它的核心思想置换一个已修改的但未被访问的页比置换一个“干净”但频繁访问的页更好。</p>
+</li>
+</ul>
+<h5 id="FIFO页面置换算法"><a href="#FIFO页面置换算法" class="headerlink" title="FIFO页面置换算法"></a>FIFO页面置换算法</h5><ul>
+<li><p>原理：链表存储页面装载，发生缺页中断时，用链表头交换</p>
+</li>
+<li><p>优点：低开销</p>
+</li>
+<li><p>缺点：老的页面可能是频繁使用的，由于这个原因，该算法很少使用</p>
+</li>
+<li><p>一个例子，假设这里有三个页框，上边的数字代表虚拟页，下边是页框里映射虚拟页的变化</p>
+<p><img src="/images/fifo_page_algorithms_ex.png" alt="img"></p>
+</li>
+</ul>
+<h5 id="第二次机会页面置换算法"><a href="#第二次机会页面置换算法" class="headerlink" title="第二次机会页面置换算法"></a>第二次机会页面置换算法</h5><ul>
+<li><p>原理：该算法是在FIFO上修正置换频繁使用页面问题，当缺页中断发生时，取出最老的页面判断R标记，如果为0，立即置换，如果为1，则置为0并放入链表尾，并且更新它的载入时间，然后遍历后边的次老页面，直到找到一个满足条件的页面</p>
+<p><img src="/images/second_choice_algorithms.png" alt="img"></p>
+</li>
+<li><p>缺点：需要在链表中移动页面</p>
+</li>
+</ul>
+<h5 id="时钟页面置换算法"><a href="#时钟页面置换算法" class="headerlink" title="时钟页面置换算法"></a>时钟页面置换算法</h5><ul>
+<li><p>原理：解决第二次机会页面置换算法，需要在链表中移动页面。将链表以时钟的形式展示：如下图，一个指针指向最老的页表，缺页发生时，检查R标记为0直接置换，为1清除R标记，指针指向下一个页面</p>
+<p><img src="/images/clock_algorithms.png" alt="img"></p>
+</li>
+</ul>
+<h5 id="最近最少使用-LRU"><a href="#最近最少使用-LRU" class="headerlink" title="最近最少使用(LRU)"></a>最近最少使用(LRU)</h5><ul>
+<li><p>原理：置换未使用时间最长的页面。用特殊硬件实现64位原子自增器C，每执行一条指令C原子自增1，并将该值设置访问的页表项，缺页发生时，检查页表中该计数值，最小的就是最近最少使用的页面</p>
+</li>
+<li><p>缺点：需要硬件支持</p>
+</li>
+<li><p>一个例子</p>
+<p><img src="/images/lru_algorithms_ex.png" alt="img"></p>
+</li>
+</ul>
+<h5 id="软件模拟LRU-NFU"><a href="#软件模拟LRU-NFU" class="headerlink" title="软件模拟LRU(NFU)"></a>软件模拟LRU(NFU)</h5><ul>
+<li><p>原理：每个页表项有一个计数器，每当时钟中断时，OS扫描内存中的所有页表，读取R标记（0/1）加到计数器上，等到缺页时，选择计数最低的置换</p>
+</li>
+<li><p>缺点：计数器不会忘记计数值，假设一个页表在第一阶段频繁使用，但是第二阶段时不常使用，会使得在第二阶段时该页表依然具有很高的计数。第二阶段开始将会频繁使用的页表因为执行时间短，计数低，被不幸的置换出去</p>
+</li>
+<li><p>优化：一个小优化可以使得NFU可以接近LRU的表现，每次将R位加到计数器时，先将计数器右移一位，然后将R值加到计数器左端而不是右端。这样可以让页表在不使用时指数方式衰减</p>
+</li>
+<li><p>一个例子</p>
+<p><img src="/images/nfu_algorithms_ex.png" alt="img"></p>
+</li>
+<li><p>和LUR的区别</p>
+<ol>
+<li>上图的page3和5在e的时候，前两次都没有访问过，而在前两次之前的同一个时钟周期都被访问过，则根据LRU规则，3和5页面的计数值是一样的，所以会从中选择出一个页面置换；而NFU规则，会选择页面3置换，因为页面5在更早之前被访问过</li>
+<li>第二个区别是，NFU的计数器有位数限制，本例为8，超过8个时钟周期，早期的记录便会丢失，如前9周期和前1000周期将会被视为一样，LRU不会</li>
+</ol>
+</li>
+</ul>
+<h5 id="工作集页面置换算法"><a href="#工作集页面置换算法" class="headerlink" title="工作集页面置换算法"></a>工作集页面置换算法</h5><ul>
+<li><p>理论：大部分进程都表现出局部性访问特性。在一个阶段只会访问少部分的页，找出工作集，发生缺页时，找出不在工作集中的页置换出去</p>
+</li>
+<li><p>假设用<script type="math/tex">w(k,t)</script>代表t时刻k次内存访问的工作集，那么工作集大小和选择k的关系，<script type="math/tex">w(k,t)</script>不会无限变大，因为进程不可能访问比它地址空间所能容纳页上限还多的页面</p>
+<p><img src="/images/working_set.png" alt="img"></p>
+</li>
+<li><p>作用：在多道程序设计系统中，经常把进程交换到磁盘上让其他进程运行，当进程恢复运行时，进程会不断的发生缺页直到它的工作集全部载入内存。利用工作集，可以在程序运行前，将工作集载入内存，就不会频繁发生缺页。</p>
+</li>
+<li><p>实现</p>
+<ul>
+<li><p>最初设想：硬件实现，每进行一次内存访问，就左移一位，然后在最右边插入最新访问的页号，缺页发生时读出寄存器中的值，然后排序和去重，剩下的便是最近k次内存访问的工作集。维护该寄存器和处理缺页开销太大，导致实际没有使用这种方案</p>
+</li>
+<li><p>替代方法：用时间来代替k次统计工作集，有一个定期的时钟中断用软件方法清除R位，发生中断时，会遍历页表项，判断R位结合最近上次访问时间来决定哪个页面置换出去具体算法如下</p>
+<ol>
+<li>当R==1时，将实际时间写入页表项的上次使用时间</li>
+<li>当R==0时，则该页作为置换候选项，计算实际时间和上次使用时间的间隔作为生存时间，然后与阈值时间对比，如果大于该阈值，则该页被置换</li>
+<li>当R==0，且生存时间小于阈值，则把它留下来但是要记录上次使用时间的最小值</li>
+<li>如果扫描完成都没有满足的，则选择R==0的生存时间最长的淘汰</li>
+<li>如果没有R==0的则最好选择一个干净的页面淘汰</li>
+</ol>
+<p>示意图如下</p>
+<p><img src="/images/work_set_algorithms.png" alt="img"></p>
+</li>
+</ul>
+</li>
+</ul>
+<h5 id="工作集时钟置换算法"><a href="#工作集时钟置换算法" class="headerlink" title="工作集时钟置换算法"></a>工作集时钟置换算法</h5><ul>
+<li><p>原理：由于工作集页面置换算法，在扫描整个列表，才能确定被置换的页面，开销比较高，所以出现了工作集时钟页面置换算法，该算法会记录最近一次使用的时间，具体算法如图</p>
+<p><img src="/images/wsclock_algorithms.png" alt="img"></p>
+</li>
+<li><p>缺页时情况</p>
+<ol>
+<li>如果R=1，说明在当前时钟滴答内被访问过，将R位置为0，指向下一个节点</li>
+<li>如果R=0且M=0，判断当前实际时间-最近使用的时间是否大于阈值，如果大于，直接置换该页，否则指向下一个节点</li>
+<li>如果M=1，考虑到此时置换当前页会调度磁盘可能导致进程切换，指向下一个节点</li>
+</ol>
+</li>
+<li><p>扫描回到起点的情况</p>
+<ol>
+<li>至少调度过一次写操作，只需移动指针寻找到第一个调度过写操作的页面（这个页面并不一定是需要第一个调度写操作的页面，因此磁盘为了优化，通常对写操作会重排序）</li>
+<li>没有调度过写操作，随便选择一个干净的页面置换（扫描过程中要记录干净的页面），如果没有干净的页面，就置换当前指针指向的页面</li>
+</ol>
+</li>
+</ul>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/OS/" rel="tag"># OS</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2020/06/07/操作系统笔记-6-内存管理基础/" rel="next" title="操作系统笔记-6-内存管理基础">
+                <i class="fa fa-chevron-left"></i> 操作系统笔记-6-内存管理基础
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Overview
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">ikan</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">19</span>
+                  <span class="site-state-item-name">posts</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">6</span>
+                  <span class="site-state-item-name">categories</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">12</span>
+                  <span class="site-state-item-name">tags</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-4"><a class="nav-link" href="#引言"><span class="nav-number">1.</span> <span class="nav-text">引言</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#基本概念"><span class="nav-number">2.</span> <span class="nav-text">基本概念</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#原理"><span class="nav-number">2.1.</span> <span class="nav-text">原理</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#页框"><span class="nav-number">2.2.</span> <span class="nav-text">页框</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#虚拟地址"><span class="nav-number">2.3.</span> <span class="nav-text">虚拟地址</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#页表"><span class="nav-number">2.4.</span> <span class="nav-text">页表</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#内存管理单元-MMU"><span class="nav-number">2.5.</span> <span class="nav-text">内存管理单元(MMU)</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#分页问题"><span class="nav-number">3.</span> <span class="nav-text">分页问题</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#加速分页-TLB"><span class="nav-number">3.1.</span> <span class="nav-text">加速分页-TLB</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#大内存页表问题"><span class="nav-number">3.2.</span> <span class="nav-text">大内存页表问题</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#页面置换算法"><span class="nav-number">4.</span> <span class="nav-text">页面置换算法</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#最优页面置换算法"><span class="nav-number">4.1.</span> <span class="nav-text">最优页面置换算法</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#最近未使用页面置换算法（NRU）"><span class="nav-number">4.2.</span> <span class="nav-text">最近未使用页面置换算法（NRU）</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#FIFO页面置换算法"><span class="nav-number">4.3.</span> <span class="nav-text">FIFO页面置换算法</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#第二次机会页面置换算法"><span class="nav-number">4.4.</span> <span class="nav-text">第二次机会页面置换算法</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#时钟页面置换算法"><span class="nav-number">4.5.</span> <span class="nav-text">时钟页面置换算法</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#最近最少使用-LRU"><span class="nav-number">4.6.</span> <span class="nav-text">最近最少使用(LRU)</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#软件模拟LRU-NFU"><span class="nav-number">4.7.</span> <span class="nav-text">软件模拟LRU(NFU)</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#工作集页面置换算法"><span class="nav-number">4.8.</span> <span class="nav-text">工作集页面置换算法</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#工作集时钟置换算法"><span class="nav-number">4.9.</span> <span class="nav-text">工作集时钟置换算法</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">ikan</span>
+
+  
+</div>
+
+
+  <div class="powered-by">Powered by <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a></div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">Theme &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+  
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+        tex2jax: {
+          inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+          processEscapes: true,
+          skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+        }
+      });
+    </script>
+
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for (i=0; i < all.length; i += 1) {
+          all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+      });
+    </script>
+    <script type="text/javascript" src="//cdn.bootcss.com/mathjax/2.7.1/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+  
+
+
+  
+
+  
+
+</body>
+</html>
