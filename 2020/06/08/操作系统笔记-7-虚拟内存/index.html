@@ -106,7 +106,15 @@
 <meta property="og:image" content="http://yoursite.com/images/working_set.png">
 <meta property="og:image" content="http://yoursite.com/images/work_set_algorithms.png">
 <meta property="og:image" content="http://yoursite.com/images/wsclock_algorithms.png">
-<meta property="og:updated_time" content="2020-06-10T15:17:58.279Z">
+<meta property="og:image" content="http://yoursite.com/images/local_global_page.png">
+<meta property="og:image" content="http://yoursite.com/images/pff.png">
+<meta property="og:image" content="http://yoursite.com/images/separate_i_d_space.png">
+<meta property="og:image" content="http://yoursite.com/images/share_page_tables.png">
+<meta property="og:image" content="http://yoursite.com/images/share_copy_on_write.png">
+<meta property="og:image" content="http://yoursite.com/images/share_library_reload.png">
+<meta property="og:image" content="http://yoursite.com/images/swap_all_space.png">
+<meta property="og:image" content="http://yoursite.com/images/swap_use_space.png">
+<meta property="og:updated_time" content="2020-06-13T06:11:16.101Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="操作系统笔记-7-虚拟内存">
 <meta name="twitter:description" content="引言上一篇笔记讲述了内存的地址空间抽象，但是还留下了问题，那就是当软件很大的时候虽然利用Swapping技术可以运行，但是每次交换整个进程的空间开销不容忽视，虽然近年来内存也有增长，但是软件大小增长的速度远大于内存增长的速度。 一个解决方法是Overlays(覆盖)，Overlays将程序分割为多个片段，称为覆盖，当程序开始时，覆盖管理器加载覆盖0，执行完成后，通知覆盖管理器加载覆盖1，然后覆盖1">
@@ -595,6 +603,115 @@
 </ol>
 </li>
 </ul>
+<h4 id="分页设计和实现问题"><a href="#分页设计和实现问题" class="headerlink" title="分页设计和实现问题"></a>分页设计和实现问题</h4><h5 id="局部分配和全局分配"><a href="#局部分配和全局分配" class="headerlink" title="局部分配和全局分配"></a>局部分配和全局分配</h5><ul>
+<li><p>页面置换时，只能从进程自己分配的页框中选择置换，全局分配页面置换算法作用域是全局页框的。如下例子</p>
+<p><img src="/images/local_global_page.png" alt="img"></p>
+<p>当进程A发生缺页中断时，如果采用局部分配，那么A5将会被替换出去；如果采用全局分配，那么B3将会被替换出去</p>
+</li>
+<li><p>通常全局分配比局部分配更好，因为局部分配算法，随着工作集增大，缺页会越来越频繁；但是当工作集减小时，局部算法又会浪费内存</p>
+</li>
+<li><p>全局分配算法实现</p>
+<ol>
+<li>检测工作集大小，工作集大小由“老化”位指出，但是不能防止颠簸，因为工作集大小可能在几微秒内变化</li>
+<li>定期会确定运行的进程的数目为进程分配等额的内存，看似公平，但是通常进程需要的内存不同，比如为30Kb和300Kb分配同样的内存是不合理的</li>
+<li>按进程大小的比例来分配内存，但是必须程序运行时动态更新，管理内存动态分配的一种方法是PFF(缺页中断率)</li>
+<li>比较明智的方法是为进程分配一个最小的内存</li>
+</ol>
+</li>
+<li><p>PFF(缺页中断率)</p>
+<p>用来管理动态为进程增加和减少页框。但是仅仅是控制分配集大小。下图是PFF示意图，A代表高缺页中断率，应该分配内存。B则代表有低中断率，有空余的内存。</p>
+<p><img src="/images/pff.png" alt="img"></p>
+</li>
+</ul>
+<h5 id="负载控制"><a href="#负载控制" class="headerlink" title="负载控制"></a>负载控制</h5><ul>
+<li>问题：当所有进程组合的工作集需要的内存超过了内存的容量，那么会引起颠簸。一个现象是OS中所有进程PFF都很高，则表示所有的进程都需要额外内存，但是没有进程需要更少的内存，则该种情况所有进程都会颠簸</li>
+<li>解决办法：减少运行的进程。可以将进程交换出去，释放占用的页框，然后分配给其他颠簸的进程。交换进程到磁盘还要考虑，在多处理器系统中，过低的进程会浪费CPU周期，所以交换时不光考虑进程大小和分页率还要考虑进程的特性(计算密集型还是I/O密集型)</li>
+</ul>
+<h5 id="分页大小"><a href="#分页大小" class="headerlink" title="分页大小"></a>分页大小</h5><ul>
+<li><p>内部碎片：程序的代码段、数据段和栈段在分页时，通常最后一页不能刚好装满，最后一页估计会浪费<script type="math/tex">\frac{1}{2}</script>的空间。假设内存有n个段，页大小为p bytes，所以内存的内部碎片为</p>
+<script type="math/tex; mode=display">wasted = \frac{np}{2} bytes</script></li>
+<li><p>选择小页面的好处</p>
+<ol>
+<li>减少内存碎片</li>
+<li>减少内存浪费，假设页大小为32Kb，一个进程分为个阶段，每个阶段需要4Kb，那么进程有28Kb的空间都属于浪费的</li>
+</ol>
+</li>
+<li><p>选择大页面的优点</p>
+<ol>
+<li>页表更小</li>
+<li>相对小页面会占用更少的TLB，TLB是非常昂贵的</li>
+<li>在某些机器，进程切换时，会将页表载入硬件寄存器，小页面页表更大，因为花费时间比大页面长</li>
+</ol>
+</li>
+<li><p>平衡：OS在系统中采用不同的页面大小，内核采用大页面，而用户空间程序采用小页面</p>
+</li>
+<li><p>数学分析：假设进程平均大小为s bytes，页大小为p bytes，页表项大小为e bytes，需要的页表项空间为<script type="math/tex">\frac{es}{p}</script>，内部碎片为<script type="math/tex">\frac{p}{2}</script>，因此一个进程的空间开销为</p>
+<script type="math/tex; mode=display">overhead = \frac{es}{p} + \frac{p}{2}</script><p>因为要求p的大小的最优值，对p求导，并令等式等于0</p>
+<script type="math/tex; mode=display">-\frac{se}{p^2}+\frac{1}{2} = 0</script><p>p的解为 <script type="math/tex">p = \sqrt{2se}</script>，假设s为1MB，e为8bytes则p为4KB</p>
+</li>
+</ul>
+<h5 id="分离指令和数据空间"><a href="#分离指令和数据空间" class="headerlink" title="分离指令和数据空间"></a>分离指令和数据空间</h5><ul>
+<li><p>存在问题：如果地址空间足够大，a的模型是ok的，但是如果地址空间小，就出现问题。程序空间示意图</p>
+<p><img src="/images/separate_i_d_space.png" alt="img"></p>
+</li>
+<li><p>一种解决方法</p>
+<p>PDP-11分离指令和数据空间，如上图的b，使用此种模型，链接器必须知道何时使用分离的I-space和D-space，因为数据被重定位到虚拟空间的0而不是在程序之后。它们有独立的页表</p>
+</li>
+<li><p>现实应用</p>
+<p>虽然如今的普遍的x64架构应用64位地址，地址空间已经足够大。但是指令和数据空间分离还是有广泛的应用，比如CPU的L1缓存</p>
+</li>
+</ul>
+<h5 id="共享页"><a href="#共享页" class="headerlink" title="共享页"></a>共享页</h5><ul>
+<li><p>存在问题：一个系统可能同时运行多个相同的程序或者几个用了相同库的程序，想象一下，即使相同的程序同时运行，系统要分配给它们独立的内存，但是程序的代码段是相同且不会改变的，如果能在同时运行时，内存只维护一个代码段，那就可以节省很多的空间；相同库也是一样的道理</p>
+</li>
+<li><p>解决办法-利用指令和数据空间分离</p>
+<p><img src="/images/share_page_tables.png" alt="img"></p>
+<p>为了防止进程被换出而导致共享页被换出，但是全局扫描哪些页是共享的开销很高，因此需要一个特殊的数据结构来跟踪共享页</p>
+</li>
+<li><p>数据页共享-利用写时复制技术</p>
+<p>Linux中当父进程创建子进程时，因为子进程要共享父进程的代码和数据，因此代码页和数据页都是进程共享的。但是此时共享的数据页都是只读状态，一旦进程对数据页发生写操作，就会陷入内核，系统便会重新拷贝一个副本，这时两个进程的页表分别指向该页的独立副本，页状态也被改为可读写。如下图的b</p>
+<p><img src="/images/share_copy_on_write.png" alt="img"></p>
+</li>
+</ul>
+<h5 id="共享库"><a href="#共享库" class="headerlink" title="共享库"></a>共享库</h5><ul>
+<li><p>传统静态链接</p>
+<p>程序编译时，在目标文件中调用但是没有定义的函数(未定义外部函数)，链接器会查找外部库，找到了该函数的代码，然后加入到当前编译的可执行文件中存入磁盘。注意：这个可执行文件中是包含了外部库的方法的代码，如果有多个程序都用了该库，那么每个程序的可执行文件都包含库的代码，并且执行的时候也会有独立的内存存放这些相同的代码。</p>
+</li>
+<li><p>DLL(动态链接库)</p>
+<p>程序编译时，当遇到调用目标文件中没有定义的外部函数时，不在将库中方法的代码加入可执行文件，而是载入一个运行时可以与被调用库的函数绑定的存根例程。依赖系统和配置信息，共享库和程序一起加载到内存或者运行到第一次调用库函数时加载，如果其他程序已经加载那么就不需要再次加载了</p>
+</li>
+<li><p>位置无关代码：解决库在不同程序调用载入时重定位的问题，如下图，如果进程1在载入共享库时，重定位了共享库的代码，那么进程2再调用时会导致问题，解决办法就是避免使用绝对地址，使用相对偏移量</p>
+<p><img src="/images/share_library_reload.png" alt="img"></p>
+</li>
+</ul>
+<h5 id="清除策略"><a href="#清除策略" class="headerlink" title="清除策略"></a>清除策略</h5><ul>
+<li>如果发生缺页时，系统有大量空闲内存时，此时分页系统工作在最佳状态</li>
+<li>实现：利用一个后台进程(分页守护进程)定期检查内存，当发现空闲内存较少时，会根据预定的算法置换一些页面出去。利用双指针的结构，当置换算法选择了页置换时，如果页是修改过的，那就写回磁盘，然后加入链表头；如果缺页发生时，就从链表的尾部取空闲页。假如，此时缺页是正好被分页守护进程回收的页且还没被覆盖，那么就直接恢复不用从磁盘载入</li>
+</ul>
+<h5 id="虚拟内存控制"><a href="#虚拟内存控制" class="headerlink" title="虚拟内存控制"></a>虚拟内存控制</h5><p>通常虚拟内存对开发人员都是透明的，但是某些高级系统提供了虚拟内存的控制。主要是用来实现不同进程间共享内存</p>
+<ul>
+<li>用途：实现高性能消息传递系统，可以避免进程间消息传递时，数据从一个地址空间复制到另一个地址空间(开销很高)</li>
+</ul>
+<h5 id="缺页处理流程"><a href="#缺页处理流程" class="headerlink" title="缺页处理流程"></a>缺页处理流程</h5><ol>
+<li>缺页发生时陷入内核，保存程序计数器</li>
+<li>启动一个汇编例程保存通用寄存器和其他易失性信息，以免被系统破坏；</li>
+<li>OS发现缺页中断，尝试发现需要哪个虚拟页面，如果没有，则取出导致缺页执行的指令用软件分析，该指令在缺页时做什么操作</li>
+<li>检查该地址是否有效且请求的操作与保护权限是否一致，如果不一致，则为非法访问，向进程发一个信号或者杀掉进程。如果有效且没有发生错误，则检查内存是否有空闲的页框，如果没有则执行页面置换算法</li>
+<li>如果选出需要置换的页是修改过的脏页面，则需要先将修改写回磁盘，因为是阻塞操作，则发生上下文切换，挂起中断处理进程（OS内核进程），直到写回数据完成，写的过程中该页框会被设置为忙，防止其他进程操作</li>
+<li>该页面干净后需要找到需要调入的页的磁盘地址，调入页面，该操作也是阻塞的，中断处理进程被挂起，直到磁盘发出中断，页表被更新，载入页面完成</li>
+<li>恢复发生缺页中断指令以前的状态，程序计数器指回缺页的指令</li>
+<li>调度引发缺页的进程，操作系统返回调用它的汇编例程</li>
+<li>例程恢复寄存器和其他状态信息，返回用户空间继续执行，就像没有发生过缺页</li>
+</ol>
+<h5 id="交换空间实现"><a href="#交换空间实现" class="headerlink" title="交换空间实现"></a>交换空间实现</h5><ul>
+<li><p>将整个进程按照程序text，data，statck全部映射到swap区中。每个进程分有固定大小的区，如图</p>
+<p><img src="/images/swap_all_space.png" alt="img"></p>
+</li>
+<li><p>进程开始时不映射到swap区，仅当发生交换时，将换出的页面写入swap区，但是需要在内存中建一个映射表（disk map）来映射换出的页</p>
+<p><img src="/images/swap_use_space.png" alt="img"></p>
+</li>
+</ul>
+<h4 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h4><p>这一部分讲了虚拟内存的原理以及调度算法，下一篇将会学习高速缓存。</p>
 
       
     </div>
@@ -765,7 +882,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-4"><a class="nav-link" href="#引言"><span class="nav-number">1.</span> <span class="nav-text">引言</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#基本概念"><span class="nav-number">2.</span> <span class="nav-text">基本概念</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#原理"><span class="nav-number">2.1.</span> <span class="nav-text">原理</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#页框"><span class="nav-number">2.2.</span> <span class="nav-text">页框</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#虚拟地址"><span class="nav-number">2.3.</span> <span class="nav-text">虚拟地址</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#页表"><span class="nav-number">2.4.</span> <span class="nav-text">页表</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#内存管理单元-MMU"><span class="nav-number">2.5.</span> <span class="nav-text">内存管理单元(MMU)</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#分页问题"><span class="nav-number">3.</span> <span class="nav-text">分页问题</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#加速分页-TLB"><span class="nav-number">3.1.</span> <span class="nav-text">加速分页-TLB</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#大内存页表问题"><span class="nav-number">3.2.</span> <span class="nav-text">大内存页表问题</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#页面置换算法"><span class="nav-number">4.</span> <span class="nav-text">页面置换算法</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#最优页面置换算法"><span class="nav-number">4.1.</span> <span class="nav-text">最优页面置换算法</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#最近未使用页面置换算法（NRU）"><span class="nav-number">4.2.</span> <span class="nav-text">最近未使用页面置换算法（NRU）</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#FIFO页面置换算法"><span class="nav-number">4.3.</span> <span class="nav-text">FIFO页面置换算法</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#第二次机会页面置换算法"><span class="nav-number">4.4.</span> <span class="nav-text">第二次机会页面置换算法</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#时钟页面置换算法"><span class="nav-number">4.5.</span> <span class="nav-text">时钟页面置换算法</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#最近最少使用-LRU"><span class="nav-number">4.6.</span> <span class="nav-text">最近最少使用(LRU)</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#软件模拟LRU-NFU"><span class="nav-number">4.7.</span> <span class="nav-text">软件模拟LRU(NFU)</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#工作集页面置换算法"><span class="nav-number">4.8.</span> <span class="nav-text">工作集页面置换算法</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#工作集时钟置换算法"><span class="nav-number">4.9.</span> <span class="nav-text">工作集时钟置换算法</span></a></li></ol></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-4"><a class="nav-link" href="#引言"><span class="nav-number">1.</span> <span class="nav-text">引言</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#基本概念"><span class="nav-number">2.</span> <span class="nav-text">基本概念</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#原理"><span class="nav-number">2.1.</span> <span class="nav-text">原理</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#页框"><span class="nav-number">2.2.</span> <span class="nav-text">页框</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#虚拟地址"><span class="nav-number">2.3.</span> <span class="nav-text">虚拟地址</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#页表"><span class="nav-number">2.4.</span> <span class="nav-text">页表</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#内存管理单元-MMU"><span class="nav-number">2.5.</span> <span class="nav-text">内存管理单元(MMU)</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#分页问题"><span class="nav-number">3.</span> <span class="nav-text">分页问题</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#加速分页-TLB"><span class="nav-number">3.1.</span> <span class="nav-text">加速分页-TLB</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#大内存页表问题"><span class="nav-number">3.2.</span> <span class="nav-text">大内存页表问题</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#页面置换算法"><span class="nav-number">4.</span> <span class="nav-text">页面置换算法</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#最优页面置换算法"><span class="nav-number">4.1.</span> <span class="nav-text">最优页面置换算法</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#最近未使用页面置换算法（NRU）"><span class="nav-number">4.2.</span> <span class="nav-text">最近未使用页面置换算法（NRU）</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#FIFO页面置换算法"><span class="nav-number">4.3.</span> <span class="nav-text">FIFO页面置换算法</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#第二次机会页面置换算法"><span class="nav-number">4.4.</span> <span class="nav-text">第二次机会页面置换算法</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#时钟页面置换算法"><span class="nav-number">4.5.</span> <span class="nav-text">时钟页面置换算法</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#最近最少使用-LRU"><span class="nav-number">4.6.</span> <span class="nav-text">最近最少使用(LRU)</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#软件模拟LRU-NFU"><span class="nav-number">4.7.</span> <span class="nav-text">软件模拟LRU(NFU)</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#工作集页面置换算法"><span class="nav-number">4.8.</span> <span class="nav-text">工作集页面置换算法</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#工作集时钟置换算法"><span class="nav-number">4.9.</span> <span class="nav-text">工作集时钟置换算法</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#分页设计和实现问题"><span class="nav-number">5.</span> <span class="nav-text">分页设计和实现问题</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#局部分配和全局分配"><span class="nav-number">5.1.</span> <span class="nav-text">局部分配和全局分配</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#负载控制"><span class="nav-number">5.2.</span> <span class="nav-text">负载控制</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#分页大小"><span class="nav-number">5.3.</span> <span class="nav-text">分页大小</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#分离指令和数据空间"><span class="nav-number">5.4.</span> <span class="nav-text">分离指令和数据空间</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#共享页"><span class="nav-number">5.5.</span> <span class="nav-text">共享页</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#共享库"><span class="nav-number">5.6.</span> <span class="nav-text">共享库</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#清除策略"><span class="nav-number">5.7.</span> <span class="nav-text">清除策略</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#虚拟内存控制"><span class="nav-number">5.8.</span> <span class="nav-text">虚拟内存控制</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#缺页处理流程"><span class="nav-number">5.9.</span> <span class="nav-text">缺页处理流程</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#交换空间实现"><span class="nav-number">5.10.</span> <span class="nav-text">交换空间实现</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#总结"><span class="nav-number">6.</span> <span class="nav-text">总结</span></a></li></ol></div>
             
 
           </div>
