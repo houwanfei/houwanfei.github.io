@@ -1,0 +1,765 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="Java," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="问题出现今天在对接其他部门的接口时，发现对方提供了一个GET请求，但是参数却要求通过body传递json格式的数据。这可难住我了，GET请求还能通过body传递参数吗？带着疑问，先试一下吧。我们项目用的RestTemplate，我想起了RestTemplate的exchange方法有个参数HttpEntity，会不会是这里可以传参数进去呢？迅速写了代码 123456public static St">
+<meta name="keywords" content="Java">
+<meta property="og:type" content="article">
+<meta property="og:title" content="日常问题随笔-RestTemplate发送Get请求通过body传参问题">
+<meta property="og:url" content="http://yoursite.com/2020/06/18/日常问题随笔-RestTemplate发送Get请求通过body传参问题/index.html">
+<meta property="og:site_name" content="IkanのBolg">
+<meta property="og:description" content="问题出现今天在对接其他部门的接口时，发现对方提供了一个GET请求，但是参数却要求通过body传递json格式的数据。这可难住我了，GET请求还能通过body传递参数吗？带着疑问，先试一下吧。我们项目用的RestTemplate，我想起了RestTemplate的exchange方法有个参数HttpEntity，会不会是这里可以传参数进去呢？迅速写了代码 123456public static St">
+<meta property="og:locale" content="default">
+<meta property="og:updated_time" content="2020-06-18T14:42:46.448Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="日常问题随笔-RestTemplate发送Get请求通过body传参问题">
+<meta name="twitter:description" content="问题出现今天在对接其他部门的接口时，发现对方提供了一个GET请求，但是参数却要求通过body传递json格式的数据。这可难住我了，GET请求还能通过body传递参数吗？带着疑问，先试一下吧。我们项目用的RestTemplate，我想起了RestTemplate的exchange方法有个参数HttpEntity，会不会是这里可以传参数进去呢？迅速写了代码 123456public static St">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: 'Author'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2020/06/18/日常问题随笔-RestTemplate发送Get请求通过body传参问题/"/>
+
+
+
+
+
+  <title>日常问题随笔-RestTemplate发送Get请求通过body传参问题 | IkanのBolg</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="default">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">IkanのBolg</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">只想安安静静撸代码</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            Home
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            Tags
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            Categories
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            Archives
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2020/06/18/日常问题随笔-RestTemplate发送Get请求通过body传参问题/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="ikan">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="IkanのBolg">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">日常问题随笔-RestTemplate发送Get请求通过body传参问题</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2020-06-18T21:51:54+08:00">
+                2020-06-18
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/问题随笔/" itemprop="url" rel="index">
+                    <span itemprop="name">问题随笔</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h4 id="问题出现"><a href="#问题出现" class="headerlink" title="问题出现"></a>问题出现</h4><p>今天在对接其他部门的接口时，发现对方提供了一个GET请求，但是参数却要求通过body传递json格式的数据。这可难住我了，GET请求还能通过body传递参数吗？带着疑问，先试一下吧。我们项目用的RestTemplate，我想起了RestTemplate的exchange方法有个参数HttpEntity，会不会是这里可以传参数进去呢？迅速写了代码</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> String <span class="title">getForJson</span><span class="params">(String url, Map&lt;String,Object&gt; dataValue)</span> </span>&#123;</span><br><span class="line">    HttpHeaders httpHeaders = <span class="keyword">new</span> HttpHeaders();</span><br><span class="line">    httpHeaders.setContentType(MediaType.APPLICATION_JSON_UTF8);</span><br><span class="line">    HttpEntity&lt;String&gt; httpEntity = <span class="keyword">new</span> HttpEntity&lt;&gt;(JSON.toJSONString(dataValue),httpHeaders);</span><br><span class="line">    <span class="keyword">return</span> SpringContextUtil.getBean(RestTemplate.class).exchange(url, HttpMethod.GET,httpEntity,String.class).getBody();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>结果</p>
+<a id="more"></a>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="number">2020</span>-<span class="number">06</span>-<span class="number">18</span> <span class="number">17</span>:<span class="number">08</span>:<span class="number">37.544</span>|DEBUG|http-nio-<span class="number">8090</span>-exec-<span class="number">2</span>|org.apache.http.impl.conn.Wire|wire|<span class="number">73</span>|http-outgoing-<span class="number">0</span> &gt;&gt; <span class="string">"GET /cross/appms-internal/v1/portal/app/config/search HTTP/1.1[\r][\n]"</span></span><br><span class="line"><span class="number">2020</span>-<span class="number">06</span>-<span class="number">18</span> <span class="number">17</span>:<span class="number">08</span>:<span class="number">37.544</span>|DEBUG|http-nio-<span class="number">8090</span>-exec-<span class="number">2</span>|org.apache.http.impl.conn.Wire|wire|<span class="number">73</span>|http-outgoing-<span class="number">0</span> &gt;&gt; <span class="string">"Accept: text/plain, application/json, application/*+json, */*[\r][\n]"</span></span><br><span class="line"><span class="number">2020</span>-<span class="number">06</span>-<span class="number">18</span> <span class="number">17</span>:<span class="number">08</span>:<span class="number">37.544</span>|DEBUG|http-nio-<span class="number">8090</span>-exec-<span class="number">2</span>|org.apache.http.impl.conn.Wire|wire|<span class="number">73</span>|http-outgoing-<span class="number">0</span> &gt;&gt; <span class="string">"Content-Type: application/json;charset=UTF-8[\r][\n]"</span></span><br><span class="line"><span class="number">2020</span>-<span class="number">06</span>-<span class="number">18</span> <span class="number">17</span>:<span class="number">08</span>:<span class="number">37.544</span>|DEBUG|http-nio-<span class="number">8090</span>-exec-<span class="number">2</span>|org.apache.http.impl.conn.Wire|wire|<span class="number">73</span>|http-outgoing-<span class="number">0</span> &gt;&gt; <span class="string">"Accept-Charset: big5, big5-hkscs, cesu-8, euc-jp, euc-kr, gb18030, gb2312, gbk, ibm-thai, ibm00858, ibm01140, ibm01141, ibm01142, ibm01143, ibm01144, ibm01145, ibm01146, ibm01147, ibm01148, ibm01149, ibm037, ibm1026, ibm1047, ibm273, ibm277, ibm278, ibm280, ibm284, ibm285, ibm290, ibm297, ibm420, ibm424, ibm437, ibm500, ibm775, ibm850, ibm852, ibm855, ibm857, ibm860, ibm861, ibm862, ibm863, ibm864, ibm865, ibm866, ibm868, ibm869, ibm870, ibm871, ibm918, iso-2022-cn, iso-2022-jp, iso-2022-jp-2, iso-2022-kr, iso-8859-1, iso-8859-13, iso-8859-15, iso-8859-2, iso-8859-3, iso-8859-4, iso-8859-5, iso-8859-6, iso-8859-7, iso-8859-8, iso-8859-9, jis_x0201, jis_x0212-1990, koi8-r, koi8-u, shift_jis, tis-620, us-ascii, utf-16, utf-16be, utf-16le, utf-32, utf-32be, utf-32le, utf-8, windows-1250, windows-1251, windows-1252, windows-1253, windows-1254, windows-1255, windows-1256, windows-1257, windows-1258, windows-31j, x-big5-hkscs-2001, x-big5-solaris, x-euc-jp-linux, x-euc-tw, x-eucjp-open, x-ibm1006, x-ibm1025, x-ibm1046, x-ibm1097, x-ibm1098, x-ibm1112, x-ibm1122, x-ibm1123, x-ibm1124, x-ibm1166, x-ibm1364, x-ibm1381, x-ibm1383, x-ibm300, x-ibm33722, x-ibm737, x-ibm833, x-ibm834, x-ibm856, x-ibm874, x-ibm875, x-ibm921, x-ibm922, x-ibm930, x-ibm933, x-ibm935, x-ibm937, x-ibm939, x-ibm942, x-ibm942c, x-ibm943, x-ibm943c, x-ibm948, x-ibm949, x-ibm949c, x-ibm950, x-ibm964, x-ibm970, x-iscii91, x-iso-2022-cn-cns, x-iso-2022-cn-gb, x-iso-8859-11, x-jis0208, x-jisautodetect, x-johab, x-macarabic, x-maccentraleurope, x-maccroatian, x-maccyrillic, x-macdingbat, x-macgreek, x-machebrew, x-maciceland, x-macroman, x-macromania, x-macsymbol, x-macthai, x-macturkish, x-macukraine, x-ms932_0213, x-ms950-hkscs, x-ms950-hkscs-xp, x-mswin-936, x-pck, x-sjis_0213, x-utf-16le-bom, x-utf-32be-bom, x-utf-32le-bom, x-windows-50220, x-windows-50221, x-windows-874, x-windows-949, x-windows-950, x-windows-iso2022jp[\r][\n]"</span></span><br><span class="line"><span class="number">2020</span>-<span class="number">06</span>-<span class="number">18</span> <span class="number">17</span>:<span class="number">08</span>:<span class="number">37.547</span>|DEBUG|http-nio-<span class="number">8090</span>-exec-<span class="number">2</span>|org.apache.http.impl.conn.Wire|wire|<span class="number">73</span>|http-outgoing-<span class="number">0</span> &gt;&gt; <span class="string">"Host: [\r][\n]"</span></span><br><span class="line"><span class="number">2020</span>-<span class="number">06</span>-<span class="number">18</span> <span class="number">17</span>:<span class="number">08</span>:<span class="number">37.547</span>|DEBUG|http-nio-<span class="number">8090</span>-exec-<span class="number">2</span>|org.apache.http.impl.conn.Wire|wire|<span class="number">73</span>|http-outgoing-<span class="number">0</span> &gt;&gt; <span class="string">"Connection: Keep-Alive[\r][\n]"</span></span><br><span class="line"><span class="number">2020</span>-<span class="number">06</span>-<span class="number">18</span> <span class="number">17</span>:<span class="number">08</span>:<span class="number">37.547</span>|DEBUG|http-nio-<span class="number">8090</span>-exec-<span class="number">2</span>|org.apache.http.impl.conn.Wire|wire|<span class="number">73</span>|http-outgoing-<span class="number">0</span> &gt;&gt; <span class="string">"User-Agent: Apache-HttpClient/4.5.10 (Java/1.8.0_201)[\r][\n]"</span></span><br><span class="line"><span class="number">2020</span>-<span class="number">06</span>-<span class="number">18</span> <span class="number">17</span>:<span class="number">08</span>:<span class="number">37.547</span>|DEBUG|http-nio-<span class="number">8090</span>-exec-<span class="number">2</span>|org.apache.http.impl.conn.Wire|wire|<span class="number">73</span>|http-outgoing-<span class="number">0</span> &gt;&gt; <span class="string">"Accept-Encoding: gzip,deflate[\r][\n]"</span></span><br><span class="line"><span class="number">2020</span>-<span class="number">06</span>-<span class="number">18</span> <span class="number">17</span>:<span class="number">08</span>:<span class="number">37.547</span>|DEBUG|http-nio-<span class="number">8090</span>-exec-<span class="number">2</span>|org.apache.http.impl.conn.Wire|wire|<span class="number">73</span>|http-outgoing-<span class="number">0</span> &gt;&gt; <span class="string">"[\r][\n]"</span></span><br><span class="line"><span class="number">2020</span>-<span class="number">06</span>-<span class="number">18</span> <span class="number">17</span>:<span class="number">08</span>:<span class="number">37.734</span>|DEBUG|http-nio-<span class="number">8090</span>-exec-<span class="number">2</span>|org.apache.http.impl.conn.Wire|wire|<span class="number">73</span>|http-outgoing-<span class="number">0</span> &lt;&lt; <span class="string">"HTTP/1.1 400 [\r][\n]"</span></span><br><span class="line"><span class="number">2020</span>-<span class="number">06</span>-<span class="number">18</span> <span class="number">17</span>:<span class="number">08</span>:<span class="number">37.735</span>|DEBUG|http-nio-<span class="number">8090</span>-exec-<span class="number">2</span>|org.apache.http.impl.conn.Wire|wire|<span class="number">73</span>|http-outgoing-<span class="number">0</span> &lt;&lt; <span class="string">"Server: nginx[\r][\n]"</span></span><br><span class="line"><span class="number">2020</span>-<span class="number">06</span>-<span class="number">18</span> <span class="number">17</span>:<span class="number">08</span>:<span class="number">37.735</span>|DEBUG|http-nio-<span class="number">8090</span>-exec-<span class="number">2</span>|org.apache.http.impl.conn.Wire|wire|<span class="number">73</span>|http-outgoing-<span class="number">0</span> &lt;&lt; <span class="string">"Date: Thu, 18 Jun 2020 09:08:36 GMT[\r][\n]"</span></span><br><span class="line"><span class="number">2020</span>-<span class="number">06</span>-<span class="number">18</span> <span class="number">17</span>:<span class="number">08</span>:<span class="number">37.736</span>|DEBUG|http-nio-<span class="number">8090</span>-exec-<span class="number">2</span>|org.apache.http.impl.conn.Wire|wire|<span class="number">73</span>|http-outgoing-<span class="number">0</span> &lt;&lt; <span class="string">"Content-Type: application/json;charset=UTF-8[\r][\n]"</span></span><br><span class="line"><span class="number">2020</span>-<span class="number">06</span>-<span class="number">18</span> <span class="number">17</span>:<span class="number">08</span>:<span class="number">37.736</span>|DEBUG|http-nio-<span class="number">8090</span>-exec-<span class="number">2</span>|org.apache.http.impl.conn.Wire|wire|<span class="number">73</span>|http-outgoing-<span class="number">0</span> &lt;&lt; <span class="string">"Transfer-Encoding: chunked[\r][\n]"</span></span><br><span class="line"><span class="number">2020</span>-<span class="number">06</span>-<span class="number">18</span> <span class="number">17</span>:<span class="number">08</span>:<span class="number">37.736</span>|DEBUG|http-nio-<span class="number">8090</span>-exec-<span class="number">2</span>|org.apache.http.impl.conn.Wire|wire|<span class="number">73</span>|http-outgoing-<span class="number">0</span> &lt;&lt; <span class="string">"Connection: keep-alive[\r][\n]"</span></span><br><span class="line"><span class="number">2020</span>-<span class="number">06</span>-<span class="number">18</span> <span class="number">17</span>:<span class="number">08</span>:<span class="number">37.737</span>|DEBUG|http-nio-<span class="number">8090</span>-exec-<span class="number">2</span>|org.apache.http.impl.conn.Wire|wire|<span class="number">73</span>|http-outgoing-<span class="number">0</span> &lt;&lt; <span class="string">"X-Application-Context: cross-gateway:test:8080[\r][\n]"</span></span><br><span class="line"><span class="number">2020</span>-<span class="number">06</span>-<span class="number">18</span> <span class="number">17</span>:<span class="number">08</span>:<span class="number">37.737</span>|DEBUG|http-nio-<span class="number">8090</span>-exec-<span class="number">2</span>|org.apache.http.impl.conn.Wire|wire|<span class="number">73</span>|http-outgoing-<span class="number">0</span> &lt;&lt; <span class="string">"Set-Cookie: Track_id=rBCB8F7rLxRhG2WIFf7OAg==; expires=Fri, 18-Jun-21 09:08:36 GMT; domain=test.cn; path=/[\r][\n]"</span></span><br><span class="line"><span class="number">2020</span>-<span class="number">06</span>-<span class="number">18</span> <span class="number">17</span>:<span class="number">08</span>:<span class="number">37.737</span>|DEBUG|http-nio-<span class="number">8090</span>-exec-<span class="number">2</span>|org.apache.http.impl.conn.Wire|wire|<span class="number">73</span>|http-outgoing-<span class="number">0</span> &lt;&lt; <span class="string">"[\r][\n]"</span></span><br><span class="line"><span class="number">2020</span>-<span class="number">06</span>-<span class="number">18</span> <span class="number">17</span>:<span class="number">08</span>:<span class="number">37.738</span>|DEBUG|http-nio-<span class="number">8090</span>-exec-<span class="number">2</span>|org.apache.http.impl.conn.Wire|wire|<span class="number">73</span>|http-outgoing-<span class="number">0</span> &lt;&lt; <span class="string">"2b[\r][\n]"</span></span><br><span class="line"><span class="number">2020</span>-<span class="number">06</span>-<span class="number">18</span> <span class="number">17</span>:<span class="number">08</span>:<span class="number">37.738</span>|DEBUG|http-nio-<span class="number">8090</span>-exec-<span class="number">2</span>|org.apache.http.impl.conn.Wire|wire|<span class="number">73</span>|http-outgoing-<span class="number">0</span> &lt;&lt; <span class="string">"&#123;"</span>code<span class="string">":4004,"</span>message<span class="string">":"</span>parameter invalid<span class="string">"&#125;[\r][\n]"</span></span><br><span class="line"><span class="number">2020</span>-<span class="number">06</span>-<span class="number">18</span> <span class="number">17</span>:<span class="number">08</span>:<span class="number">37.738</span>|DEBUG|http-nio-<span class="number">8090</span>-exec-<span class="number">2</span>|org.apache.http.impl.conn.Wire|wire|<span class="number">73</span>|http-outgoing-<span class="number">0</span> &lt;&lt; <span class="string">"0[\r][\n]"</span></span><br><span class="line"><span class="number">2020</span>-<span class="number">06</span>-<span class="number">18</span> <span class="number">17</span>:<span class="number">08</span>:<span class="number">37.739</span>|DEBUG|http-nio-<span class="number">8090</span>-exec-<span class="number">2</span>|org.apache.http.impl.conn.Wire|wire|<span class="number">73</span>|http-outgoing-<span class="number">0</span> &lt;&lt; <span class="string">"[\r][\n]"</span></span><br></pre></td></tr></table></figure>
+<p>通过日志可以看到请求失败了，对方接口返回了参数无效</p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&#123;<span class="attr">"code"</span>:<span class="number">4004</span>,<span class="attr">"message"</span>:<span class="string">"parameter invalid"</span>&#125;</span><br></pre></td></tr></table></figure>
+<h4 id="解决问题"><a href="#解决问题" class="headerlink" title="解决问题"></a>解决问题</h4><p>在HTTP1.1中GET请求已经可以在body里发送数据，但是既然用了RestTemplate，就要看一下RestTemplate是否提供了实现，这里我们用的httpclient，默认用的HttpComponentsClientHttpRequestFactory工厂，查看了HttpComponentsClientHttpRequestFactory的createHttpUriRequest方法，发现GET请求是HttpGet，HttpGet继承HttpRequestBase，HttpRequestBase是不支持传递body的。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">protected</span> HttpUriRequest <span class="title">createHttpUriRequest</span><span class="params">(HttpMethod httpMethod, URI uri)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">switch</span> (httpMethod) &#123;</span><br><span class="line">        <span class="keyword">case</span> GET:</span><br><span class="line">            <span class="keyword">return</span> <span class="keyword">new</span> HttpGet(uri);</span><br><span class="line">        <span class="keyword">case</span> HEAD:</span><br><span class="line">            <span class="keyword">return</span> <span class="keyword">new</span> HttpHead(uri);</span><br><span class="line">        <span class="keyword">case</span> POST:</span><br><span class="line">            <span class="keyword">return</span> <span class="keyword">new</span> HttpPost(uri);</span><br><span class="line">        <span class="keyword">case</span> PUT:</span><br><span class="line">            <span class="keyword">return</span> <span class="keyword">new</span> HttpPut(uri);</span><br><span class="line">        <span class="keyword">case</span> PATCH:</span><br><span class="line">            <span class="keyword">return</span> <span class="keyword">new</span> HttpPatch(uri);</span><br><span class="line">        <span class="keyword">case</span> DELETE:</span><br><span class="line">            <span class="keyword">return</span> <span class="keyword">new</span> HttpDelete(uri);</span><br><span class="line">        <span class="keyword">case</span> OPTIONS:</span><br><span class="line">            <span class="keyword">return</span> <span class="keyword">new</span> HttpOptions(uri);</span><br><span class="line">        <span class="keyword">case</span> TRACE:</span><br><span class="line">            <span class="keyword">return</span> <span class="keyword">new</span> HttpTrace(uri);</span><br><span class="line">        <span class="keyword">default</span>:</span><br><span class="line">            <span class="keyword">throw</span> <span class="keyword">new</span> IllegalArgumentException(<span class="string">"Invalid HTTP method: "</span> + httpMethod);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>查了资料发现HttpEntityEnclosingRequestBase是可以传递body的，那就自定义一个工厂继承HttpComponentsClientHttpRequestFactory，重写createHttpUriRequest方法，当发送的请求是GET请求时，创建自定义的继承HttpEntityEnclosingRequestBase的类，这样GET请求就可以传送body。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Configuration</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">RestTemplateConfig</span> </span>&#123;</span><br><span class="line">    <span class="meta">@Bean</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> RestTemplate <span class="title">restTemplate</span><span class="params">(ClientHttpRequestFactory clientHttpRequestFactory)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">new</span> RestTemplate(clientHttpRequestFactory);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Bean</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> ClientHttpRequestFactory <span class="title">httpRequestFactory</span><span class="params">(HttpClient httpClient)</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">new</span> HttpComponentsClientHttpRequestCRMFactory(httpClient);</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Bean</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> HttpClient <span class="title">httpClient</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        Registry&lt;ConnectionSocketFactory&gt; registry = RegistryBuilder.&lt;ConnectionSocketFactory&gt;create()</span><br><span class="line">                .register(<span class="string">"http"</span>, PlainConnectionSocketFactory.getSocketFactory())</span><br><span class="line">                .register(<span class="string">"https"</span>, SSLConnectionSocketFactory.getSocketFactory())</span><br><span class="line">                .build();</span><br><span class="line">        PoolingHttpClientConnectionManager connectionManager = <span class="keyword">new</span> PoolingHttpClientConnectionManager(registry);</span><br><span class="line">        <span class="comment">//设置整个连接池最大连接数 根据自己的场景决定</span></span><br><span class="line">        connectionManager.setMaxTotal(<span class="number">200</span>);</span><br><span class="line">        <span class="comment">//路由是对maxTotal的细分</span></span><br><span class="line">        connectionManager.setDefaultMaxPerRoute(<span class="number">100</span>);</span><br><span class="line">        RequestConfig requestConfig = RequestConfig.custom()</span><br><span class="line">                .setSocketTimeout(<span class="number">10000</span>) <span class="comment">//服务器返回数据(response)的时间，超过该时间抛出read timeout</span></span><br><span class="line">                .setConnectTimeout(<span class="number">5000</span>)<span class="comment">//连接上服务器(握手成功)的时间，超出该时间抛出connect timeout</span></span><br><span class="line">                .setConnectionRequestTimeout(<span class="number">1000</span>)<span class="comment">//从连接池中获取连接的超时时间，超过该时间未拿到可用连接，会抛出org.apache.http.conn.ConnectionPoolTimeoutException: Timeout waiting for connection from pool</span></span><br><span class="line">                .build();</span><br><span class="line">        <span class="keyword">return</span> HttpClientBuilder.create()</span><br><span class="line">                .setDefaultRequestConfig(requestConfig)</span><br><span class="line">                .setConnectionManager(connectionManager)</span><br><span class="line">                .build();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="class"><span class="keyword">class</span> <span class="title">HttpComponentsClientHttpRequestCRMFactory</span> <span class="keyword">extends</span> <span class="title">HttpComponentsClientHttpRequestFactory</span> </span>&#123;</span><br><span class="line">        <span class="function"><span class="keyword">public</span> <span class="title">HttpComponentsClientHttpRequestCRMFactory</span><span class="params">(HttpClient httpClient)</span> </span>&#123;</span><br><span class="line">            <span class="keyword">super</span>(httpClient);</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="meta">@Override</span></span><br><span class="line">        <span class="function"><span class="keyword">protected</span> HttpUriRequest <span class="title">createHttpUriRequest</span><span class="params">(HttpMethod httpMethod, URI uri)</span> </span>&#123;</span><br><span class="line">            <span class="keyword">if</span> (httpMethod == HttpMethod.GET) &#123;</span><br><span class="line">                <span class="keyword">return</span> <span class="keyword">new</span> HttpGetRequestForBody(uri);</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">return</span> <span class="keyword">super</span>.createHttpUriRequest(httpMethod, uri);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="class"><span class="keyword">class</span> <span class="title">HttpGetRequestForBody</span> <span class="keyword">extends</span> <span class="title">HttpEntityEnclosingRequestBase</span> </span>&#123;</span><br><span class="line">        <span class="function"><span class="keyword">public</span> <span class="title">HttpGetRequestForBody</span><span class="params">(<span class="keyword">final</span> URI uri)</span> </span>&#123;</span><br><span class="line">            <span class="keyword">super</span>.setURI(uri);</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="meta">@Override</span></span><br><span class="line">        <span class="function"><span class="keyword">public</span> String <span class="title">getMethod</span><span class="params">()</span> </span>&#123;</span><br><span class="line">            <span class="keyword">return</span> HttpMethod.GET.name();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h4 id="测试结果"><a href="#测试结果" class="headerlink" title="测试结果"></a>测试结果</h4><p>再次测试结果，发现调用正确返回</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="number">2020</span>-<span class="number">06</span>-<span class="number">18</span> <span class="number">17</span>:<span class="number">10</span>:<span class="number">28.403</span>|DEBUG|http-nio-<span class="number">8090</span>-exec-<span class="number">1</span>|org.apache.http.impl.conn.Wire|wire|<span class="number">73</span>|http-outgoing-<span class="number">0</span> &gt;&gt; <span class="string">"GET /cross/appms-internal/v1/portal/app/config/search HTTP/1.1[\r][\n]"</span></span><br><span class="line"><span class="number">2020</span>-<span class="number">06</span>-<span class="number">18</span> <span class="number">17</span>:<span class="number">10</span>:<span class="number">28.404</span>|DEBUG|http-nio-<span class="number">8090</span>-exec-<span class="number">1</span>|org.apache.http.impl.conn.Wire|wire|<span class="number">73</span>|http-outgoing-<span class="number">0</span> &gt;&gt; <span class="string">"Accept: text/plain, application/json, application/*+json, */*[\r][\n]"</span></span><br><span class="line"><span class="number">2020</span>-<span class="number">06</span>-<span class="number">18</span> <span class="number">17</span>:<span class="number">10</span>:<span class="number">28.404</span>|DEBUG|http-nio-<span class="number">8090</span>-exec-<span class="number">1</span>|org.apache.http.impl.conn.Wire|wire|<span class="number">73</span>|http-outgoing-<span class="number">0</span> &gt;&gt; <span class="string">"Content-Type: application/json;charset=UTF-8[\r][\n]"</span></span><br><span class="line"><span class="number">2020</span>-<span class="number">06</span>-<span class="number">18</span> <span class="number">17</span>:<span class="number">10</span>:<span class="number">28.407</span>|DEBUG|http-nio-<span class="number">8090</span>-exec-<span class="number">1</span>|org.apache.http.impl.conn.Wire|wire|<span class="number">73</span>|http-outgoing-<span class="number">0</span> &gt;&gt; <span class="string">"Accept-Charset: big5, big5-hkscs, cesu-8, euc-jp, euc-kr, gb18030, gb2312, gbk, ibm-thai, ibm00858, ibm01140, ibm01141, ibm01142, ibm01143, ibm01144, ibm01145, ibm01146, ibm01147, ibm01148, ibm01149, ibm037, ibm1026, ibm1047, ibm273, ibm277, ibm278, ibm280, ibm284, ibm285, ibm290, ibm297, ibm420, ibm424, ibm437, ibm500, ibm775, ibm850, ibm852, ibm855, ibm857, ibm860, ibm861, ibm862, ibm863, ibm864, ibm865, ibm866, ibm868, ibm869, ibm870, ibm871, ibm918, iso-2022-cn, iso-2022-jp, iso-2022-jp-2, iso-2022-kr, iso-8859-1, iso-8859-13, iso-8859-15, iso-8859-2, iso-8859-3, iso-8859-4, iso-8859-5, iso-8859-6, iso-8859-7, iso-8859-8, iso-8859-9, jis_x0201, jis_x0212-1990, koi8-r, koi8-u, shift_jis, tis-620, us-ascii, utf-16, utf-16be, utf-16le, utf-32, utf-32be, utf-32le, utf-8, windows-1250, windows-1251, windows-1252, windows-1253, windows-1254, windows-1255, windows-1256, windows-1257, windows-1258, windows-31j, x-big5-hkscs-2001, x-big5-solaris, x-euc-jp-linux, x-euc-tw, x-eucjp-open, x-ibm1006, x-ibm1025, x-ibm1046, x-ibm1097, x-ibm1098, x-ibm1112, x-ibm1122, x-ibm1123, x-ibm1124, x-ibm1166, x-ibm1364, x-ibm1381, x-ibm1383, x-ibm300, x-ibm33722, x-ibm737, x-ibm833, x-ibm834, x-ibm856, x-ibm874, x-ibm875, x-ibm921, x-ibm922, x-ibm930, x-ibm933, x-ibm935, x-ibm937, x-ibm939, x-ibm942, x-ibm942c, x-ibm943, x-ibm943c, x-ibm948, x-ibm949, x-ibm949c, x-ibm950, x-ibm964, x-ibm970, x-iscii91, x-iso-2022-cn-cns, x-iso-2022-cn-gb, x-iso-8859-11, x-jis0208, x-jisautodetect, x-johab, x-macarabic, x-maccentraleurope, x-maccroatian, x-maccyrillic, x-macdingbat, x-macgreek, x-machebrew, x-maciceland, x-macroman, x-macromania, x-macsymbol, x-macthai, x-macturkish, x-macukraine, x-ms932_0213, x-ms950-hkscs, x-ms950-hkscs-xp, x-mswin-936, x-pck, x-sjis_0213, x-utf-16le-bom, x-utf-32be-bom, x-utf-32le-bom, x-windows-50220, x-windows-50221, x-windows-874, x-windows-949, x-windows-950, x-windows-iso2022jp[\r][\n]"</span></span><br><span class="line"><span class="number">2020</span>-<span class="number">06</span>-<span class="number">18</span> <span class="number">17</span>:<span class="number">10</span>:<span class="number">28.407</span>|DEBUG|http-nio-<span class="number">8090</span>-exec-<span class="number">1</span>|org.apache.http.impl.conn.Wire|wire|<span class="number">73</span>|http-outgoing-<span class="number">0</span> &gt;&gt; <span class="string">"Content-Length: 59[\r][\n]"</span></span><br><span class="line"><span class="number">2020</span>-<span class="number">06</span>-<span class="number">18</span> <span class="number">17</span>:<span class="number">10</span>:<span class="number">28.407</span>|DEBUG|http-nio-<span class="number">8090</span>-exec-<span class="number">1</span>|org.apache.http.impl.conn.Wire|wire|<span class="number">73</span>|http-outgoing-<span class="number">0</span> &gt;&gt; <span class="string">"Host: dev-test.com[\r][\n]"</span></span><br><span class="line"><span class="number">2020</span>-<span class="number">06</span>-<span class="number">18</span> <span class="number">17</span>:<span class="number">10</span>:<span class="number">28.407</span>|DEBUG|http-nio-<span class="number">8090</span>-exec-<span class="number">1</span>|org.apache.http.impl.conn.Wire|wire|<span class="number">73</span>|http-outgoing-<span class="number">0</span> &gt;&gt; <span class="string">"Connection: Keep-Alive[\r][\n]"</span></span><br><span class="line"><span class="number">2020</span>-<span class="number">06</span>-<span class="number">18</span> <span class="number">17</span>:<span class="number">10</span>:<span class="number">28.407</span>|DEBUG|http-nio-<span class="number">8090</span>-exec-<span class="number">1</span>|org.apache.http.impl.conn.Wire|wire|<span class="number">73</span>|http-outgoing-<span class="number">0</span> &gt;&gt; <span class="string">"User-Agent: Apache-HttpClient/4.5.10 (Java/1.8.0_201)[\r][\n]"</span></span><br><span class="line"><span class="number">2020</span>-<span class="number">06</span>-<span class="number">18</span> <span class="number">17</span>:<span class="number">10</span>:<span class="number">28.407</span>|DEBUG|http-nio-<span class="number">8090</span>-exec-<span class="number">1</span>|org.apache.http.impl.conn.Wire|wire|<span class="number">73</span>|http-outgoing-<span class="number">0</span> &gt;&gt; <span class="string">"Accept-Encoding: gzip,deflate[\r][\n]"</span></span><br><span class="line"><span class="number">2020</span>-<span class="number">06</span>-<span class="number">18</span> <span class="number">17</span>:<span class="number">10</span>:<span class="number">28.408</span>|DEBUG|http-nio-<span class="number">8090</span>-exec-<span class="number">1</span>|org.apache.http.impl.conn.Wire|wire|<span class="number">73</span>|http-outgoing-<span class="number">0</span> &gt;&gt; <span class="string">"[\r][\n]"</span></span><br><span class="line"><span class="number">2020</span>-<span class="number">06</span>-<span class="number">18</span> <span class="number">17</span>:<span class="number">10</span>:<span class="number">28.408</span>|DEBUG|http-nio-<span class="number">8090</span>-exec-<span class="number">1</span>|org.apache.http.impl.conn.Wire|wire|<span class="number">87</span>|http-outgoing-<span class="number">0</span> &gt;&gt; <span class="string">"&#123;"</span>devIdList<span class="string">":[164359,164893],"</span>pageSize<span class="string">":10,"</span>currentPage<span class="string">":1&#125;"</span></span><br></pre></td></tr></table></figure>
+<p>和第一次的请求相比，这一次请求日志中多了一句</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="number">2020</span>-<span class="number">06</span>-<span class="number">18</span> <span class="number">17</span>:<span class="number">10</span>:<span class="number">28.408</span>|DEBUG|http-nio-<span class="number">8090</span>-exec-<span class="number">1</span>|org.apache.http.impl.conn.Wire|wire|<span class="number">87</span>|http-outgoing-<span class="number">0</span> &gt;&gt; <span class="string">"&#123;"</span>devIdList<span class="string">":[164359,164893],"</span>pageSize<span class="string">":10,"</span>currentPage<span class="string">":1&#125;"</span></span><br></pre></td></tr></table></figure>
+<p>如果还没看出来，我在整理一下日志</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">GET /cross/appms-internal/v1/portal/app/config/search HTTP/<span class="number">1.1</span>[\r][\n]</span><br><span class="line">Accept: text/plain, application/json, application<span class="comment">/*+json, */</span>*[\r][\n]</span><br><span class="line">Content-Type: application/json;charset=UTF-<span class="number">8</span>[\r][\n]</span><br><span class="line">Accept-Charset: big5, big5-hkscs, cesu-<span class="number">8</span>, euc-jp, euc-kr, gb18030, gb2312, gbk, ibm-thai, ibm00858, ibm01140, ibm01141, ibm01142, ibm01143, ibm01144, ibm01145, ibm01146, ibm01147, ibm01148, ibm01149, ibm037, ibm1026, ibm1047, ibm273, ibm277, ibm278, ibm280, ibm284, ibm285, ibm290, ibm297, ibm420, ibm424, ibm437, ibm500, ibm775, ibm850, ibm852, ibm855, ibm857, ibm860, ibm861, ibm862, ibm863, ibm864, ibm865, ibm866, ibm868, ibm869, ibm870, ibm871, ibm918, iso-<span class="number">2022</span>-cn, iso-<span class="number">2022</span>-jp, iso-<span class="number">2022</span>-jp-<span class="number">2</span>, iso-<span class="number">2022</span>-kr, iso-<span class="number">8859</span>-<span class="number">1</span>, iso-<span class="number">8859</span>-<span class="number">13</span>, iso-<span class="number">8859</span>-<span class="number">15</span>, iso-<span class="number">8859</span>-<span class="number">2</span>, iso-<span class="number">8859</span>-<span class="number">3</span>, iso-<span class="number">8859</span>-<span class="number">4</span>, iso-<span class="number">8859</span>-<span class="number">5</span>, iso-<span class="number">8859</span>-<span class="number">6</span>, iso-<span class="number">8859</span>-<span class="number">7</span>, iso-<span class="number">8859</span>-<span class="number">8</span>, iso-<span class="number">8859</span>-<span class="number">9</span>, jis_x0201, jis_x0212-<span class="number">1990</span>, koi8-r, koi8-u, shift_jis, tis-<span class="number">620</span>, us-ascii, utf-<span class="number">16</span>, utf-<span class="number">16</span>be, utf-<span class="number">16l</span>e, utf-<span class="number">32</span>, utf-<span class="number">32</span>be, utf-<span class="number">32l</span>e, utf-<span class="number">8</span>, windows-<span class="number">1250</span>, windows-<span class="number">1251</span>, windows-<span class="number">1252</span>, windows-<span class="number">1253</span>, windows-<span class="number">1254</span>, windows-<span class="number">1255</span>, windows-<span class="number">1256</span>, windows-<span class="number">1257</span>, windows-<span class="number">1258</span>, windows-<span class="number">31</span>j, x-big5-hkscs-<span class="number">2001</span>, x-big5-solaris, x-euc-jp-linux, x-euc-tw, x-eucjp-open, x-ibm1006, x-ibm1025, x-ibm1046, x-ibm1097, x-ibm1098, x-ibm1112, x-ibm1122, x-ibm1123, x-ibm1124, x-ibm1166, x-ibm1364, x-ibm1381, x-ibm1383, x-ibm300, x-ibm33722, x-ibm737, x-ibm833, x-ibm834, x-ibm856, x-ibm874, x-ibm875, x-ibm921, x-ibm922, x-ibm930, x-ibm933, x-ibm935, x-ibm937, x-ibm939, x-ibm942, x-ibm942c, x-ibm943, x-ibm943c, x-ibm948, x-ibm949, x-ibm949c, x-ibm950, x-ibm964, x-ibm970, x-iscii91, x-iso-<span class="number">2022</span>-cn-cns, x-iso-<span class="number">2022</span>-cn-gb, x-iso-<span class="number">8859</span>-<span class="number">11</span>, x-jis0208, x-jisautodetect, x-johab, x-macarabic, x-maccentraleurope, x-maccroatian, x-maccyrillic, x-macdingbat, x-macgreek, x-machebrew, x-maciceland, x-macroman, x-macromania, x-macsymbol, x-macthai, x-macturkish, x-macukraine, x-ms932_0213, x-ms950-hkscs, x-ms950-hkscs-xp, x-mswin-<span class="number">936</span>, x-pck, x-sjis_0213, x-utf-<span class="number">16l</span>e-bom, x-utf-<span class="number">32</span>be-bom, x-utf-<span class="number">32l</span>e-bom, x-windows-<span class="number">50220</span>, x-windows-<span class="number">50221</span>, x-windows-<span class="number">874</span>, x-windows-<span class="number">949</span>, x-windows-<span class="number">950</span>, x-windows-iso2022jp[\r][\n]</span><br><span class="line">Content-Length: <span class="number">59</span>[\r][\n]</span><br><span class="line">Host: dev-test.com[\r][\n]</span><br><span class="line">Connection: Keep-Alive[\r][\n]</span><br><span class="line">User-Agent: Apache-HttpClient/<span class="number">4.5</span>.10 (Java/<span class="number">1.8</span>.0_201)[\r][\n]</span><br><span class="line">Accept-Encoding: gzip,deflate[\r][\n]</span><br><span class="line">[\r][\n]</span><br><span class="line"></span><br><span class="line">&#123;<span class="string">"devIdList"</span>:[<span class="number">164359</span>,<span class="number">164893</span>],<span class="string">"pageSize"</span>:<span class="number">10</span>,<span class="string">"currentPage"</span>:<span class="number">1</span>&#125;</span><br></pre></td></tr></table></figure>
+<p>这个就是HTTP协议，可以看到最后一行就是body里的数据，问题也解决了。</p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Java/" rel="tag"># Java</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2020/06/13/操作系统笔记-8-高速缓存/" rel="next" title="操作系统笔记-8-高速缓存">
+                <i class="fa fa-chevron-left"></i> 操作系统笔记-8-高速缓存
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2020/06/20/操作系统笔记-9-文件系统/" rel="prev" title="操作系统笔记-9-文件系统">
+                操作系统笔记-9-文件系统 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Overview
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">ikan</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">22</span>
+                  <span class="site-state-item-name">posts</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">7</span>
+                  <span class="site-state-item-name">categories</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">12</span>
+                  <span class="site-state-item-name">tags</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-4"><a class="nav-link" href="#问题出现"><span class="nav-number">1.</span> <span class="nav-text">问题出现</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#解决问题"><span class="nav-number">2.</span> <span class="nav-text">解决问题</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#测试结果"><span class="nav-number">3.</span> <span class="nav-text">测试结果</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">ikan</span>
+
+  
+</div>
+
+
+  <div class="powered-by">Powered by <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a></div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">Theme &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+  
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+        tex2jax: {
+          inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+          processEscapes: true,
+          skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+        }
+      });
+    </script>
+
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for (i=0; i < all.length; i += 1) {
+          all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+      });
+    </script>
+    <script type="text/javascript" src="//cdn.bootcss.com/mathjax/2.7.1/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+  
+
+
+  
+
+  
+
+</body>
+</html>

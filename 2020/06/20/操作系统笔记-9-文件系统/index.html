@@ -1,0 +1,1246 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="OS," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="引言之前已经学习过数据在内存中是如何表示，如何存储，但是这些存储在PC断电后数据便消失。因此我们需要一个可以持久化存储并且容量远远大于内存的结构，这一篇我们将学习，文件是如何被组织和操作的，这是一个操作系统重要的部分-文件系统。文章的结构主要分为文件和目录的概念、文件系统的实现、文件系统的管理和优化、最后是例子。 文件和目录基本概念文件 文件定义：文件是一种抽象的概念，它提供了一种方法可以将信息存">
+<meta name="keywords" content="OS">
+<meta property="og:type" content="article">
+<meta property="og:title" content="操作系统笔记-9-文件系统">
+<meta property="og:url" content="http://yoursite.com/2020/06/20/操作系统笔记-9-文件系统/index.html">
+<meta property="og:site_name" content="IkanのBolg">
+<meta property="og:description" content="引言之前已经学习过数据在内存中是如何表示，如何存储，但是这些存储在PC断电后数据便消失。因此我们需要一个可以持久化存储并且容量远远大于内存的结构，这一篇我们将学习，文件是如何被组织和操作的，这是一个操作系统重要的部分-文件系统。文章的结构主要分为文件和目录的概念、文件系统的实现、文件系统的管理和优化、最后是例子。 文件和目录基本概念文件 文件定义：文件是一种抽象的概念，它提供了一种方法可以将信息存">
+<meta property="og:locale" content="default">
+<meta property="og:image" content="http://yoursite.com/images/file_structure.png">
+<meta property="og:image" content="http://yoursite.com/images/executable_file.png">
+<meta property="og:image" content="http://yoursite.com/images/archive_file.png">
+<meta property="og:image" content="http://yoursite.com/images/file_attributes.png">
+<meta property="og:image" content="http://yoursite.com/images/single_level_directory.png">
+<meta property="og:image" content="http://yoursite.com/images/hierarchical_directory.png">
+<meta property="og:image" content="http://yoursite.com/images/file_system_layout.png">
+<meta property="og:image" content="http://yoursite.com/images/load_file_system.png">
+<meta property="og:image" content="http://yoursite.com/images/contiguous_allocation.png">
+<meta property="og:image" content="http://yoursite.com/images/linked-list_allocation.png">
+<meta property="og:image" content="http://yoursite.com/images/memory_table_linked_allocation.png">
+<meta property="og:image" content="http://yoursite.com/images/i_node_ex.png">
+<meta property="og:image" content="http://yoursite.com/images/attrubutes_in_directory.png">
+<meta property="og:image" content="http://yoursite.com/images/attributes_in_i_node.png">
+<meta property="og:image" content="http://yoursite.com/images/in_line_file_name.png">
+<meta property="og:image" content="http://yoursite.com/images/in_a_heap_file_name.png">
+<meta property="og:image" content="http://yoursite.com/images/share_file_system.png">
+<meta property="og:image" content="http://yoursite.com/images/smaller_than_given_size.png">
+<meta property="og:image" content="http://yoursite.com/images/disk_rate_space.png">
+<meta property="og:image" content="http://yoursite.com/images/list_free_disk_space.png">
+<meta property="og:image" content="http://yoursite.com/images/free_list_block_mem.png">
+<meta property="og:image" content="http://yoursite.com/images/bitmap_disk_free.png">
+<meta property="og:image" content="http://yoursite.com/images/user_disk_quota_table.png">
+<meta property="og:image" content="http://yoursite.com/images/logical_dump_fs.png">
+<meta property="og:image" content="http://yoursite.com/images/dump_bitmap.png">
+<meta property="og:image" content="http://yoursite.com/images/fs_consistent.png">
+<meta property="og:image" content="http://yoursite.com/images/fs_missing_block.png">
+<meta property="og:image" content="http://yoursite.com/images/fs_duplicate_block.png">
+<meta property="og:image" content="http://yoursite.com/images/fs_duplicate_data_block.png">
+<meta property="og:image" content="http://yoursite.com/images/buffer_cache_data_structures.png">
+<meta property="og:updated_time" content="2020-06-26T10:06:57.307Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="操作系统笔记-9-文件系统">
+<meta name="twitter:description" content="引言之前已经学习过数据在内存中是如何表示，如何存储，但是这些存储在PC断电后数据便消失。因此我们需要一个可以持久化存储并且容量远远大于内存的结构，这一篇我们将学习，文件是如何被组织和操作的，这是一个操作系统重要的部分-文件系统。文章的结构主要分为文件和目录的概念、文件系统的实现、文件系统的管理和优化、最后是例子。 文件和目录基本概念文件 文件定义：文件是一种抽象的概念，它提供了一种方法可以将信息存">
+<meta name="twitter:image" content="http://yoursite.com/images/file_structure.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: 'Author'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2020/06/20/操作系统笔记-9-文件系统/"/>
+
+
+
+
+
+  <title>操作系统笔记-9-文件系统 | IkanのBolg</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="default">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">IkanのBolg</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">只想安安静静撸代码</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            Home
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            Tags
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            Categories
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            Archives
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2020/06/20/操作系统笔记-9-文件系统/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="ikan">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="IkanのBolg">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">操作系统笔记-9-文件系统</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2020-06-20T08:23:47+08:00">
+                2020-06-20
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/OS学习笔记/" itemprop="url" rel="index">
+                    <span itemprop="name">OS学习笔记</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h4 id="引言"><a href="#引言" class="headerlink" title="引言"></a>引言</h4><p>之前已经学习过数据在内存中是如何表示，如何存储，但是这些存储在PC断电后数据便消失。因此我们需要一个可以持久化存储并且容量远远大于内存的结构，这一篇我们将学习，文件是如何被组织和操作的，这是一个操作系统重要的部分-<strong>文件系统</strong>。文章的结构主要分为文件和目录的概念、文件系统的实现、文件系统的管理和优化、最后是例子。</p>
+<h4 id="文件和目录基本概念"><a href="#文件和目录基本概念" class="headerlink" title="文件和目录基本概念"></a>文件和目录基本概念</h4><h5 id="文件"><a href="#文件" class="headerlink" title="文件"></a>文件</h5><ul>
+<li><p>文件定义：文件是一种抽象的概念，它提供了一种方法可以将信息存储到硬盘并且随后读取回来。</p>
+</li>
+<li><p>文件命名：文件命名规则是通常分为两部分，小数点后的叫文件扩展名（不是必须的），小数点前的叫文件名，某些操作系统有字符数限制（学完文件的组织结构就知道为什么了），某些系统区分大小写。</p>
+<a id="more"></a>
+</li>
+<li><p>文件结构：文件结构可以多种方式，下图是常见的三种方式</p>
+<p><img src="/images/file_structure.png" alt="img"></p>
+<ul>
+<li>a代表文件是一个无结构的字节序列，操作系统无需知道文件是什么，由用户程序解释字节序列。这种方式提供了最大限度的灵活性，用户程序可以以自己觉得合适的方式来存放文件</li>
+<li>b代表文件是一个定长记录的序列，记录有其内部结构。核心思想是对文件的操作以记录为单位，读取一个记录或者覆盖或追加一个记录</li>
+<li>c代表文件被组织成树型结构，大家可能都知道，树的最大好处是方便查找，因此这种文件结构在数据库中常用作索引，比如mysql的B+Tree索引。</li>
+</ul>
+</li>
+<li><p>文件类型</p>
+<p>文件类型通用分为<strong>普通文件</strong>和<strong>目录</strong>，因为目录是比较重要的一块放到后边讲，UNIX还有额外的字符特殊文件和块特殊文件</p>
+<ul>
+<li><p>普通文件</p>
+<ol>
+<li><p>ASCII</p>
+<p>ASCII文件包含多行正文，每行以换行或者回车结束，Windows系统同时使用换行和回车。ASCII文件的好处是可以显示和打印也可以通过文本编辑器编辑</p>
+</li>
+<li><p>二进制文件</p>
+<p>二进制文件即使打印出来也是无法理解的字符，通常其有独立的内部结构，只有其用户程序才能解释，下面是两个UNIX系统的两个二进制文件的例子</p>
+<ol>
+<li><p>可执行二进制</p>
+<p>通常可执行程序都是存放为二进制</p>
+<p><img src="/images/executable_file.png" alt="img"></p>
+<ul>
+<li>头（以魔数开头，魔数通常用于标识程序的特定文件，比如java的class文件就有魔数0xCAFEBABE，还存放了正文大小、数据大小等信息）</li>
+<li>程序正文（代码）</li>
+<li>数据</li>
+<li>重定位位（程序被载入内存重定位时需要）</li>
+<li>符号表（通常是程序debug需要）</li>
+</ul>
+</li>
+<li><p>存档文件</p>
+<p>UNIX存档文件是已编译但未链接的文件，其结构如下</p>
+<p><img src="/images/archive_file.png" alt="img"></p>
+</li>
+</ol>
+</li>
+</ol>
+</li>
+<li><p>字符特殊文件，通常用于串行I/O设备，比如终端、打印机和网络</p>
+</li>
+<li><p>块特殊文件，通常用于硬盘交互</p>
+</li>
+</ul>
+</li>
+<li><p>文件访问</p>
+<ul>
+<li><p>顺序访问</p>
+<p>早期操作系统只支持顺序访问，那时的磁带也只支持顺序访问</p>
+</li>
+<li><p>随机访问</p>
+<p>磁盘支持随机访问，有两种思路</p>
+<ol>
+<li>read操作每次指定开始读文件的位置读取</li>
+<li>通过seek设置当前位置，然后顺序读取（UNIX和Windows采用这种方式）</li>
+</ol>
+</li>
+</ul>
+</li>
+<li><p>文件属性</p>
+<p><img src="/images/file_attributes.png" alt="img"></p>
+<ul>
+<li>前四个是创建者和所有者以及访问权限相关</li>
+<li>flags指定特殊属性，很容易理解</li>
+<li>record-length、key-position、key-length只出现在用key查找的文件中</li>
+<li>Time相关属性，Creation time是创建时间；Time of last access最后访问时间；Time of last change，最后修改时间</li>
+<li>size相关属性，Current size，文件字节数；Maximum size在老的操作系统中有使用，在创建时指定文件的最大大小，然后预留存储空间，现代操作系统已经不需要</li>
+</ul>
+</li>
+<li><p>文件操作</p>
+<ul>
+<li>Create：创建文件</li>
+<li>Delete：删除文件</li>
+<li>Open：打开文件，在使用文件之前必须先打开</li>
+<li>Close：关闭文件</li>
+<li>Read：读取文件，通常从当前位置读取，必须指定需要读取多少个byte而且必须提供一个buffer来容纳它们</li>
+<li>Write：写入文件，通常从当前位置写入，如果当前位置是文件末尾，则增加文件的大小，如果在中间，则覆盖原有的数据</li>
+<li>Append：追加内容，只能写入在文件末尾</li>
+<li>Seek：用于随机访问时，指定文件的需要操作的位置，seek操作后，read和write操作都将在这个位置执行</li>
+<li>Get attributes：获取文件属性</li>
+<li>Set attributes：设置文件属性</li>
+<li>Rename：重命名</li>
+</ul>
+</li>
+</ul>
+<h5 id="目录"><a href="#目录" class="headerlink" title="目录"></a>目录</h5><p>目录是为了记录文件的位置，管理文件</p>
+<ul>
+<li><p>单级目录系统</p>
+<p>早期个人计算机比较通用这类目录系统，那时个人计算机通常只有一个用户。这个方案的好处是简单，定位文件快（因为磁盘只有一个地方存目录信息），目前常用于嵌入式设备，因为现代计算机文件太多，单级的目录无法适用。其结构示意图如下</p>
+<p><img src="/images/single_level_directory.png" alt="img"></p>
+</li>
+<li><p>层级目录系统</p>
+<p>虽然单级目录系统有简单和定位文件快的好处，但是现在计算机的用户通常有成千上万的文件，不可能放到一个目录中，因此需要一种方法将有关系文件分组聚集在一起，一种方案是层级目录，就像一本书的目录，如下图，不仅可以分组聚集相关文件，还可以为不同用户创建独立的目录</p>
+<p><img src="/images/hierarchical_directory.png" alt="img"></p>
+</li>
+<li><p>路径名</p>
+<p>用目录树组织目录时，需用某种方法指定文件名。</p>
+<ul>
+<li><p>绝对路径：每个文件获得一个从root目录到文件的路径。比如路径/usr/ast/mailbox代表根目录有一个子目录usr，然后usr下有一个子目录ast，然后ast目录有mailbox文件。绝对路径都是从根目录“/“开始，并且是唯一的。在UNIX下路径目录分隔用”/“，windows下用”\“</p>
+</li>
+<li><p>相对路径：相对路径通常和工作目录一起使用，例如，使用绝对路径复制mailbox</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">cp /usr/ast/mailbox /usr/ast/mailbox.bak</span><br></pre></td></tr></table></figure>
+<p>如果此时在目录/usr/ast，也就是工作目录是/usr/ast，使用相对路径</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">cp mailbox mailbox.bak</span><br></pre></td></tr></table></figure>
+<p>每个目录中有两个特殊的目录”.”和”,,”，”.”代表当前目录，”..”代表父级目录</p>
+</li>
+</ul>
+</li>
+<li><p>目录主要操作</p>
+<ul>
+<li>Create：创建一个空目录，除了”.”和”..“</li>
+<li>Delete：只有空目录才能被删除</li>
+<li>Opendir：打开目录</li>
+<li>Closedir：关闭目录</li>
+<li>Readdir：返回打开目录的下一个目录项</li>
+<li>Rename：重命名</li>
+<li>Link：链接，可以使同一个文件出现在多个目录中，</li>
+<li>Unlink：解除链接，当文件只出现在一个目录中时，删除文件</li>
+</ul>
+</li>
+</ul>
+<h4 id="文件系统实现"><a href="#文件系统实现" class="headerlink" title="文件系统实现"></a>文件系统实现</h4><h5 id="文件系统布局"><a href="#文件系统布局" class="headerlink" title="文件系统布局"></a>文件系统布局</h5><p>文件系统存储在磁盘上，一个disk可以分成多个分区，每个分区都可以有自己独立的文件系统</p>
+<ul>
+<li><p>MBR：0号扇区叫作主引导记录，用于引导计算机，在MBR结尾有一个分区表，记录了磁盘分区的开始和结束位置，表中的一个记录被标记为活跃的。</p>
+</li>
+<li><p>分区：计算机引导时，读入MBR并执行，MBR程序的第一件事是确定活跃分区并读入第一个块（<strong>引导块boot block</strong>），引导块的程序将加载该分区的操作系统，每一个分区都是以boot block开头，即使没有可执行的操作系统。文件系统分区布局如下</p>
+<p><img src="/images/file_system_layout.png" alt="img"></p>
+<ul>
+<li>超级块(superblock)：包含了文件系统的所有关键参数，在计算机启动时或者文件系统第一次使用时就会被读入内存，通常里边包括代表文件系统类型的魔数，文件系统块数量和其他关键管理信息</li>
+<li>Free space mgmt：管理空闲块信息</li>
+<li>I-nodes：i节点数组，每个文件一个，包含文件的各种信息</li>
+<li>Root dir：根目录，存放了文件系统目录树的根</li>
+<li>Files and directories：所有其他目录和文件</li>
+</ul>
+</li>
+<li><p>系统引导读取文件系统流程</p>
+<p><img src="/images/load_file_system.png" alt="img"></p>
+</li>
+</ul>
+<h5 id="文件实现"><a href="#文件实现" class="headerlink" title="文件实现"></a>文件实现</h5><p>文件实现的关键问题是记录各个文件用了哪些块</p>
+<ul>
+<li><p>连续分配：最简单的方案，为各个文件分配连续的块存储，示意图如下，a是磁盘前40个块存放7个文件块的示意图</p>
+<p><img src="/images/contiguous_allocation.png" alt="img"></p>
+<ul>
+<li>优点<ol>
+<li>实现简单，只需要记录文件起始块和块数</li>
+<li>有出色的读取性能，只需要一次seek操作就可以读取整个文件，因为块连续，只需要找到文件第一个块就可以</li>
+</ol>
+</li>
+<li>缺点<ol>
+<li>随着时间推移，磁盘容易产生碎片，如上图中b，文件D和F被删除后留下了磁盘碎片，如果压缩磁盘碎片开销非常高，解决方法是利用碎片列表重用碎片，但是为了选择合适的碎片需要确定的文件最终大小，这种方式对用户很不友好，比如编辑一个文档根本不知道最终大小，只能预估。</li>
+</ol>
+</li>
+<li>适用场景：CD-ROMs，因为CD-ROMs第一次写的时候明确知道文件的大小，并且后续不会改变，比如存放电影</li>
+</ul>
+</li>
+<li><p>链式分配：每个块的第一个字都是指向下一个块的指针，其结构如图</p>
+<p><img src="/images/linked-list_allocation.png" alt="img"></p>
+<ul>
+<li>优点<ol>
+<li>不会像连续分配那样产生外部碎片</li>
+<li>目录项中只需要保存文件第一个块的地址</li>
+</ol>
+</li>
+<li>缺点、<ol>
+<li>随机读取速度慢，因为每一次都要从头开始</li>
+<li>因为块中需要空间存放指针，因为存放数据不足一个块，此时如果程序读取一个块的数据就要读两个块</li>
+</ol>
+</li>
+</ul>
+</li>
+<li><p>利用内存存放表的链式分配：链式分配的两个缺点都可以通过将文件用到的块信息单独存放在内存的方式来解决，这个内存中表叫做FAT(File Allocation Table)，这样块不用再存放指针，而且随机访问也变得容易</p>
+<p><img src="/images/memory_table_linked_allocation.png" alt="img"></p>
+<ul>
+<li>缺点：要使用这种方式，FAT需要常驻内存，假设1T的硬盘和1kb大小的块，可能需要2个多G的内存空间。由于这个缺点导致它的扩展性很差</li>
+</ul>
+</li>
+<li><p>I-nodes：为文件单独分配的一个数据结构，用来存放文件的属性和文件包含的磁盘块。一个简单的i-nodes例子</p>
+<p><img src="/images/i_node_ex.png" alt="img"></p>
+<ul>
+<li>优点：i-nodes只需要将打开的文件的nodes信息存入内存中，节省大量的空间，使得i-nodes可以支持很大的磁盘，因此其对大磁盘的扩展性较好，因为它占用内存的大小和磁盘大小无关而和打开的文件有关</li>
+<li>解决文件块数量很多的问题：如果i-node的大小是固定的，那么文件可以存放的磁盘块地址也是固定的，为了解决这个问题，当i-node结构不能存放所有块时，那么最后一个块地址不是指向文件的数据，而是指向存放额外块的块，如上图</li>
+</ul>
+</li>
+</ul>
+<h5 id="目录实现"><a href="#目录实现" class="headerlink" title="目录实现"></a>目录实现</h5><ul>
+<li><p>目录属性存储方式</p>
+<ol>
+<li>attributes存在目录项中，具有固定长度的目录项</li>
+</ol>
+<p><img src="/images/attrubutes_in_directory.png" alt="img"></p>
+<ol>
+<li><p>如果系统使用i-node，那么可以将attributes存储到i-node中，如下图，前面文件系统布局提到过i-nodes数组单独存放在分区的某个位置。因此目录项非常短，只需要存储文件名和i-node索引号</p>
+<p><img src="/images/attributes_in_i_node.png" alt="img"></p>
+</li>
+</ol>
+</li>
+<li><p>文件名实现方式</p>
+<ol>
+<li><p>定长文件名，比如分配255个字符固定长度来存放文件名，浪费空间</p>
+</li>
+<li><p>变长文件名</p>
+<ul>
+<li>行内存放文件名：目录项的开头是目录项的长度，目录项属性是定长的，文件名放在属性后，变长的，如下图。缺点是当文件删除后，目录项会产生空隙，之后的目录项可能不匹配这个空隙</li>
+</ul>
+<p><img src="/images/in_line_file_name.png" alt="img"></p>
+<ul>
+<li><p>堆内存放文件名：目录项有固定的长度，将文件名放在目录项后边的堆中，如下图。这种方式的优点是当文件被删除时，产生的目录项空隙肯定可以和下一个目录项匹配，一个优化是，堆中的文件名不需要字对齐</p>
+<p><img src="/images/in_a_heap_file_name.png" alt="img"></p>
+</li>
+</ul>
+</li>
+<li><p>加速查找</p>
+<ul>
+<li>散列查找文件名：当目录中的文件非常多时，如果线性查找必然会慢，一种解决方法是每个目录构造一个散列表，用文件名的hash值求模来映射，如果hash值相同，用链表来连接</li>
+<li>缓存文件查找结果</li>
+</ul>
+</li>
+</ol>
+</li>
+</ul>
+<h5 id="共享文件"><a href="#共享文件" class="headerlink" title="共享文件"></a>共享文件</h5><ul>
+<li><p>共享文件，如下图的C目录的一个文件也出现在了B目录下，B对共享文件的联系称为链接</p>
+<p><img src="/images/share_file_system.png" alt="img"></p>
+</li>
+<li><p>共享文件实现</p>
+<ol>
+<li>目录不包含文件的磁盘块，而是列入文件中的一个小数据结构，目录指向这个结构，UNIX就是采用这种方式，小型数据结构即i-node。i-node中需要一个计数器记录当前有多少目录项指向它，当删除时，扣减计数，直到为0时，由其所有者删除</li>
+<li>符号链接：当B链接C目录下的文件时，系统会在B目录中创建一个LINK类型的文件，只包含了共享文件的路径，当读取B目录下的共享文件时，发现类型为LINK，则拿到真实的路径读取共享文件。缺点是需要额外的开销</li>
+</ol>
+</li>
+</ul>
+<h5 id="日志结构文件系统-LFS"><a href="#日志结构文件系统-LFS" class="headerlink" title="日志结构文件系统(LFS)"></a>日志结构文件系统(LFS)</h5><ul>
+<li>基本假设<ol>
+<li>随着内存和磁盘缓存越来越大，一般程序的工作集都会保持在内存和磁盘缓存中，真正的读操作是很少的，大部分磁盘操作都是写操作</li>
+<li>磁盘的随机操作速度慢，顺序操作速度快</li>
+<li>传统的零碎写操作是非常低效的</li>
+</ol>
+</li>
+<li>LFS实现<ul>
+<li>写入流程：将磁盘抽象为一个日志，将零碎的写先缓存在内存中，当缓存达到一个段的大小时，然后作为一个段写在日志的末尾，由于是顺序写，因此可以高效的利用磁盘带宽。段中包含各种数据，比如目录块、文件数据块和i-nodes，段的开头是段内容的摘要，概述了段中包含什么内容。</li>
+<li>i-node的查找处理：因为i-nodes现在散落在各个段中，所以查找i-nodes是一个很困难的任务，因此LFS引入一个i-node的映射的map，这个map保存在磁盘上，当然也会缓存在内存中</li>
+<li>磁盘压缩：磁盘的容量是有上限的，因此需要定期清理已删除的文件。清理的过程是读入一个段，如果段中的信息已经没有使用，丢弃该内容，否则写入缓冲区等待写回下一个段，清理线程从后面清理，因此磁盘成了一个大环形缓冲区。LFS详细介绍会单独写一篇文章</li>
+</ul>
+</li>
+</ul>
+<h5 id="日志文件系统"><a href="#日志文件系统" class="headerlink" title="日志文件系统"></a>日志文件系统</h5><ul>
+<li>原理：以日志的方式记录文件系统下一步的操作，当系统崩溃时，重启读取日志完成未完成的任务。记录日志的操作必须幂等的，可以重复执行</li>
+</ul>
+<h4 id="文件系统管理和优化"><a href="#文件系统管理和优化" class="headerlink" title="文件系统管理和优化"></a>文件系统管理和优化</h4><h5 id="磁盘空间管理"><a href="#磁盘空间管理" class="headerlink" title="磁盘空间管理"></a>磁盘空间管理</h5><ul>
+<li><p>块大小</p>
+<ul>
+<li><p>选择合适的块大小需要平衡空间浪费和性能，大尺寸的块存放小文件浪费空间，小尺寸的块查找块次数多导致访问慢（SSD除外）。确定合适的尺寸需要统计文件大小分布</p>
+</li>
+<li><p>一个文件大小分布的研究，数据是1984年和2005年的大型研究型大学的计算机系、一个政治网站(www.electoral-vote.com)的文件分布数据。通过数据可以看出90%以下的文件是小于64KB的</p>
+<p><img src="/images/smaller_than_given_size.png" alt="img"></p>
+</li>
+<li><p>磁盘访问时间：<script type="math/tex">seek + rotational delay + transfer</script></p>
+</li>
+<li><p>磁盘块大小对磁盘数据率和磁盘利用率的影响，实线是磁盘利用率随着磁盘块的增大而减小；虚线代表磁盘数据率随磁盘块增大而增大</p>
+<p><img src="/images/disk_rate_space.png" alt="img"></p>
+</li>
+</ul>
+</li>
+<li><p>记录空闲块</p>
+<p>前面我们学习过空闲内存的管理，其实知识都是相通的，所以我们也很容易的想到用链表和bitmap来管理</p>
+<ul>
+<li><p>链表，如果块大小为1KB，一个块号用32位表示，则一个块可以存放256个空闲块，如果1T的硬盘，没有使用时，需要400万个块管理空闲块，虽然占用了很多空间，但是它们是存储在空闲块中，并且随着磁盘使用率增加，它们占用的空间会变小</p>
+<p><img src="/images/list_free_disk_space.png" alt="img"></p>
+<ul>
+<li><p>空闲链表管理实现过程：保持一个空闲链表块在内存中，当文件删除导致块回收时，空闲链表块增加，当空闲链表块满时写回磁盘，如下图的a-&gt;b；为了避免刚删除文件导致空闲链表写回磁盘后马上又有需要写文件导致刚写回的空闲链表块又读回内存，做了一个优化，当内存中的空闲链表块满时，不是整块写回磁盘，而是写一半，然后内存中的空闲块就只剩一半左右的空闲块，来处理临时的释放和申请空闲块，减少磁盘IO</p>
+<p><img src="/images/free_list_block_mem.png" alt="img"></p>
+</li>
+</ul>
+</li>
+<li><p>bittmap，只需要用一位就可以表示一个块是否空闲，假设磁盘大小为1T，块大小为1KB，则需要130,000 1-KB块存储</p>
+<p><img src="/images/bitmap_disk_free.png" alt="img"></p>
+</li>
+</ul>
+</li>
+<li><p>磁盘配额</p>
+<p>在多用户系统中，为了避免某一个用户占用太多的磁盘空间，通常会对用户做限额，限额主要是文件数量和磁盘块数量。</p>
+<ul>
+<li><p>实现原理：当一个文件被创建或打开时，会记录到打开的文件列表中，并且根据其属性中的所有者，加载用户配额到内存中的配额表，打开的文件列表项中记录了文件所有者配额的指针，如图</p>
+<p><img src="/images/user_disk_quota_table.png" alt="img"></p>
+</li>
+<li><p>配额表项结构</p>
+<ol>
+<li>Soft *  limit：软限制</li>
+<li>Hard *  limit：硬限制，绝对不能超过</li>
+<li>warnings left：剩余警告次数，当用户登录时，会校验软限制，如果其中一项超过，则会警告用户，每警告一次，该值减一，当减到0时，则用户被拒绝登录</li>
+</ol>
+</li>
+</ul>
+</li>
+</ul>
+<h5 id="文件系统备份"><a href="#文件系统备份" class="headerlink" title="文件系统备份"></a>文件系统备份</h5><ul>
+<li><p>备份的关键问题</p>
+<ol>
+<li>是整个文件系统备份还是部分备份</li>
+<li>对前一次备份后没有变化的文件备份是非常浪费的：增量转储<ul>
+<li>最简单的，定期与全量备份比较，备份期间变化的</li>
+<li>更好的方式，与上一次备份比较</li>
+<li>优缺点：最小化了备份时间，但是恢复时可能比较复杂</li>
+</ul>
+</li>
+<li>备份的数据通常都是很大的，因此可能会采用压缩备份的方式，但是压缩过程中产生的一个错误可能导致整个备份文件无法使用，因此使用压缩算法时要小心</li>
+<li>对活动文件系统备份是困难，因为可能导致数据不一致，虽然可能在晚上或空闲的时候备份，但是有时可能备份时间很长。Hutchinson在1999年提出基于文件系统快照的备份，记录文件系统关键数据结构的快照，然后在空闲的时候备份</li>
+<li>非技术性数据安全问题</li>
+</ol>
+</li>
+<li><p>备份策略</p>
+<ol>
+<li><p>物理转储</p>
+<ul>
+<li>原理：从磁盘块0开始，按磁盘顺序备份，直到最后一个块备份完停止</li>
+<li>优点：备份程序简单并且万无一失</li>
+<li>缺点：不能跳过指定的目录，不能增量转储</li>
+<li>细节<ol>
+<li>备份未使用的磁盘块无价值，因此可以跳过空闲块，但是这样的话，备份之后的文件需要记录磁盘块号，因为跳过空闲块后不是一一对应了</li>
+<li>磁盘坏块的转储，磁盘会检测坏块并利用备用块替换，备份程序可以利用这些信息来完成备份</li>
+</ol>
+</li>
+</ul>
+</li>
+<li><p>逻辑转储</p>
+<ul>
+<li><p>原理：根据指定的一个或多个目录递归dump基于某个时间点改变的文件</p>
+</li>
+<li><p>一个算法例子，中序遍历，阴影节点是在基于某个时间点修改过的节点，只有这些节点需要复制，还会转储通向修改文件的目录即使目录没有修改</p>
+<p><img src="/images/logical_dump_fs.png" alt="img"></p>
+</li>
+<li><p>转储执行步骤</p>
+<p><img src="/images/dump_bitmap.png" alt="img"></p>
+<ol>
+<li>从开始的目录检查所有的条目，每个被修改的文件，它的i-nodes标记在一个bitmap中，所有的目录也会被标记无论是否修改过，然后递归执行；(a)</li>
+<li>去掉Bitmap中没有修改过的文件和目录的标记;(b)</li>
+<li>以Bitmap的节点为序，扫描i-node节点并转储被标记的目录;(c)</li>
+<li>转储标记修改的文件。(d)</li>
+</ol>
+</li>
+<li><p>存在问题</p>
+<ol>
+<li>数据恢复后的空闲链表需要重建</li>
+<li>关于链接，共享文件只能恢复一次，其他目录只是指向该文件</li>
+</ol>
+</li>
+</ul>
+</li>
+</ol>
+<h5 id="文件一致性"><a href="#文件一致性" class="headerlink" title="文件一致性"></a>文件一致性</h5><p>当系统崩溃时可能导致文件系统数据一致性问题，OS通过应用程序来分析和处理这些数据一致性问题</p>
+<ul>
+<li><p>块检查</p>
+<ul>
+<li><p>检查需要的数据结构：一个表记录文件用到的块，一个表记录空闲块</p>
+</li>
+<li><p>程序执行步骤</p>
+<ol>
+<li>读出所有的i-node，从磁盘0号块开始，由i-node开始构建第一个表，如果块被使用计数加1</li>
+<li>读出空闲链表或者bitmap检查空闲的块，如果块出现在空闲链表或bitmap中第二个表中计数加1</li>
+<li>对比两个表，如果文件系统一致，那么一个块有且仅出现一次在两个表中的某一个，且必须出现</li>
+</ol>
+</li>
+<li><p>程序执行结果各种情形</p>
+<ol>
+<li><p>文件系统一致</p>
+<p><img src="/images/fs_consistent.png" alt="img"></p>
+</li>
+<li><p>块缺失：块不在任何一个表中，比如2号块，不会造成实际的损害，但是会造成空间的浪费，解决方法很简单，将它加入空闲链表</p>
+<p><img src="/images/fs_missing_block.png" alt="img"></p>
+</li>
+<li><p>空闲块重复：比如4号块，这种情况解决方法也很简单，减少空闲链表</p>
+<p><img src="/images/fs_duplicate_block.png" alt="img"></p>
+</li>
+<li><p>数据块重复：最坏的情况是一个块出现在两个或多个文件中，比如5号块，这中情形应该报告给用户，由用户处理</p>
+<p><img src="/images/fs_duplicate_data_block.png" alt="img"></p>
+</li>
+</ol>
+</li>
+</ul>
+</li>
+<li><p>文件检查</p>
+<ul>
+<li>原理：从文件目录的根目录开始递归扫描，将出现的文件和目录加入一个表中，并增加其计数，然后遍历表将i-nodes的链接数（文件创建时值为1，每一个硬链接都会加1）和表的计数对比，如果一致，则文件系统一致</li>
+<li>第一种错误：i-nodes链接数目太大<ul>
+<li>导致问题：即使所有目录中都删除了这个文件，该文件也不会释放，会继续占用空间。</li>
+<li>解决办法：修正i-nodes中的值为正确值</li>
+</ul>
+</li>
+<li>第二种错误：i-nodes链接数目太小<ul>
+<li>导致问题：可能会导致严重的后果，当有两个文件链接了文件，而i-nodes链接计数为1时，一旦一个文件链接删除，则i-nodes的链接计数将降为0，导致文件i-nodes和块被释放，如果被分配给其他文件，则此时另一个链接指向了错误的文件。</li>
+<li>解决办法：修正i-nodes中的链接数值为真实的链接数（即表中的计数）</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h5 id="文件系统性能"><a href="#文件系统性能" class="headerlink" title="文件系统性能"></a>文件系统性能</h5><ul>
+<li><p>缓存</p>
+<ul>
+<li><p>缓存结构：通过设备号和磁盘地址的hash值构建一个hash表快速查询缓存，缓存节点有三个指针，一个是用于hash冲突时，构成的一个单链表，另外两个用户构造缓存块使用顺序的双向链表</p>
+<p><img src="/images/buffer_cache_data_structures.png" alt="img"></p>
+</li>
+<li><p>缓存淘汰算法：类似内存分页系统的页面淘汰算法</p>
+</li>
+<li><p>LRU算法磁盘缓存存在的问题</p>
+<ol>
+<li><p>使用LRU缓存对块的修改会在淘汰的时候写回磁盘，但是如果修改一个i-nodes块，要从队尾到队首才写回磁盘，中间需要一段时间，而此时系统崩溃，会导致文件系统不一致</p>
+<ul>
+<li>考虑两个因素：<ol>
+<li>这个块是否会在稍后还会修改</li>
+<li>这个块是否对文件系统一致性是必不可少的</li>
+</ol>
+</li>
+<li>根据上述因素对块分类<ol>
+<li>i-nodes块</li>
+<li>间接块</li>
+<li>目录块</li>
+<li>满数据块</li>
+<li>不满数据块</li>
+</ol>
+</li>
+<li>改进：将稍后可能不在需要的块放在队首，将还在写不满的块放在队尾</li>
+</ul>
+</li>
+<li><p>除了数据块，其他块应该立刻写回磁盘</p>
+<ul>
+<li><p>解决办法</p>
+<ol>
+<li>unix提供sync系统调用，系统启动时启动一个update进程，定期调用sync系统调用强制将修改写回磁盘</li>
+<li>Windows提供FlushFileBuffers调用，Windows采用比unix更好（某种程度更坏）的策略，采用write-through caches的方式，每当缓存中的块发生改变立刻写回磁盘，和CPU高速缓存的写穿透一样。但是需要更多的磁盘IO</li>
+</ol>
+</li>
+<li><p>Windows和unix处理的区别</p>
+<ol>
+<li>如果unix没有调用sync就移除磁盘，那么数据会丢失</li>
+<li>Unix的方法在Windows中也有使用，ntfs改进（日志文件系统）了来增强其可靠性</li>
+</ol>
+</li>
+</ul>
+</li>
+</ol>
+</li>
+</ul>
+</li>
+<li><p>块预读</p>
+<ul>
+<li>原理：在块被需要使用之前先将它们载入到缓存中来提高缓存命中率</li>
+<li>缺点：这种策略只能在顺序读时能提高效率</li>
+<li>实现：需要跟踪每个文件的访问方式，通过提供一个访问模式标记来判断当前读是顺序访问还是随机访问，如果不知道是什么模式，先以顺序读的模式读，读完之后立即清除标记，如果接下来读是顺序的，那么顺序读标记就会被设置</li>
+</ul>
+</li>
+</ul>
+<h5 id="磁盘碎片整理"><a href="#磁盘碎片整理" class="headerlink" title="磁盘碎片整理"></a>磁盘碎片整理</h5><ul>
+<li>Windows下有defrag，用户应该定时运行（除了SSD）</li>
+<li>SSD碎片整理会缩短其寿命</li>
+</ul>
+<h5 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h5><p>本篇笔记主要讲述了文件系统的基础，文件和目录的数据结构和实现以及文件系统的实现。但是随着SSD的流行，文件系统也在发生变化比如F2FS，针对NAND Flash开发的文件系统。更多详细的文件系统可以参考后边的扩展列表。</p>
+<h5 id="扩展阅读"><a href="#扩展阅读" class="headerlink" title="扩展阅读"></a>扩展阅读</h5><ol>
+<li><a href="http://paperhub.s3.amazonaws.com/18e91eb4db2114a06ea614f0384f2784.pdf" target="_blank" rel="noopener">The Log-Structured Merge-Tree</a></li>
+<li><a href="https://people.eecs.berkeley.edu/~brewer/cs262/LFS.pdf" target="_blank" rel="noopener">The Design and Implementation of a Log-Structured File System</a></li>
+<li><a href="https://www.researchgate.net/publication/262177144_BTRFS_The_linux_B-tree_filesystem" target="_blank" rel="noopener">BTRFS: The Linux B-Tree Filesystem</a></li>
+<li><a href="https://www.usenix.org/system/files/conference/fast15/fast15-paper-lee.pdf" target="_blank" rel="noopener">F2FS: A New File System for Flash Storage</a></li>
+</ol>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/OS/" rel="tag"># OS</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2020/06/18/日常问题随笔-RestTemplate发送Get请求通过body传参问题/" rel="next" title="日常问题随笔-RestTemplate发送Get请求通过body传参问题">
+                <i class="fa fa-chevron-left"></i> 日常问题随笔-RestTemplate发送Get请求通过body传参问题
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Overview
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">ikan</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">22</span>
+                  <span class="site-state-item-name">posts</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">7</span>
+                  <span class="site-state-item-name">categories</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">12</span>
+                  <span class="site-state-item-name">tags</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-4"><a class="nav-link" href="#引言"><span class="nav-number">1.</span> <span class="nav-text">引言</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#文件和目录基本概念"><span class="nav-number">2.</span> <span class="nav-text">文件和目录基本概念</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#文件"><span class="nav-number">2.1.</span> <span class="nav-text">文件</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#目录"><span class="nav-number">2.2.</span> <span class="nav-text">目录</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#文件系统实现"><span class="nav-number">3.</span> <span class="nav-text">文件系统实现</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#文件系统布局"><span class="nav-number">3.1.</span> <span class="nav-text">文件系统布局</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#文件实现"><span class="nav-number">3.2.</span> <span class="nav-text">文件实现</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#目录实现"><span class="nav-number">3.3.</span> <span class="nav-text">目录实现</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#共享文件"><span class="nav-number">3.4.</span> <span class="nav-text">共享文件</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#日志结构文件系统-LFS"><span class="nav-number">3.5.</span> <span class="nav-text">日志结构文件系统(LFS)</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#日志文件系统"><span class="nav-number">3.6.</span> <span class="nav-text">日志文件系统</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#文件系统管理和优化"><span class="nav-number">4.</span> <span class="nav-text">文件系统管理和优化</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#磁盘空间管理"><span class="nav-number">4.1.</span> <span class="nav-text">磁盘空间管理</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#文件系统备份"><span class="nav-number">4.2.</span> <span class="nav-text">文件系统备份</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#文件一致性"><span class="nav-number">4.3.</span> <span class="nav-text">文件一致性</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#文件系统性能"><span class="nav-number">4.4.</span> <span class="nav-text">文件系统性能</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#磁盘碎片整理"><span class="nav-number">4.5.</span> <span class="nav-text">磁盘碎片整理</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#总结"><span class="nav-number">4.6.</span> <span class="nav-text">总结</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#扩展阅读"><span class="nav-number">4.7.</span> <span class="nav-text">扩展阅读</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">ikan</span>
+
+  
+</div>
+
+
+  <div class="powered-by">Powered by <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a></div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">Theme &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+  
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+        tex2jax: {
+          inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+          processEscapes: true,
+          skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+        }
+      });
+    </script>
+
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for (i=0; i < all.length; i += 1) {
+          all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+      });
+    </script>
+    <script type="text/javascript" src="//cdn.bootcss.com/mathjax/2.7.1/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+  
+
+
+  
+
+  
+
+</body>
+</html>
