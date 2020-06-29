@@ -1,0 +1,828 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="OS," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="引言过去几十年CPU速度的增长是巨大的，但是磁盘的访问速度却增长较慢。内存近些年发展也很快，可以提供较大的空间存储程序的工作集，因此磁盘传输主要是被写操作支配。因此如何提升写效率是有效利用磁盘的关键。 日志结构文件系统是用顺序写，因为省去了绝大部分seek操作，因此大大提升了写的性能。还有一个好处就是系统崩溃恢复，日志结构文件系统只需要检查最近的部分日志 日志结构文件系统实现基本假设 大部分的读请">
+<meta name="keywords" content="OS">
+<meta property="og:type" content="article">
+<meta property="og:title" content="操作系统-番外-日志结构文件系统LFS">
+<meta property="og:url" content="http://yoursite.com/2020/06/26/操作系统-番外-日志结构文件系统LFS/index.html">
+<meta property="og:site_name" content="IkanのBolg">
+<meta property="og:description" content="引言过去几十年CPU速度的增长是巨大的，但是磁盘的访问速度却增长较慢。内存近些年发展也很快，可以提供较大的空间存储程序的工作集，因此磁盘传输主要是被写操作支配。因此如何提升写效率是有效利用磁盘的关键。 日志结构文件系统是用顺序写，因为省去了绝大部分seek操作，因此大大提升了写的性能。还有一个好处就是系统崩溃恢复，日志结构文件系统只需要检查最近的部分日志 日志结构文件系统实现基本假设 大部分的读请">
+<meta property="og:locale" content="default">
+<meta property="og:image" content="http://yoursite.com/images/lfs_segment_structure.png">
+<meta property="og:image" content="http://yoursite.com/images/imap_store_ex.png">
+<meta property="og:image" content="http://yoursite.com/images/checkpoint_region_ex.png">
+<meta property="og:image" content="http://yoursite.com/images/lfs_read_process.png">
+<meta property="og:image" content="http://yoursite.com/images/lfs_directory_ex.png">
+<meta property="og:image" content="http://yoursite.com/images/lfs_both_garbage.png">
+<meta property="og:image" content="http://yoursite.com/images/lfs_inode_garbage.png">
+<meta property="og:image" content="http://yoursite.com/images/lfs_garbage_process.png">
+<meta property="og:image" content="http://yoursite.com/images/segment_summary.png">
+<meta property="og:updated_time" content="2020-06-29T14:28:59.385Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="操作系统-番外-日志结构文件系统LFS">
+<meta name="twitter:description" content="引言过去几十年CPU速度的增长是巨大的，但是磁盘的访问速度却增长较慢。内存近些年发展也很快，可以提供较大的空间存储程序的工作集，因此磁盘传输主要是被写操作支配。因此如何提升写效率是有效利用磁盘的关键。 日志结构文件系统是用顺序写，因为省去了绝大部分seek操作，因此大大提升了写的性能。还有一个好处就是系统崩溃恢复，日志结构文件系统只需要检查最近的部分日志 日志结构文件系统实现基本假设 大部分的读请">
+<meta name="twitter:image" content="http://yoursite.com/images/lfs_segment_structure.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: 'Author'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2020/06/26/操作系统-番外-日志结构文件系统LFS/"/>
+
+
+
+
+
+  <title>操作系统-番外-日志结构文件系统LFS | IkanのBolg</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="default">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">IkanのBolg</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">只想安安静静撸代码</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            Home
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            Tags
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            Categories
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            Archives
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2020/06/26/操作系统-番外-日志结构文件系统LFS/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="ikan">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="IkanのBolg">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">操作系统-番外-日志结构文件系统LFS</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2020-06-26T18:34:23+08:00">
+                2020-06-26
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/OS学习笔记/" itemprop="url" rel="index">
+                    <span itemprop="name">OS学习笔记</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h4 id="引言"><a href="#引言" class="headerlink" title="引言"></a>引言</h4><p>过去几十年CPU速度的增长是巨大的，但是磁盘的访问速度却增长较慢。内存近些年发展也很快，可以提供较大的空间存储程序的工作集，因此磁盘传输主要是被写操作支配。因此如何提升写效率是有效利用磁盘的关键。</p>
+<p><strong>日志结构文件系统</strong>是用顺序写，因为省去了绝大部分seek操作，因此大大提升了写的性能。还有一个好处就是系统崩溃恢复，日志结构文件系统只需要检查最近的部分日志</p>
+<h4 id="日志结构文件系统实现"><a href="#日志结构文件系统实现" class="headerlink" title="日志结构文件系统实现"></a>日志结构文件系统实现</h4><h5 id="基本假设"><a href="#基本假设" class="headerlink" title="基本假设"></a>基本假设</h5><ul>
+<li>大部分的读请求都从缓存中读取</li>
+<li>大部分磁盘访问都是写请求</li>
+</ul>
+<h5 id="段概念"><a href="#段概念" class="headerlink" title="段概念"></a>段概念</h5><ul>
+<li><p>段定义：虽然磁盘顺序写效率高，考虑一下，如果有一个文件执行写操作就写，但是如果中间间隔一会儿写另一个文件，那么中间磁盘已经旋转。要想获得高效率，必须连续顺序写，因此需要在内存中缓存修改的块，直到达到一定数量的时候执行一次写操作，这个大块叫做<strong>段</strong></p>
+</li>
+<li><p>段布局：段中不仅包含了数据块，也包括i-node块，段的开头还包括一个段summary块，包含了垃圾回收需要的关键信息，后边详细解释</p>
+<p><img src="/images/lfs_segment_structure.png" alt="img"></p>
+<a id="more"></a>
+</li>
+<li><p>缓存大小：<script type="math/tex">T_{position}</script>代表写操作前旋转和寻道开销时间，磁盘传输速率<script type="math/tex">R_{peak}</script>MB/s，因此传输<script type="math/tex">D</script>MB需要的时间<script type="math/tex">T_{write}</script></p>
+<script type="math/tex; mode=display">T_{write} = T_{position} + \frac{D}{R_{peak}}</script><p>写效率</p>
+<script type="math/tex; mode=display">R_{effective} = \frac{D}{T_{write}} = \frac{D}{T_{position} + \frac{D}{R_{peak}}}</script><p>写效率是以传输速率为基准，用F(0&lt;F&lt;1)表示</p>
+<script type="math/tex; mode=display">R_{effective} = \frac{D}{T_{position} + \frac{D}{R_{peak}}} = F \times R_{peak}</script><script type="math/tex; mode=display">D = F \times R_{peak} \times (T_{position} + \frac{D}{R_{peak}})</script><p>变换得到</p>
+<script type="math/tex; mode=display">D = \frac{F}{1-F} \times R_{peak} \times T_{position}</script><p>假设要得到90%的效率，假设<script type="math/tex">T_{position}</script>为0.01秒，磁盘传输速率为100MB/s，因此计算D为9MB，因此缓存大小为9MB</p>
+</li>
+</ul>
+<h5 id="I-node查找"><a href="#I-node查找" class="headerlink" title="I-node查找"></a>I-node查找</h5><ul>
+<li><p>i-node查找问题：因为i-node信息现在存放在各个段中，这就引入了一个新文件，如何查找i-node，如果遍历查找肯定不行效率太低。引入了一个新的结构<strong>imap</strong>，imap是一个简单的数组结构index为k的元素存放着第k个i-node在磁盘的地址，imap信息常驻在内存中，因此查询i-node的位置是很快的</p>
+</li>
+<li><p>imap存储问题：imap也是需要存储的，这里假设在磁盘固定位置存储imap，因为imap频繁的被修改，因此会导致频繁的写回磁盘，每当文件修改时，imap也需要随后更新，这会导致额外的seek开销。所以LFS将imap信息和i-node一样存在段中，存在i-node右边，如下图</p>
+<p><img src="/images/imap_store_ex.png" alt="img"></p>
+</li>
+<li><p>imap查找问题：imap存储在段中，也出现了i-node查找一样的问题，为了解决这个问题，LFS用一个固定的空间来存放指向imap地址的区域叫作checkpoint region (CR)，CR存放了指向最新的imap地址的指针，在查找imap之前会首先加载CR，CR通常是周期性的更新，并不会某一个imap更新就立马写回磁盘</p>
+<p><img src="/images/checkpoint_region_ex.png" alt="img"></p>
+</li>
+<li><p>read操作流程，假设此时内存还是空的</p>
+<p><img src="/images/lfs_read_process.png" alt="img"></p>
+</li>
+</ul>
+<h5 id="目录实现"><a href="#目录实现" class="headerlink" title="目录实现"></a>目录实现</h5><ul>
+<li><p>目录结构：一个目录名映射i-node编号</p>
+</li>
+<li><p>目录存储问题：和i-node一样存在段中，其索引存在段中imap结构中并且缓存在内存中，其结构例子如下，文件foo在目录dir中，通过dir在imap找到存储dir目录的i-node例子中A3，然后在i-nodeA3中找到目录数据在块A2，在A2中查找到foo文件对应k号i-node，然后在imap中查找到k号i-node在A1，最终找到文件foo的数据在块A0中</p>
+<p><img src="/images/lfs_directory_ex.png" alt="img"></p>
+</li>
+</ul>
+<h5 id="垃圾回收"><a href="#垃圾回收" class="headerlink" title="垃圾回收"></a>垃圾回收</h5><ul>
+<li><p>垃圾产生的原因</p>
+<ol>
+<li><p>文件更新导致的老的数据块和i-node块无效，如下图</p>
+<p><img src="/images/lfs_both_garbage.png" alt="img"></p>
+</li>
+<li><p>文件增加导致的老的i-node块无效，如下图</p>
+<p><img src="/images/lfs_inode_garbage.png" alt="img"></p>
+</li>
+</ol>
+</li>
+<li><p>垃圾回收流程</p>
+<p>读出旧的段，将段中有效的块复制到内存缓存中，当量达到一个段大小时，像普通修改文件那样以日志方式写入磁盘，旧的段便释放了，下图大概描述了垃圾回收的流程，假设读入segment 1和segment 2然后整理出有效的块并刚好组成一个段，写入磁盘，因此清理点就后移2个段，而写入点后移一个，当写入点达到磁盘最大值时，指针又移到磁盘开始位置，因此在LFS文件系统中，磁盘被抽象成一个大环形数组结构</p>
+<p><img src="/images/lfs_garbage_process.png" alt="img"></p>
+</li>
+<li><p>如何分辨垃圾</p>
+<p>前边我们提到过段summary块，这个块主要记录了段内块的摘要信息，每个块所属的i-node和offset。如何确定哪些块是垃圾呢？我们加载段到内存，然后根据段summary信息，查看一个块所属的i-node号，然后从imap中查询最新的i-node存放地址，加载到内存中然后找到offset对应的地址是否为段中块的地址，如果是，那么这个块是活跃的；如果不是那么这个块是垃圾</p>
+<p><img src="/images/segment_summary.png" alt="img"></p>
+</li>
+<li><p>何时清理</p>
+<ol>
+<li>定期</li>
+<li>空闲时</li>
+<li>磁盘满了，不得不清理</li>
+</ol>
+</li>
+</ul>
+<h5 id="崩溃恢复"><a href="#崩溃恢复" class="headerlink" title="崩溃恢复"></a>崩溃恢复</h5><ul>
+<li><p>保证CR原子写：有两个CR，分布在磁盘两端，交替写入，写入时会先写一个头，里边包含一个时间戳，然后开始写CR body，当写完最后一个块时再写入时间戳，如果是原子写入的，那么两个时间戳是一致的</p>
+</li>
+<li><p>第一种场景：因为CR是周期性写入，所以可能丢失数据，这种场景解决方式很简单，丢弃最后一个CR后的更新</p>
+</li>
+<li>第二种场景：CR的写入不是原子的，解决方式如上述的保证CR原子写的基础上，当系统崩溃时，查找最新一个时间戳一致的CR</li>
+</ul>
+<h4 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h4><p>LFS是一个优秀的文件系统，它的思想是先进的，并且和现在正逐渐流行的SSD不谋而合。并且它的思想影响非常广，LSM是一个很多存储引擎广泛使用的文件结构，比如BigTable、HBase、Cassandra、LevelDB、SQLite、mangodb3.0的Wired Tiger存储引擎。并且还影响了很多后续的文件系统，比如号称下一代Linux文件系统btrfs、针对NAND SSD的文件系统F2FS，其基础都是LFS，学习LFS对于理解这些很有帮助</p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/OS/" rel="tag"># OS</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2020/06/20/操作系统笔记-9-文件系统/" rel="next" title="操作系统笔记-9-文件系统">
+                <i class="fa fa-chevron-left"></i> 操作系统笔记-9-文件系统
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Overview
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">ikan</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">23</span>
+                  <span class="site-state-item-name">posts</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">7</span>
+                  <span class="site-state-item-name">categories</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">12</span>
+                  <span class="site-state-item-name">tags</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-4"><a class="nav-link" href="#引言"><span class="nav-number">1.</span> <span class="nav-text">引言</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#日志结构文件系统实现"><span class="nav-number">2.</span> <span class="nav-text">日志结构文件系统实现</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#基本假设"><span class="nav-number">2.1.</span> <span class="nav-text">基本假设</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#段概念"><span class="nav-number">2.2.</span> <span class="nav-text">段概念</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#I-node查找"><span class="nav-number">2.3.</span> <span class="nav-text">I-node查找</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#目录实现"><span class="nav-number">2.4.</span> <span class="nav-text">目录实现</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#垃圾回收"><span class="nav-number">2.5.</span> <span class="nav-text">垃圾回收</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#崩溃恢复"><span class="nav-number">2.6.</span> <span class="nav-text">崩溃恢复</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#总结"><span class="nav-number">3.</span> <span class="nav-text">总结</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">ikan</span>
+
+  
+</div>
+
+
+  <div class="powered-by">Powered by <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a></div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">Theme &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+  
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+        tex2jax: {
+          inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+          processEscapes: true,
+          skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+        }
+      });
+    </script>
+
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for (i=0; i < all.length; i += 1) {
+          all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+      });
+    </script>
+    <script type="text/javascript" src="//cdn.bootcss.com/mathjax/2.7.1/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+  
+
+
+  
+
+  
+
+</body>
+</html>
