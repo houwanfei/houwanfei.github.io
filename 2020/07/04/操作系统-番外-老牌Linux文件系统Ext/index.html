@@ -1,0 +1,930 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="OS," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="引言和标题一样，ext文件系统是一个老牌的Linux的文件系统，是Linux的第一个文件系统。虽然业界将Ext文件系统看成是一个过度用的文件系统，但是现在的Ext4依然有很强的生命力。从ext2-ext3-ext4，文件系统的磁盘布局没有发生太大的变化，从ext2到ext3，主要是增强了可用性、数据完整性、速度、易于迁移等功能；ext3到ext4就不仅仅是功能增强，它修改了某一些重要的数据结构，并">
+<meta name="keywords" content="OS">
+<meta property="og:type" content="article">
+<meta property="og:title" content="操作系统-番外-老牌Linux文件系统Ext">
+<meta property="og:url" content="http://yoursite.com/2020/07/04/操作系统-番外-老牌Linux文件系统Ext/index.html">
+<meta property="og:site_name" content="IkanのBolg">
+<meta property="og:description" content="引言和标题一样，ext文件系统是一个老牌的Linux的文件系统，是Linux的第一个文件系统。虽然业界将Ext文件系统看成是一个过度用的文件系统，但是现在的Ext4依然有很强的生命力。从ext2-ext3-ext4，文件系统的磁盘布局没有发生太大的变化，从ext2到ext3，主要是增强了可用性、数据完整性、速度、易于迁移等功能；ext3到ext4就不仅仅是功能增强，它修改了某一些重要的数据结构，并">
+<meta property="og:locale" content="default">
+<meta property="og:image" content="http://yoursite.com/images/ext2_layout.png">
+<meta property="og:image" content="http://yoursite.com/images/super_block_ex1.png">
+<meta property="og:image" content="http://yoursite.com/images/super_block_ex2.png">
+<meta property="og:image" content="http://yoursite.com/images/gdt_no_meta_group.png">
+<meta property="og:image" content="http://yoursite.com/images/meta_block_group.png">
+<meta property="og:image" content="http://yoursite.com/images/flexible_block_group.png">
+<meta property="og:image" content="http://yoursite.com/images/flexiable_size.png">
+<meta property="og:image" content="http://yoursite.com/images/flexiable_ex1.png">
+<meta property="og:image" content="http://yoursite.com/images/flexiable_ex2.png">
+<meta property="og:image" content="http://yoursite.com/images/ext2_3_data_block_map.png">
+<meta property="og:image" content="http://yoursite.com/images/ext4_extend_tree.png">
+<meta property="og:image" content="http://yoursite.com/images/ext4_extent_header.png">
+<meta property="og:image" content="http://yoursite.com/images/ext4_extent_idx.png">
+<meta property="og:image" content="http://yoursite.com/images/ext4_extent.png">
+<meta property="og:image" content="http://yoursite.com/images/classic_dir_entity.png">
+<meta property="og:image" content="http://yoursite.com/images/hash_tree_ex1.png">
+<meta property="og:image" content="http://yoursite.com/images/htree_dir_ex2.png">
+<meta property="og:image" content="http://yoursite.com/images/jbd2_ex.png">
+<meta property="og:updated_time" content="2020-07-09T15:03:29.706Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="操作系统-番外-老牌Linux文件系统Ext">
+<meta name="twitter:description" content="引言和标题一样，ext文件系统是一个老牌的Linux的文件系统，是Linux的第一个文件系统。虽然业界将Ext文件系统看成是一个过度用的文件系统，但是现在的Ext4依然有很强的生命力。从ext2-ext3-ext4，文件系统的磁盘布局没有发生太大的变化，从ext2到ext3，主要是增强了可用性、数据完整性、速度、易于迁移等功能；ext3到ext4就不仅仅是功能增强，它修改了某一些重要的数据结构，并">
+<meta name="twitter:image" content="http://yoursite.com/images/ext2_layout.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: 'Author'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2020/07/04/操作系统-番外-老牌Linux文件系统Ext/"/>
+
+
+
+
+
+  <title>操作系统-番外-老牌Linux文件系统Ext | IkanのBolg</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="default">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">IkanのBolg</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">只想安安静静撸代码</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            Home
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            Tags
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            Categories
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            Archives
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2020/07/04/操作系统-番外-老牌Linux文件系统Ext/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="ikan">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="IkanのBolg">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">操作系统-番外-老牌Linux文件系统Ext</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2020-07-04T19:11:00+08:00">
+                2020-07-04
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/OS学习笔记/" itemprop="url" rel="index">
+                    <span itemprop="name">OS学习笔记</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h4 id="引言"><a href="#引言" class="headerlink" title="引言"></a>引言</h4><p>和标题一样，ext文件系统是一个老牌的Linux的文件系统，是Linux的第一个文件系统。虽然业界将Ext文件系统看成是一个过度用的文件系统，但是现在的Ext4依然有很强的生命力。从ext2-ext3-ext4，文件系统的磁盘布局没有发生太大的变化，从ext2到ext3，主要是增强了可用性、数据完整性、速度、易于迁移等功能；ext3到ext4就不仅仅是功能增强，它修改了某一些重要的数据结构，并且在对大文件的支持上做了更多的优化改进</p>
+<h4 id="Ext文件系统磁盘布局"><a href="#Ext文件系统磁盘布局" class="headerlink" title="Ext文件系统磁盘布局"></a>Ext文件系统磁盘布局</h4><h5 id="Ext2文件系统磁盘布局"><a href="#Ext2文件系统磁盘布局" class="headerlink" title="Ext2文件系统磁盘布局"></a>Ext2文件系统磁盘布局</h5><p>ext文件系统从ext2-ext4磁盘布局并没有太大的改动，如下图</p>
+<p><img src="/images/ext2_layout.png" alt="img"></p>
+<a id="more"></a>
+<h5 id="Block-Group"><a href="#Block-Group" class="headerlink" title="Block Group"></a>Block Group</h5><p>ext文件系统将文件系统分块组管理，在写文件时，尽可能保证文件集中在块组内，减少读取时磁盘旋转的开销。块组的结构如上图，这里要注意，块组0的结构和其他组有点区别，块组0开始位置多了一个固定1024byte用于安装x86引导扇区以及其他信息。</p>
+<ul>
+<li><p>super block</p>
+<ul>
+<li><p>定义：块组0的super block是从1024byte偏移量开始的，如果每个group都备份super block，可能造成一些空间浪费，因此提供了sparse_super的设置，如果设置了该sparse_super，那么只有group 0，3、5、7的幂组才会备份super block</p>
+</li>
+<li><p>可能理论优点抽象，一个简单ext4的例子，是我Linux系统引导分区的例子，首先我们看到并不是所有的组上都有super block的备份，并且备份分别在 0,1,3,5,7,9,25,49，正如上边描述的，开启了sparse_super后，只有0号和3,5,7的幂的组才会备份</p>
+<p><img src="/images/super_block_ex1.png" alt="img"></p>
+<p>下边是7和9组，其他的不列举，如果有兴趣可以用dumpe2fs工具看一下自己的电脑，尽量挑小的分区看，分区太大，数据太多</p>
+<p><img src="/images/super_block_ex2.png" alt="img"></p>
+</li>
+</ul>
+</li>
+<li><p>GDT（块组描述符表）</p>
+<ul>
+<li><p>定义：记录块组的信息，super block和GDT从组1-组n都是组0的备份，因为super block和GDT是非常重要的信息，为了安全，需要备份</p>
+</li>
+<li><p>GDT的局限，假设一个组描述符占用64byte，块大小为4KB，那么一个组全部存放GDT能存放</p>
+<script type="math/tex; mode=display">C_{GDT} = 2^{27} \div 2^{6} = 2^{21}</script><p>因此如果块为4KB，那么一个组最多存放GDT为2^{21}个，那么可以表示的最大文件系统大小为组容量乘组数</p>
+<script type="math/tex; mode=display">C_{Disk} = 2^{27} × 2^{21} = 2^{48} = 256PB</script><p>通过上面的简单计算，即使第一个组全部用于存放GDT，文件系统大小无法突破256PB的极限。并且，文件系统为了安全，所有组的GDT会随着super block备份，也会消耗很大的文件系统空间，即使设置了sparse_super设置也会</p>
+</li>
+</ul>
+</li>
+<li><p>block bitmap：记录块组内块的使用情况，同时也限制了块组的块数量，所以块组的最大大小为</p>
+<script type="math/tex; mode=display">BG\_B\_SIZE = B\_SIZE * 8</script><p>所以一个4KB块的文件系统，一个组最多可以包含$2^{12}*2^{3} = 2^{15} = 32768$个块，因此块的大小</p>
+<script type="math/tex; mode=display">BG\_SIZE = B\_SIZE * BG\_B\_SIZE</script><p>依然假设文件系统为4KB的块，那么一个块组的大小为$2^{15} * 2^{12} = 2^{27}$byte，为128MB</p>
+</li>
+<li><p>inode bitmap：记录哪些项在inode table中使用</p>
+</li>
+<li><p>特殊inode</p>
+</li>
+</ul>
+<div class="table-container">
+<table>
+<thead>
+<tr>
+<th><strong>inode</strong></th>
+<th><strong>用途</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>0</td>
+<td>不存在0号inode</td>
+</tr>
+<tr>
+<td>1</td>
+<td>损坏数据块链表</td>
+</tr>
+<tr>
+<td>2</td>
+<td>根目录</td>
+</tr>
+<tr>
+<td>3</td>
+<td>ACL索引</td>
+</tr>
+<tr>
+<td>4</td>
+<td>ACL数据</td>
+</tr>
+<tr>
+<td>5</td>
+<td>引导装载程序</td>
+</tr>
+<tr>
+<td>6</td>
+<td>未删除的目录</td>
+</tr>
+<tr>
+<td>7</td>
+<td>预留的块组描述符inode</td>
+</tr>
+<tr>
+<td>8</td>
+<td>日志inode</td>
+</tr>
+<tr>
+<td>9</td>
+<td>排除在外的inode，用于快照</td>
+</tr>
+<tr>
+<td>10</td>
+<td>备份inode，用于一些非上游特性</td>
+</tr>
+<tr>
+<td>11</td>
+<td>第一个非预留的inode，通常是lost + found目录</td>
+</tr>
+</tbody>
+</table>
+</div>
+<h4 id="改进"><a href="#改进" class="headerlink" title="改进"></a>改进</h4><h5 id="Meta-Block-Group-元块组"><a href="#Meta-Block-Group-元块组" class="headerlink" title="Meta Block Group(元块组)"></a>Meta Block Group(元块组)</h5><ul>
+<li><p>定义：改进GDT，上边描述了ext2中GDT的局限，在ext3中引入了Meta Block Group，其固定用一个块来存放GDT，用于记录连续的组组成的一个元块组，GDT不在跟随super block一起备份，而是在自己元块组内备份，分别存放在元块组的1,2号组和最后一个组上。元块组的大小为一个块能存放的组描述数数目</p>
+<script type="math/tex; mode=display">C_{MBG} = B\_SIZE \div GDT\_SIZE</script><p>假设块组为4KB，组描述符为64byte，那么元块组的大小为$2^{12} \div 2^6 = 2^6$，为64个</p>
+</li>
+<li><p>画了一个简单的示意图，凑合着看</p>
+<p>没有使用meta block group的文件系统组分布示意图</p>
+<p><img src="/images/gdt_no_meta_group.png" alt="img"></p>
+<p>使用meta block group的文件系统组分布示意图，</p>
+<p><img src="/images/meta_block_group.png" alt="img"></p>
+</li>
+</ul>
+<h5 id="Flexible-Block-Groups"><a href="#Flexible-Block-Groups" class="headerlink" title="Flexible Block Groups"></a>Flexible Block Groups</h5><ul>
+<li><p>定义：我们知道，机械硬盘每次读取块前要先寻道，相对读取数据，寻道开销是非常高的，而block bitmap、i-node table、i-node table这些数据需要频繁加载，它们分散在各个组上存放就会导致频繁的寻道。为了减少加载block bitmap、i-node table、i-node table时的寻道开销和大文件的连续块分配，ext4引入了Flexible Block Groups，它将一定数量的物理块组连起来组成一个逻辑块组，block bitmap、i-node table、i-node table按顺序存储在逻辑块组的第一个块组上</p>
+</li>
+<li><p>简单的示意图，注意该图只是一个简单示意图，一个方块并不代表一个块，block bitmip、i-node bitmap依然是一个组一个块，i-node table依顺序占用多个块</p>
+<p><img src="/images/flexible_block_group.png" alt="img"></p>
+</li>
+<li><p>一个简单的例子，还是以我操作系统为例，先看一下，flexible block group size</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo dumpe2fs /dev/sda10 |grep 'Flex'</span><br></pre></td></tr></table></figure>
+<p>看到组大小16</p>
+<p><img src="/images/flexiable_size.png" alt="img"></p>
+<p>然后来看一下组的block bitmap 、i-node bitmap、i-node table分布，可以看到从0-7block bitmap 、i-node bitmap、i-node table都是依次连续的，当然一直到15都是连续的，从第16组开始会变化</p>
+<p><img src="/images/flexiable_ex1.png" alt="img"></p>
+<p>再来看一下第16组，是从524288块开始的，它们属于另一个Flexible Block Groups，和上图中flex block group size大小吻合</p>
+<p><img src="/images/flexiable_ex2.png" alt="img"></p>
+</li>
+</ul>
+<h5 id="Extent-树"><a href="#Extent-树" class="headerlink" title="Extent 树"></a>Extent 树</h5><ul>
+<li><p>定义：ext2/3时，i-node中指向文件数据块采用直接/间接块地址，如下图，0-11是直接地址，之后的块分为3种，第一种是一级间接地址，第二种是二级，第三种三级，随着间接级数变大，指向的数据块越多，但是这种表示方法有一个缺点，那就是如果数据块连续，依然会每个数据块都存储一个地址，很浪费空间</p>
+<p><img src="/images/ext2_3_data_block_map.png" alt="img"></p>
+<p>ext4采用Extent树优化了这种情况，它的核心原理是连续块只存储起始块和连续的块数，每个节点都是以ext4_extent_header(12byte)结构开始，然后如果是内节点，则后边是ext4_extent_idx的项其大小为12byte；如果是叶子节点，则后边是ext4_extent，其大小也是12byte。</p>
+<p><img src="/images/ext4_extend_tree.png" alt="img"></p>
+<ul>
+<li><p>ext4_extent_header结构</p>
+<p><img src="/images/ext4_extent_header.png" alt="img"></p>
+</li>
+<li><p>ext4_extent_idx结构</p>
+<p><img src="/images/ext4_extent_idx.png" alt="img"></p>
+</li>
+<li><p>ext4_extent结构，ee_block该连续块段的第一个块号，ee_len连续块数量，ee_start_hi是该范围段起始指针的高16位，ee_start_lo是该范围段的起始指针低32位</p>
+<p><img src="/images/ext4_extent.png" alt="img"></p>
+</li>
+</ul>
+</li>
+</ul>
+<h5 id="目录项"><a href="#目录项" class="headerlink" title="目录项"></a>目录项</h5><ul>
+<li><p>线性(传统)目录，示意图如下，ext4默认是ext4_dir_entry_2，ext4_dir_entry_2和ext4_dir_entry的区别主要是因为文件名不超过255，所以不需要16位存储文件名，因此抽出8位用来存储文件类型，inode 2是系统保留的inode号代表根目录，该图是简单的根目录下的文件目录项示意图，可以看到在块内查找一个文件几乎要遍历目录项数组对比文件名</p>
+<p><img src="/images/classic_dir_entity.png" alt="img"></p>
+</li>
+<li><p>Hash树目录，由于传统目录查找文件几乎是遍历查找，出于性能的考虑，ext3引入了文件名hash值的B树来提升查找文件的速度。其结构如下图，树的root通常保存在文件的第一个数据块中，这里有一个地方要<strong>注意</strong>dx_entry结构中的block号是文件内部的块号，代表是文件的第几个数据块，并非文件系统的块号。</p>
+<p><img src="/images/hash_tree_ex1.png" alt="img"></p>
+<p>如果dx_root.info.indirect_levels为非零，则htree有两层，根节点并非指向存放ext4_dir_entry_2的叶子节点，而是指向内部节点，其示意图如下，此时根节点中的hash值为其指向内部节点中hash值的最小值</p>
+<p><img src="/images/htree_dir_ex2.png" alt="img"></p>
+</li>
+</ul>
+<h5 id="jbd2日志"><a href="#jbd2日志" class="headerlink" title="jbd2日志"></a>jbd2日志</h5><ul>
+<li><p>jdb2流程简单示意图，写文件时，先写到磁盘缓冲区，然后写到journal（是一个文件系统保留区域，inode为8，大小默认128MB），因为是顺序写，速度很快。当写入完成时，写入一个提交记录，然后刷新磁盘缓冲区。之后文件系统会将journal的提交记录在擦除前写入最终的位置，这里的写就可能会比较慢，因为数据可能需要写到不同块，需要多个寻道开销</p>
+<p><img src="/images/jbd2_ex.png" alt="img"></p>
+</li>
+<li><p>jdb2日志模式</p>
+<ol>
+<li>ordered(默认级别)：只将文件系统元数据写入journal，当系统崩溃时，不能保证任何一致性状态</li>
+<li>journal：所有数据和元数据都会写入到journal，该模式比较慢，但是很安全</li>
+<li>writeback：在元数据通过journal写入到磁盘最终位置前，脏数据不能刷新到磁盘</li>
+</ol>
+</li>
+<li><p>崩溃恢复：当系统崩溃重启时，文件系统利用journal的最近的提交记录重放写过程来恢复数据，journal详细的数据结构参考<a href="https://www.kernel.org/doc/html/latest/filesystems/ext4/globals.html#journal-jbd2" target="_blank" rel="noopener">jdb2</a></p>
+</li>
+</ul>
+<h5 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h5><ul>
+<li><a href="https://www.kernel.org/doc/html/latest/filesystems/ext4/about.html" target="_blank" rel="noopener">Linux ext4 官方文档</a></li>
+</ul>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/OS/" rel="tag"># OS</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2020/07/02/操作系统-番外-基于NAND存储设备文件系统F2FS/" rel="next" title="操作系统-番外-基于NAND存储设备文件系统F2FS">
+                <i class="fa fa-chevron-left"></i> 操作系统-番外-基于NAND存储设备文件系统F2FS
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Overview
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">ikan</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">25</span>
+                  <span class="site-state-item-name">posts</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">7</span>
+                  <span class="site-state-item-name">categories</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">12</span>
+                  <span class="site-state-item-name">tags</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-4"><a class="nav-link" href="#引言"><span class="nav-number">1.</span> <span class="nav-text">引言</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Ext文件系统磁盘布局"><span class="nav-number">2.</span> <span class="nav-text">Ext文件系统磁盘布局</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#Ext2文件系统磁盘布局"><span class="nav-number">2.1.</span> <span class="nav-text">Ext2文件系统磁盘布局</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#Block-Group"><span class="nav-number">2.2.</span> <span class="nav-text">Block Group</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#改进"><span class="nav-number">3.</span> <span class="nav-text">改进</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#Meta-Block-Group-元块组"><span class="nav-number">3.1.</span> <span class="nav-text">Meta Block Group(元块组)</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#Flexible-Block-Groups"><span class="nav-number">3.2.</span> <span class="nav-text">Flexible Block Groups</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#Extent-树"><span class="nav-number">3.3.</span> <span class="nav-text">Extent 树</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#目录项"><span class="nav-number">3.4.</span> <span class="nav-text">目录项</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#jbd2日志"><span class="nav-number">3.5.</span> <span class="nav-text">jbd2日志</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#参考"><span class="nav-number">3.6.</span> <span class="nav-text">参考</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">ikan</span>
+
+  
+</div>
+
+
+  <div class="powered-by">Powered by <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a></div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">Theme &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+  
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+        tex2jax: {
+          inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+          processEscapes: true,
+          skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+        }
+      });
+    </script>
+
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for (i=0; i < all.length; i += 1) {
+          all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+      });
+    </script>
+    <script type="text/javascript" src="//cdn.bootcss.com/mathjax/2.7.1/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+  
+
+
+  
+
+  
+
+</body>
+</html>
