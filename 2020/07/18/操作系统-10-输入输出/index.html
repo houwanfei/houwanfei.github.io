@@ -1,0 +1,943 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="OS," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="引言上一篇学习了文件系统的原理，我们知道了操作系统是如何管理文件的，但是却没有学习磁盘是如何处理操作系统发出的读写操作，这一篇我们要学习操作系统是如果实现I/O和管理I/O的。 什么是I/OI/O包含两部分，I/O设备和I/O接口以及如何管理I/O设备，I/O设备就是我们常见的磁盘、网卡、鼠标键盘、打印机和显示器等。 接下来的文章就要学习I/O设备、I/O模型和I/O、中断处理和错误处理。 I/O">
+<meta name="keywords" content="OS">
+<meta property="og:type" content="article">
+<meta property="og:title" content="操作系统-10-I&#x2F;O-基本原理">
+<meta property="og:url" content="http://yoursite.com/2020/07/18/操作系统-10-输入输出/index.html">
+<meta property="og:site_name" content="IkanのBolg">
+<meta property="og:description" content="引言上一篇学习了文件系统的原理，我们知道了操作系统是如何管理文件的，但是却没有学习磁盘是如何处理操作系统发出的读写操作，这一篇我们要学习操作系统是如果实现I/O和管理I/O的。 什么是I/OI/O包含两部分，I/O设备和I/O接口以及如何管理I/O设备，I/O设备就是我们常见的磁盘、网卡、鼠标键盘、打印机和显示器等。 接下来的文章就要学习I/O设备、I/O模型和I/O、中断处理和错误处理。 I/O">
+<meta property="og:locale" content="default">
+<meta property="og:image" content="http://yoursite.com/images/two_address_structure.png">
+<meta property="og:image" content="http://yoursite.com/images/io_one_address_sturcture.png">
+<meta property="og:image" content="http://yoursite.com/images/io_hardware_bus.png">
+<meta property="og:image" content="http://yoursite.com/images/io_two_address_space.png">
+<meta property="og:image" content="http://yoursite.com/images/dma_operation.png">
+<meta property="og:image" content="http://yoursite.com/images/pc_interrupt_structure.png">
+<meta property="og:image" content="http://yoursite.com/images/precise_interrupt.png">
+<meta property="og:image" content="http://yoursite.com/images/imprecise_interrupt.png">
+<meta property="og:image" content="http://yoursite.com/images/programed_io_ex.png">
+<meta property="og:image" content="http://yoursite.com/images/io_software_layers.png">
+<meta property="og:updated_time" content="2020-07-23T12:36:48.091Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="操作系统-10-I&#x2F;O-基本原理">
+<meta name="twitter:description" content="引言上一篇学习了文件系统的原理，我们知道了操作系统是如何管理文件的，但是却没有学习磁盘是如何处理操作系统发出的读写操作，这一篇我们要学习操作系统是如果实现I/O和管理I/O的。 什么是I/OI/O包含两部分，I/O设备和I/O接口以及如何管理I/O设备，I/O设备就是我们常见的磁盘、网卡、鼠标键盘、打印机和显示器等。 接下来的文章就要学习I/O设备、I/O模型和I/O、中断处理和错误处理。 I/O">
+<meta name="twitter:image" content="http://yoursite.com/images/two_address_structure.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: 'Author'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2020/07/18/操作系统-10-输入输出/"/>
+
+
+
+
+
+  <title>操作系统-10-I/O-基本原理 | IkanのBolg</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="default">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">IkanのBolg</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">只想安安静静撸代码</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            Home
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            Tags
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            Categories
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            Archives
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2020/07/18/操作系统-10-输入输出/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="ikan">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="IkanのBolg">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">操作系统-10-I/O-基本原理</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2020-07-18T12:07:32+08:00">
+                2020-07-18
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/OS学习笔记/" itemprop="url" rel="index">
+                    <span itemprop="name">OS学习笔记</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h4 id="引言"><a href="#引言" class="headerlink" title="引言"></a>引言</h4><p>上一篇学习了文件系统的原理，我们知道了操作系统是如何管理文件的，但是却没有学习磁盘是如何处理操作系统发出的读写操作，这一篇我们要学习操作系统是如果实现I/O和管理I/O的。</p>
+<h5 id="什么是I-O"><a href="#什么是I-O" class="headerlink" title="什么是I/O"></a>什么是I/O</h5><p>I/O包含两部分，I/O设备和I/O接口以及如何管理I/O设备，I/O设备就是我们常见的磁盘、网卡、鼠标键盘、打印机和显示器等。</p>
+<p>接下来的文章就要学习I/O设备、I/O模型和I/O、中断处理和错误处理。</p>
+<h4 id="I-O硬件原理"><a href="#I-O硬件原理" class="headerlink" title="I/O硬件原理"></a>I/O硬件原理</h4><h5 id="IO设备"><a href="#IO设备" class="headerlink" title="IO设备"></a>IO设备</h5><ul>
+<li>块设备：存储信息在固定大小的块，每一个块都自己的地址，所有的传输单元都是一个或者多个块。可寻址，基本特征是每个块都可以独立于其他块读写。例如硬盘、光盘、USB</li>
+<li>字符设备：传送和接收一个字符流，不可寻址。例如打印机，网络接口</li>
+</ul>
+<h5 id="CPU与设备管理器交互"><a href="#CPU与设备管理器交互" class="headerlink" title="CPU与设备管理器交互"></a>CPU与设备管理器交互</h5><p>设备控制器有一个寄存器用于和CPU交互，有一些控制器还有数据缓存结构，接下来要讲讲如何解决CPU和设备控制器寄存器和数据缓存交流的方式</p>
+<a id="more"></a>
+<ul>
+<li><p>I/O端口号</p>
+<ul>
+<li><p>原理：这种方法为每个寄存器分配一个I/O端口号，是一个8bit或16bit的整数。和设备管理器交流通过特殊I/O指令，比如从设备管理器读取数据到CPU寄存器</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">IN REG,PORT</span><br></pre></td></tr></table></figure>
+<p>从CPU寄存器写数据到设备管理器</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">OUT PORT,REG</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>在这种方案中，内存地址空间和I/O地址空间是分开的，比如</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"># 读取I/O端口4的内容然后加载到CPU的R0寄存器</span><br><span class="line">IN R0,4</span><br><span class="line"># 将内存字4加载到CPU的R0寄存器</span><br><span class="line">MOVE R0,4</span><br></pre></td></tr></table></figure>
+<p>地址空间示意图</p>
+<p><img src="/images/two_address_structure.png" alt="img"></p>
+</li>
+</ul>
+</li>
+<li><p>内存映射I/O</p>
+<ul>
+<li><p>原理：这种方案是映射I/O设备控制器寄存器到内存地址空间，所有的I/O设备管理器寄存器被分配唯一的内存地址，并且这些地址不会再被分配给其他使用。CPU和设备管理器寄存器交互不需要特殊指令，其地址空间结构如下。内存映射I/O的作用是让通过这种抽象，让CPU可以像访问内存一样访问I/O设备，采用同一套指令</p>
+<p><img src="/images/io_one_address_sturcture.png" alt="img"></p>
+</li>
+<li><p>优点</p>
+<ul>
+<li>不需要汇编指令(IN OUT)支持,C语言可以支持，因此设备驱动可由C语言实现</li>
+<li>不需要特殊的保护措施来防止用户直接访问I/O设备，OS只需要把I/O控制器寄存器映射的内存空间不放入用户空间即可。</li>
+<li>所有可用于内存的指令都可以用于I/O控制器寄存器</li>
+</ul>
+</li>
+<li><p>缺点</p>
+<ul>
+<li><p>对I/O控制器寄存器值缓存是重大的灾难。解决办法：硬件为为页提供了选择禁用缓存的功能，但是又增加了OS的复杂性</p>
+</li>
+<li><p>如果只有一个地址空间，所有的内存模块和I/O设备都要对每一个地址检查，以便做出响应，采用单一的bus总线是简单可行的(下图a)。现代计算机为了提高性能建立了CPU到内存单独的总线(下图b)，这个时候CPU访问内存通过这个独立的总线，内存映射的I/O寄存器访问就有问题，I/O设备没法查看CPU发出的地址，因此没办法响应</p>
+<p><img src="/images/io_hardware_bus.png" alt="img"></p>
+<ul>
+<li>解决方案<ol>
+<li>先发送给内存，如果返回失败，再将地址返送到所有其他bus上。需要额外的硬件复杂性</li>
+<li>在内存总线上增加一个探测器，放过I/O设备可能的感兴趣的所有地址。I/O设备的响应速度可能跟不上内存的速度</li>
+<li>通过内存控制器过滤I/O设备的映射的地址，内存控制器预装载引导时设备寄存器的地址范围。引导时就要确定设备寄存器映射的地址范围</li>
+</ol>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>混合实现</p>
+<ul>
+<li><p>原理：这种方案是在内存映射的I/O设备管理器数据缓冲区，而设备管理器的寄存器通过分配I/O端口的方式，其结构示意图如下</p>
+<p><img src="/images/io_two_address_space.png" alt="img"></p>
+</li>
+</ul>
+</li>
+<li><p>CPU读取过程</p>
+<ul>
+<li>cpu发送一个地址到bus的地址线上</li>
+<li>然后在bus的控制线置起一个READ</li>
+<li>在第二个信号线上标识该地址是内存地址空间还是I/O地址空间</li>
+<li>如果是内存地址空间，那么内存响应请求</li>
+<li>如果只有内存地址空间，那么内存模块和所有的I/O设备会比较地址范围，如果该地址在其范围内，那么该设备会响应请求</li>
+</ul>
+</li>
+</ul>
+<h5 id="直接内存访问-DMA"><a href="#直接内存访问-DMA" class="headerlink" title="直接内存访问(DMA)"></a>直接内存访问(DMA)</h5><ul>
+<li><p>解决的问题：无论是否使用内存映射I/O，CPU都需要寻址设备管理器交换数据，cpu一次可以与设备管理器传输一个byte，然后写入内存，再读下一个。效率非常低，DMA就是用来解决这一问题的技术</p>
+</li>
+<li><p>原理：DMA的作用是将数据从设备复制到内存不需要经过CPU，从而提升效率。为了简化原理，这里假设所有的I/O设备和内存在一条bus上，DMA的作用如下图。有时有些设备有独立的DMA比如磁盘，但是更通用的是DMA在主板上作为所有I/O设备共用。DMA是可编程的，CPU可以对其进行编程，DMA有一个内存地址寄存器、一个count寄存器、一个或多个控制寄存器，控制寄存器包含使用的I/O端口号、数据流向(读/写I/O设备)、传输数据单元(byte/word)和一次突发传输的byte数</p>
+<p><img src="/images/dma_operation.png" alt="img"></p>
+</li>
+<li><p>DMA处理Disk数据流程</p>
+<ol>
+<li><p>CPU编程DMA控制器，然后发出命令到bus上通知Disk控制器，磁盘控制器读取数据到内部缓存然后校验是否数据是否正确</p>
+</li>
+<li><p>当磁盘数据准备完成后，DMA在bus上发出read请求、</p>
+</li>
+<li><p>Disk控制器收到read请求并且从bus上知道了写入下一个字节的内存地址</p>
+</li>
+<li><p>disk控制器传送完成后，像DMA发出确认应答</p>
+</li>
+<li><p>DMA收到应答后增加内存地址并且减小count寄存器的值，如果不为0，重复2-4步骤，如果count为0，则DMA发出一个中断，通知CPU数据准备好了</p>
+<p>从上边的步骤可以看出，DMA其实只是做了CPU复制数据到内存的工作，解放了CPU，让CPU去做其他事</p>
+</li>
+</ol>
+</li>
+<li><p>DMA传输模式</p>
+<ul>
+<li>word-at-a-time模式：一次传输一个字节，如果CPU想用bus则需要等待，DMA偷偷的溜进来窃取CPU周期来传输一个字，所以叫作“周期窃取”</li>
+<li>块模式：获得bus一次传输一串的字节然后释放bus，叫作“突发模式”，效率更高。不足：可能会长时间占用bus导致cpu和其他设备阻塞</li>
+<li>飞跃模式：DMA向设备发送请求读取一个word，设备传输到DMA，然后DMA在bus上再发送一个写请求将这个字写到它要去的地方，这个模式传输每个word需要额外的bus周期，但是提供了很好的灵活性，可以device-to-device，memory-to-memory</li>
+</ul>
+</li>
+<li><p>DMA小结：并不是所有的计算机都有DMA，因为现在cpu越来越快，如果让快速的cpu无所事事的等待DMA处理I/O传输得不偿失，在嵌入式计算机上尤其重要，少一个组件可以节省钱</p>
+</li>
+</ul>
+<h5 id="中断"><a href="#中断" class="headerlink" title="中断"></a>中断</h5><ul>
+<li><p>当设备完成工作会置起一个中断信号在bus上，这个信号被中断处理器检测到，如果中断处理器此时空闲，那么会立即处理这个中断信号，但是如果此时中断处理器正在处理其他中断或者bus上同时有一个优先级更高的中断，那么该中断信号会被忽略，设备会重新置起中断信号直到被CPU处理。中断处理器会放置一个代表需要被关注的设备的数字(中断向量索引，用于读取新的程序计数器，该程序计数器指向相应中断服务过程)在bus上，导致cpu停止当前工作并根据中断向量索引开始处理新的中断处理程序，当cpu中断过程开始后，会发出一个确认到中断处理器，示意中断处理器可以处理下一个中断信号。下图是个人计算机的中断处理示意图</p>
+<p><img src="/images/pc_interrupt_structure.png" alt="img"></p>
+</li>
+<li><p>保存中断程序信息以便恢复</p>
+<ul>
+<li>保存方式<ul>
+<li>各个CPU处理不一样，但是最基本要保存程序计数器</li>
+<li>保存所有可见寄存器和内部寄存器都保存</li>
+</ul>
+</li>
+<li>保存在哪儿<ul>
+<li>CPU内部寄存器：缺点是要等到内部寄存器的值被读出才能应答，防止下一个中断到来，将内部寄存器值覆盖</li>
+<li>保存在栈上<ul>
+<li>保存在用户空间栈上，堆栈指针可能不是合法的，会导致致命错误；其次，它可能在页面末端，几次写操作后可能发生缺页，将导致一个更重大的问题，缺页也是一个中断，在何处保存状态来处理缺页</li>
+<li>保存在内核空间栈上，堆栈指针是合法的并且指向一个固定的页面。问题：切换到内核态可能会切换MMU上下文，缓存和TLB可能会失效</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>精确中断与非精确中断</p>
+<ul>
+<li><p>问题：由于现代CPU具有流水线和超标量架构存在不同程度的问题，流水线使CPU可以流水线式的处理指令，而超标量则可以并行处理微指令，程序计数器不能准确表达指令的执行情况。比如当中断出现时，流水线的指令可能处于不同的阶段；而超标量将指令分解成微指令，可能导致之前的指令可能还没执行完，而最近的指令可能已经执行完成</p>
+</li>
+<li><p>精确中断：中断停留在某个确定的状态</p>
+<ul>
+<li><p>PC(程序计数器)保存在已知的地方</p>
+</li>
+<li><p>在PC之前的所有指令都已执行完毕</p>
+</li>
+<li><p>在PC之后的所有指令都没有执行</p>
+</li>
+<li><p>PC指向的指令状态是已知的</p>
+<p>如下图，PC316</p>
+</li>
+</ul>
+<p><img src="/images/precise_interrupt.png" alt="img"></p>
+</li>
+<li><p>非精确中断：不满足精确中断条件都为非精确中断，其示意图如下，比如PC为316，但是PC前后都有指令执行。需要保存的信息很多，导致中断处理慢</p>
+<p><img src="/images/imprecise_interrupt.png" alt="img"></p>
+</li>
+<li><p>小结</p>
+<p>有些中断和陷阱是精确的（I/O中断），有些不是精确的（程序错误），有些机器有一个位来设置中断时精确中断。某些超标量机器为了兼容精确中断，使得CPU内部复杂，必须记录日志和寄存器的副本，这是很大的性能开销。非精确中断使得操作系统复杂并且运行得很慢</p>
+</li>
+</ul>
+</li>
+</ul>
+<h4 id="I-O软件原理"><a href="#I-O软件原理" class="headerlink" title="I/O软件原理"></a>I/O软件原理</h4><h5 id="I-O软件目标"><a href="#I-O软件目标" class="headerlink" title="I/O软件目标"></a>I/O软件目标</h5><ul>
+<li>设备无关性</li>
+<li>统一命名：所有的设备和文件都用同一种方式-路径名寻址</li>
+<li>错误处理：错误应该在更接近于底层得到处理，解决不了的在交给上层处理</li>
+<li>同步(阻塞)异步(中断)：大多数I/O是异步的，cpu可以处理其他程序，I/O完成时会发出中断信号。同步的程序更容易编写</li>
+<li>缓冲：数据离开设备后通常不能直接到达其目的地，因此需要一个缓冲区来暂存</li>
+<li>共享设备和独占设备问题：共享设备如disk，可以同时被多个用户使用；而打印机则不能被多个用户同时使用属于独占设备</li>
+</ul>
+<h5 id="可编程I-O"><a href="#可编程I-O" class="headerlink" title="可编程I/O"></a>可编程I/O</h5><ul>
+<li><p>定义：可编程I/O的关键是需要CPU的处理数据传输，并且一次只能传输一个字符。</p>
+</li>
+<li><p>简单的例子</p>
+<p><img src="/images/programed_io_ex.png" alt="img"></p>
+<ol>
+<li>用户程序准备需要打印的字符到缓冲区</li>
+<li>用户程序调用打开打印机的系统调用，如果打印机正在被使用，则系统调用等待，否则程序获得打印机发出打印系统调用</li>
+<li>操作系统将用户缓冲区复制到内核缓冲区，然后检查打印机是否可用，如果可用，则操作系统复制一个字符到打印机，然后轮询检查是否可以传输下一个字符</li>
+</ol>
+</li>
+</ul>
+<h5 id="中断驱动I-O"><a href="#中断驱动I-O" class="headerlink" title="中断驱动I/O"></a>中断驱动I/O</h5><ul>
+<li>可编程I/O存在的问题：打印机打印的速度是很慢的，当传输了一个字符之后，CPU便轮询设备是否就绪，非常浪费cpu</li>
+<li>定义：中断驱动I/O用于解决这一问题，用户程序需要打印时，首先还是先将字符从用户空间复制到内核空间的缓冲区，然后操作调用打印，为了避免CPU浪费，调度器立即调用其他程序运行。当打印机完成打印准备好接收下一个字符时，会发出一个中断，中断cpu当前的用户程序，启动打印中断服务继续判断是否还有字符需要打印</li>
+</ul>
+<h5 id="利用DMA的I-O"><a href="#利用DMA的I-O" class="headerlink" title="利用DMA的I/O"></a>利用DMA的I/O</h5><ul>
+<li>中断驱动I/O存在的问题：中断驱动I/O每打印一个字符都需要中断一次，中断也需要开销</li>
+<li>定义：为了解决每打印一个字符都需要中断的问题，原理上利用DMA的和可编程I/O一样，操作系统利用DMA来完成CPU的工作，解放CPU去做其他的事。所以当CPU无所事事时，可编程I/O或中断驱动I/O可能比DMA的I/O效率要高，因为CPU比DMA更快</li>
+</ul>
+<h5 id="通道控制的I-O"><a href="#通道控制的I-O" class="headerlink" title="通道控制的I/O"></a>通道控制的I/O</h5><ul>
+<li>原理：以内存为中心，实现设备和内存直接交换数据，CPU向通道发出指令，指明内存中通道程序、I/O设备。然后调度器切换程序。通道执行内存中的通道程序并读取/写入其中指明的字节数，当完成之后发出中断</li>
+</ul>
+<h5 id="I-O软件层次"><a href="#I-O软件层次" class="headerlink" title="I/O软件层次"></a>I/O软件层次</h5><p>I/O软件通常组织成4层，从下到上中断处理程序、设备驱动程序、设备无关的操作系统软件和用户级I/O软件，其示意图如下</p>
+<p><img src="/images/io_software_layers.png" alt="img"></p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/OS/" rel="tag"># OS</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2020/07/04/操作系统-番外-老牌Linux文件系统Ext/" rel="next" title="操作系统-番外-老牌Linux文件系统Ext">
+                <i class="fa fa-chevron-left"></i> 操作系统-番外-老牌Linux文件系统Ext
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2020/07/23/操作系统-11-死锁/" rel="prev" title="操作系统-11-死锁">
+                操作系统-11-死锁 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Overview
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">ikan</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">27</span>
+                  <span class="site-state-item-name">posts</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">7</span>
+                  <span class="site-state-item-name">categories</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">12</span>
+                  <span class="site-state-item-name">tags</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-4"><a class="nav-link" href="#引言"><span class="nav-number">1.</span> <span class="nav-text">引言</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#什么是I-O"><span class="nav-number">1.1.</span> <span class="nav-text">什么是I/O</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#I-O硬件原理"><span class="nav-number">2.</span> <span class="nav-text">I/O硬件原理</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#IO设备"><span class="nav-number">2.1.</span> <span class="nav-text">IO设备</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#CPU与设备管理器交互"><span class="nav-number">2.2.</span> <span class="nav-text">CPU与设备管理器交互</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#直接内存访问-DMA"><span class="nav-number">2.3.</span> <span class="nav-text">直接内存访问(DMA)</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#中断"><span class="nav-number">2.4.</span> <span class="nav-text">中断</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#I-O软件原理"><span class="nav-number">3.</span> <span class="nav-text">I/O软件原理</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#I-O软件目标"><span class="nav-number">3.1.</span> <span class="nav-text">I/O软件目标</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#可编程I-O"><span class="nav-number">3.2.</span> <span class="nav-text">可编程I/O</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#中断驱动I-O"><span class="nav-number">3.3.</span> <span class="nav-text">中断驱动I/O</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#利用DMA的I-O"><span class="nav-number">3.4.</span> <span class="nav-text">利用DMA的I/O</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#通道控制的I-O"><span class="nav-number">3.5.</span> <span class="nav-text">通道控制的I/O</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#I-O软件层次"><span class="nav-number">3.6.</span> <span class="nav-text">I/O软件层次</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">ikan</span>
+
+  
+</div>
+
+
+  <div class="powered-by">Powered by <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a></div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">Theme &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+  
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+        tex2jax: {
+          inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+          processEscapes: true,
+          skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+        }
+      });
+    </script>
+
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for (i=0; i < all.length; i += 1) {
+          all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+      });
+    </script>
+    <script type="text/javascript" src="//cdn.bootcss.com/mathjax/2.7.1/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+  
+
+
+  
+
+  
+
+</body>
+</html>

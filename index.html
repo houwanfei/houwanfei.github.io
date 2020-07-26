@@ -249,6 +249,308 @@
   
   
   <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2020/07/23/操作系统-11-死锁/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="ikan">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="IkanのBolg">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2020/07/23/操作系统-11-死锁/" itemprop="url">操作系统-11-死锁</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2020-07-23T21:33:46+08:00">
+                2020-07-23
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/OS学习笔记/" itemprop="url" rel="index">
+                    <span itemprop="name">OS学习笔记</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          <h4 id="引言"><a href="#引言" class="headerlink" title="引言"></a>引言</h4><p>计算机的某些资源同一时间只能一个进程或线程使用，比如打印机，如果两个进程同时使用打印机便会出问题。所以需要使用锁来控制进程并发的使用某些资源，但是不恰当的使用锁会造成一个严重的问题。举个例子，进程A申请扫描仪，A获得扫描仪；进程B申请刻录仪，B获得刻录仪，此时进程A需要申请刻录仪，而进程B要申请扫描仪，因为进程A、B都需要有扫描仪和刻录仪才能完成工作，因此这个过程将一直等待下去，这就叫做死锁。</p>
+<p>死锁可以发生在各种各样的场景，比如数据库，接下来学习死锁的发生和死锁的检查以及死锁的避免和解决</p>
+<h4 id="资源"><a href="#资源" class="headerlink" title="资源"></a>资源</h4><p>大部分的死锁都和资源有关，先来了解一下资源</p>
+<h5 id="资源定义"><a href="#资源定义" class="headerlink" title="资源定义"></a>资源定义</h5><p>根据时间推移，能够获得、使用、释放的任何东西</p>
+          <!--noindex-->
+          <div class="post-button text-center">
+            <a class="btn" href="/2020/07/23/操作系统-11-死锁/#more" rel="contents">
+              Read more &raquo;
+            </a>
+          </div>
+          <!--/noindex-->
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2020/07/18/操作系统-10-输入输出/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="ikan">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="IkanのBolg">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2020/07/18/操作系统-10-输入输出/" itemprop="url">操作系统-10-I/O-基本原理</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2020-07-18T12:07:32+08:00">
+                2020-07-18
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/OS学习笔记/" itemprop="url" rel="index">
+                    <span itemprop="name">OS学习笔记</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          <h4 id="引言"><a href="#引言" class="headerlink" title="引言"></a>引言</h4><p>上一篇学习了文件系统的原理，我们知道了操作系统是如何管理文件的，但是却没有学习磁盘是如何处理操作系统发出的读写操作，这一篇我们要学习操作系统是如果实现I/O和管理I/O的。</p>
+<h5 id="什么是I-O"><a href="#什么是I-O" class="headerlink" title="什么是I/O"></a>什么是I/O</h5><p>I/O包含两部分，I/O设备和I/O接口以及如何管理I/O设备，I/O设备就是我们常见的磁盘、网卡、鼠标键盘、打印机和显示器等。</p>
+<p>接下来的文章就要学习I/O设备、I/O模型和I/O、中断处理和错误处理。</p>
+<h4 id="I-O硬件原理"><a href="#I-O硬件原理" class="headerlink" title="I/O硬件原理"></a>I/O硬件原理</h4><h5 id="IO设备"><a href="#IO设备" class="headerlink" title="IO设备"></a>IO设备</h5><ul>
+<li>块设备：存储信息在固定大小的块，每一个块都自己的地址，所有的传输单元都是一个或者多个块。可寻址，基本特征是每个块都可以独立于其他块读写。例如硬盘、光盘、USB</li>
+<li>字符设备：传送和接收一个字符流，不可寻址。例如打印机，网络接口</li>
+</ul>
+<h5 id="CPU与设备管理器交互"><a href="#CPU与设备管理器交互" class="headerlink" title="CPU与设备管理器交互"></a>CPU与设备管理器交互</h5><p>设备控制器有一个寄存器用于和CPU交互，有一些控制器还有数据缓存结构，接下来要讲讲如何解决CPU和设备控制器寄存器和数据缓存交流的方式</p>
+          <!--noindex-->
+          <div class="post-button text-center">
+            <a class="btn" href="/2020/07/18/操作系统-10-输入输出/#more" rel="contents">
+              Read more &raquo;
+            </a>
+          </div>
+          <!--/noindex-->
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="http://yoursite.com/2020/07/04/操作系统-番外-老牌Linux文件系统Ext/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1435,302 +1737,6 @@
 
 
     
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2020/06/02/操作系统笔记-番外-书籍推荐/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="ikan">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="IkanのBolg">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2020/06/02/操作系统笔记-番外-书籍推荐/" itemprop="url">操作系统笔记-番外-操作系统经典书籍推荐</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">Posted on</span>
-              
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2020-06-02T22:45:06+08:00">
-                2020-06-02
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">In</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/OS学习笔记/" itemprop="url" rel="index">
-                    <span itemprop="name">OS学习笔记</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          <p>最近整理以前的笔记，有人问关于操作系统的书籍。我有个爱好喜欢收集书籍，前后也收集了几百本高质量的书籍，这里给大家推荐基本关于操作系统的书籍</p>
-<h5 id="Operating-System-Concepts-10th-edition"><a href="#Operating-System-Concepts-10th-edition" class="headerlink" title="Operating System Concepts 10th edition"></a>Operating System Concepts 10th edition</h5><p><img src="/images/opration_book1.jpg" alt="img"></p>
-<p>又称恐龙书，这本书已经出到第10版，可见其经典。作者是想从理论层面把问题的产生和解决思路阐述清楚，包含了操作系统各个方面，是一本非常不错的入门书籍。</p>
-          <!--noindex-->
-          <div class="post-button text-center">
-            <a class="btn" href="/2020/06/02/操作系统笔记-番外-书籍推荐/#more" rel="contents">
-              Read more &raquo;
-            </a>
-          </div>
-          <!--/noindex-->
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2020/06/02/操作系统笔记-5-进程-线程同步/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="ikan">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="IkanのBolg">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2020/06/02/操作系统笔记-5-进程-线程同步/" itemprop="url">操作系统笔记-5-进程&线程同步</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">Posted on</span>
-              
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2020-06-02T22:23:02+08:00">
-                2020-06-02
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">In</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/OS学习笔记/" itemprop="url" rel="index">
-                    <span itemprop="name">OS学习笔记</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          <h4 id="引言"><a href="#引言" class="headerlink" title="引言"></a>引言</h4><p>前一篇介绍了进程和线程调度，知道线程和进程在系统中是并发执行，这将会引发出一些问题。接下来从一个简单的生产者和消费者例子说起，从前有两个进程，一个进程负责往一个buffer里写数据，我们把它叫做生产者；一个进程负责消费数据也就是取走buffer里的数据，我们把它叫做消费者。因为我们要记录写到哪里，所以需要一个变量in来记录，还需要一个变量记录消费到哪里了out，现在我们假设核心的生产者代码段。</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">while</span> (<span class="keyword">true</span>) &#123;</span><br><span class="line">    <span class="keyword">while</span> (count == BUFFER SIZE)</span><br><span class="line">    ; <span class="comment">/* 忙等待，等到buffer有空间写入 */</span></span><br><span class="line">    buffer[in] = next produced;</span><br><span class="line">    in = (in + <span class="number">1</span>) % BUFFER SIZE; <span class="comment">//构建一个环形数组</span></span><br><span class="line">    count++;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>消费者核心代码</p>
-          <!--noindex-->
-          <div class="post-button text-center">
-            <a class="btn" href="/2020/06/02/操作系统笔记-5-进程-线程同步/#more" rel="contents">
-              Read more &raquo;
-            </a>
-          </div>
-          <!--/noindex-->
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
   </section>
 
   
@@ -1781,7 +1787,7 @@
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">25</span>
+                  <span class="site-state-item-count">27</span>
                   <span class="site-state-item-name">posts</span>
                 </a>
               </div>

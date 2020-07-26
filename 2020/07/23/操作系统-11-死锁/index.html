@@ -1,0 +1,939 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="OS," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="引言计算机的某些资源同一时间只能一个进程或线程使用，比如打印机，如果两个进程同时使用打印机便会出问题。所以需要使用锁来控制进程并发的使用某些资源，但是不恰当的使用锁会造成一个严重的问题。举个例子，进程A申请扫描仪，A获得扫描仪；进程B申请刻录仪，B获得刻录仪，此时进程A需要申请刻录仪，而进程B要申请扫描仪，因为进程A、B都需要有扫描仪和刻录仪才能完成工作，因此这个过程将一直等待下去，这就叫做死锁。">
+<meta name="keywords" content="OS">
+<meta property="og:type" content="article">
+<meta property="og:title" content="操作系统-11-死锁">
+<meta property="og:url" content="http://yoursite.com/2020/07/23/操作系统-11-死锁/index.html">
+<meta property="og:site_name" content="IkanのBolg">
+<meta property="og:description" content="引言计算机的某些资源同一时间只能一个进程或线程使用，比如打印机，如果两个进程同时使用打印机便会出问题。所以需要使用锁来控制进程并发的使用某些资源，但是不恰当的使用锁会造成一个严重的问题。举个例子，进程A申请扫描仪，A获得扫描仪；进程B申请刻录仪，B获得刻录仪，此时进程A需要申请刻录仪，而进程B要申请扫描仪，因为进程A、B都需要有扫描仪和刻录仪才能完成工作，因此这个过程将一直等待下去，这就叫做死锁。">
+<meta property="og:locale" content="default">
+<meta property="og:image" content="http://yoursite.com/images/resorce_model_ex.png">
+<meta property="og:image" content="http://yoursite.com/images/deadlock_ex.png">
+<meta property="og:image" content="http://yoursite.com/images/resource_graph_ex.png">
+<meta property="og:image" content="http://yoursite.com/images/deadlock_detection_al_ex.png">
+<meta property="og:image" content="http://yoursite.com/images/trajectory.png">
+<meta property="og:image" content="http://yoursite.com/images/safe_state_ex.png">
+<meta property="og:image" content="http://yoursite.com/images/not_safe_state_ex.png">
+<meta property="og:image" content="http://yoursite.com/images/one_resource_of_type_ex.png">
+<meta property="og:image" content="http://yoursite.com/images/multiple_resources_bank_al_ex.png">
+<meta property="og:updated_time" content="2020-07-26T14:42:15.703Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="操作系统-11-死锁">
+<meta name="twitter:description" content="引言计算机的某些资源同一时间只能一个进程或线程使用，比如打印机，如果两个进程同时使用打印机便会出问题。所以需要使用锁来控制进程并发的使用某些资源，但是不恰当的使用锁会造成一个严重的问题。举个例子，进程A申请扫描仪，A获得扫描仪；进程B申请刻录仪，B获得刻录仪，此时进程A需要申请刻录仪，而进程B要申请扫描仪，因为进程A、B都需要有扫描仪和刻录仪才能完成工作，因此这个过程将一直等待下去，这就叫做死锁。">
+<meta name="twitter:image" content="http://yoursite.com/images/resorce_model_ex.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: 'Author'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2020/07/23/操作系统-11-死锁/"/>
+
+
+
+
+
+  <title>操作系统-11-死锁 | IkanのBolg</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="default">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">IkanのBolg</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">只想安安静静撸代码</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            Home
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            Tags
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            Categories
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            Archives
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2020/07/23/操作系统-11-死锁/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="ikan">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="IkanのBolg">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">操作系统-11-死锁</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2020-07-23T21:33:46+08:00">
+                2020-07-23
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/OS学习笔记/" itemprop="url" rel="index">
+                    <span itemprop="name">OS学习笔记</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h4 id="引言"><a href="#引言" class="headerlink" title="引言"></a>引言</h4><p>计算机的某些资源同一时间只能一个进程或线程使用，比如打印机，如果两个进程同时使用打印机便会出问题。所以需要使用锁来控制进程并发的使用某些资源，但是不恰当的使用锁会造成一个严重的问题。举个例子，进程A申请扫描仪，A获得扫描仪；进程B申请刻录仪，B获得刻录仪，此时进程A需要申请刻录仪，而进程B要申请扫描仪，因为进程A、B都需要有扫描仪和刻录仪才能完成工作，因此这个过程将一直等待下去，这就叫做死锁。</p>
+<p>死锁可以发生在各种各样的场景，比如数据库，接下来学习死锁的发生和死锁的检查以及死锁的避免和解决</p>
+<h4 id="资源"><a href="#资源" class="headerlink" title="资源"></a>资源</h4><p>大部分的死锁都和资源有关，先来了解一下资源</p>
+<h5 id="资源定义"><a href="#资源定义" class="headerlink" title="资源定义"></a>资源定义</h5><p>根据时间推移，能够获得、使用、释放的任何东西</p>
+<a id="more"></a>
+<h5 id="可抢占资源和不可抢占资源"><a href="#可抢占资源和不可抢占资源" class="headerlink" title="可抢占资源和不可抢占资源"></a>可抢占资源和不可抢占资源</h5><ul>
+<li>可抢占资源：可以从拥有它的进程中拿走资源，不会有副作用（比如：内存）</li>
+<li>不可抢占资源：无法从拥有它的进程中拿走资源而不引起计算失败</li>
+<li>可抢占资源死锁解决方案：重新分配资源即可解决</li>
+<li>资源申请和使用顺序抽象<ol>
+<li>申请资源：如果进程申请时资源不可用，那么进程强制等待</li>
+<li>使用资源</li>
+<li>释放资源</li>
+</ol>
+</li>
+</ul>
+<h4 id="死锁检测和恢复"><a href="#死锁检测和恢复" class="headerlink" title="死锁检测和恢复"></a>死锁检测和恢复</h4><ul>
+<li>死锁的书面定义：如果一个进程集合中，每一个进程都在等待只能由该集合中的进程才能引发的事件，那么该进程集合就产生了死锁</li>
+</ul>
+<h5 id="死锁的条件"><a href="#死锁的条件" class="headerlink" title="死锁的条件"></a>死锁的条件</h5><ul>
+<li><p>互斥条件：每个资源在同一时间只能分配给一个进程</p>
+</li>
+<li><p>持有和等待条件：每个进程持有之前申请的资源并可以申请新的资源</p>
+</li>
+<li><p>不可抢占条件：每个进程持有的之前申请的资源不可以被强制抢占，必须由申请并持有的进程释放</p>
+</li>
+<li><p>环路等待条件：如果发生死锁，肯定有两个或更多的进程组成了一个环路，每一个环路中的进程都在等待下一个进程持有的资源</p>
+<p>上述四个条件很重要，因为死锁发生时，四个条件必定同时满足，如果有一个条件不满足，死锁就不会发生。这也是如何避免死锁的关键</p>
+</li>
+</ul>
+<h5 id="死锁建模"><a href="#死锁建模" class="headerlink" title="死锁建模"></a>死锁建模</h5><ul>
+<li><p>模型描述图示</p>
+<p><img src="/images/resorce_model_ex.png" alt="img"></p>
+<ul>
+<li>a持有资源，A持有R资源</li>
+<li>b申请资源，B申请S资源</li>
+<li>c死锁，C持有U申请T，D持有T申请U</li>
+</ul>
+</li>
+<li><p>举个例子：假设有三个进程A、B、C申请三个资源R、S、T，如下图</p>
+<p><img src="/images/deadlock_ex.png" alt="img"></p>
+<ul>
+<li>进程A需要的资源为R和S，顺序为申请R-&gt;申请S-&gt;释放R-&gt;释放S</li>
+<li>进程B需要的资源为S和T，顺序为申请S-&gt;申请T-&gt;释放S-&gt;释放T</li>
+<li>进程C需要的资源为T和R，顺序为申请T-&gt;申请R-&gt;释放T-&gt;释放R</li>
+<li>假设进程A、B、C申请资源的顺序<ul>
+<li>A申请R-&gt;B申请S-&gt;C申请T-&gt;A申请S-&gt;B申请T&gt;C申请R，最终A、B、C进程获取资源和持有资源的示意图如上图(e-&gt;j)，会发生死锁</li>
+<li>A申请R-&gt;C申请T-&gt;A申请S-&gt;C申请R-&gt;A释放R&gt;A释放S，最终A、B、C进程获取资源和持有资源的示意图如上图(l-&gt;q)，不会发生死锁</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>死锁处策略</p>
+<ul>
+<li>忽略(鸵鸟算法，很形象，像鸵鸟一样，把头埋进沙子，假装什么事也没发生)</li>
+<li>检测和恢复，让死锁发生，检测它并解决死锁</li>
+<li>小心分配资源避免死锁发生</li>
+<li>破坏死锁四个条件之一，防止死锁发生</li>
+</ul>
+</li>
+</ul>
+<h5 id="死锁检测"><a href="#死锁检测" class="headerlink" title="死锁检测"></a>死锁检测</h5><p>不防止死锁的发生，而是通过死锁检测的方式解决死锁</p>
+<ul>
+<li><p>各类型一个资源的死锁检测</p>
+<ul>
+<li><p>这种方式各类型的资源只有一个，因此这种类型检测死锁可以构建一个进程获取资源和申请资源的图，如果检测到一个或多个环，那么就出现了死锁</p>
+</li>
+<li><p>如何确定哪些进程发生死锁，在环中的进程是发生死锁的进程，如下图所示，D、E、G。D持有U申请T；E持有T申请V；G持有V申请U，因此产生了死锁</p>
+<p><img src="/images/resource_graph_ex.png" alt="img"></p>
+</li>
+<li><p>有向图环路检测算法在图算法中有很多，下面举一个简单的例子（图深度优先遍历），这个算法并非最优的</p>
+<ol>
+<li>初始化一个列表L为空，清除所有节点有向边的标记</li>
+<li>将当前节点加入到L尾部，判断是否出现了两次，如果出现了两次，那么存在环</li>
+<li>从给定的节点检查是否还有没有标记的边，如果存在，执行第4步，否则执行第5步</li>
+<li>随机选择一条并标记，指向的节点作为新的当前节点执行第2步</li>
+<li>如果该节点为初始节点，说明，图中不存在环，否则说明该节点没有后续节点，弹出该节点，返回前一个节点作为当前节点执行第2步</li>
+</ol>
+</li>
+</ul>
+</li>
+<li><p>各类型多个资源的死锁检测</p>
+<ul>
+<li><p>这种场景因为资源有多个，所以用图是否有环算法不能处理这种场景，因此需要另外一种算法</p>
+</li>
+<li><p>死锁检测建模数据结构</p>
+<ol>
+<li><p>$E$向量代表拥有各类型资源的数量，比如$E_1$代表类型1的数量，其向量表示为</p>
+<script type="math/tex; mode=display">E=\begin{bmatrix} E_1 & E_2 &... &E_m \\  \end{bmatrix}</script></li>
+<li><p>$A$向量代表当前可用的各类型资源的数量，比如$A_1$代表类型的当前剩余可用的资源数，其向量表示为</p>
+<script type="math/tex; mode=display">A = \begin{bmatrix} A_1 & A_2 & ... & A_m \end{bmatrix}</script></li>
+<li><p>$C$矩阵表示当前各进程拥有各类型资源的数量，矩阵的每一行代表一个进程，比如$C_i$代表第i个进程拥有的资源向量，$C_{i,j}$代表进程i拥有资源类型j的数量，矩阵表示如下</p>
+<script type="math/tex; mode=display">\begin{bmatrix} C_{1,1} & C_{1,2} & \cdots & C_{1,m} \\ C_{2,1} & C_{2,2} & \cdots & C_{2, m} \\ \vdots & \vdots & \vdots & \vdots \\ C_{n,1} & C_{n,2} & \cdots & C_{n,m} \end{bmatrix}</script></li>
+<li><p>R矩阵表示当前进程完成任务还需要申请的各类型资源，矩阵的每一行代表一个进程，比如$R_i$代表第i个进程还需要申请的资源向量，$R_{i,j}$代表进程i还需要申请的资源类型j的数量</p>
+<script type="math/tex; mode=display">\begin{bmatrix} R_{1,1} & R_{1,2} & \cdots & R_{1,m} \\ R_{2,1} & R_{2,2} & \cdots & R_{2, m} \\ \vdots & \vdots & \vdots & \vdots \\ R_{n,1} & R_{n,2} & \cdots & R_{n,m} \end{bmatrix}</script></li>
+<li><p>资源数量之间关系</p>
+<script type="math/tex; mode=display">\sum_{i=1}^nC_{i,j} + A_j = E_j</script></li>
+</ol>
+</li>
+<li><p>死锁检测算法</p>
+<ol>
+<li>查找一个未标记的进程，比较$R_{i}$行是否小于等于向量$A$</li>
+<li>如果找到这样一个进程，那么标记当前进程，将$R_i$加到向量$A$然后返回第一步</li>
+<li>如果没有这样的一个进程，则发生了死锁</li>
+</ol>
+</li>
+<li><p>简单的例子</p>
+<p><img src="/images/deadlock_detection_al_ex.png" alt="img"></p>
+<ul>
+<li>首先找到第三个进程，因此$A$累计$C_{3}$，因此$A$为$\begin{bmatrix} 2 &amp; 2 &amp; 2 &amp; 0 \end{bmatrix}$</li>
+<li>然后第二个进程满足条件，$A$累计$C_2$，因此$A$为$\begin{bmatrix} 4 &amp; 2 &amp; 2 &amp; 1 \end{bmatrix}$</li>
+<li>最后是第一个进程，因此不会发生死锁</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h5 id="死锁恢复"><a href="#死锁恢复" class="headerlink" title="死锁恢复"></a>死锁恢复</h5><ul>
+<li>通过抢占恢复，这种方法要根据资源的类型来确定，通常比较困难或者不可行</li>
+<li>利用回滚恢复，这种方式需要存储进程的各种状态包括获得的资源，叫做进程检查点，新的检查点并不会覆盖之前的检查点，一旦发生死锁，进程可以选择之前的检查点来回滚到未获得该资源的状态，因此在该检查点之后的工作是无效的</li>
+<li>通过杀死进程恢复，如果可能，杀死一个在死锁环中的一个进程来打破死锁。选择杀死进程要非常小心，最好选择那种重新执行进程不会产生副作用的进程</li>
+</ul>
+<h4 id="死锁避免"><a href="#死锁避免" class="headerlink" title="死锁避免"></a>死锁避免</h4><p>上边讨论了死锁的检测和恢复，其没有考虑避免死锁发生，而是从检测和解决死锁考虑。是否能有方法每次资源分配时做出正确的选择避免死锁？接下来讲述如果避免死锁发生</p>
+<h5 id="资源轨迹图"><a href="#资源轨迹图" class="headerlink" title="资源轨迹图"></a>资源轨迹图</h5><ul>
+<li><p>通过对资源轨迹的描述，来判断两个进程是否进入死锁状态，如下图，横坐标代表A进程需要的资源和时间点，纵坐标代表进程B需要的资源和时间点，虚线代表调度器调度进程A、B运行的时间，比如p-&gt;q调度A运行，q-&gt;r是进程B运行</p>
+<p><img src="/images/trajectory.png" alt="img"></p>
+<p>阴影区域是我们关注的区域，因为这两个区域内两个进程运行同时需要该资源，因此如果进入该区域便会产生死锁，为了避免死锁，B进程会被挂起直到进程A申请并释放Plotter</p>
+</li>
+</ul>
+<h5 id="安全和不安全状态"><a href="#安全和不安全状态" class="headerlink" title="安全和不安全状态"></a>安全和不安全状态</h5><ul>
+<li><p>如果直到各进程需要某一个资源的最大需求，并且进程存在某种调度顺序能完成任务，不会发生死锁，那么就称为安全状态，比如下图，总共资源有10个，如图a已分配的资源为7个还剩余3个，所以可以先调度B进程运行如图b，然后调度C进程运行，资源刚好，最后调度A不会发生死锁</p>
+<p><img src="/images/safe_state_ex.png" alt="img"></p>
+</li>
+<li><p>不安全状态，比如下图，a为初始状态，但是A进程申请了一个资源如b，此时我们无法找到一个顺序能完成任务，因此b为不安全状态。注意，不安全状态并不是死锁</p>
+<p><img src="/images/not_safe_state_ex.png" alt="img"></p>
+</li>
+</ul>
+<h5 id="单资源银行家算法"><a href="#单资源银行家算法" class="headerlink" title="单资源银行家算法"></a>单资源银行家算法</h5><ul>
+<li><p>定义：银行家算法，Dijkstra提出的一种避免死锁的算法，思想来源于银行家贷款，所以叫银行家算法。该算法在请求资源时，会判断同意该请求会不会导致不安全状态，如果是，则该请求会等待，如果不会，则会同意</p>
+</li>
+<li><p>一个简单的例子，假设有四个客户A、B、C、D需要的贷款总共为22单位，但是客户并不是一次性就需要所有贷款，所以银行并不需要22个单位的金额，假设现在银行有10个单位的金额，a是状态安全的；b也是状态安全的因为剩余2单位贷款可以满足客户C，C获得资源后可以满足B、D客户，最后可以满足A客户；但是c不是安全的因为不能满足任何一个客户的贷款</p>
+<p><img src="/images/one_resource_of_type_ex.png" alt="img"></p>
+</li>
+<li><p>缺点：进程运行前需要知道需要的资源</p>
+</li>
+</ul>
+<h5 id="多资源银行家算法"><a href="#多资源银行家算法" class="headerlink" title="多资源银行家算法"></a>多资源银行家算法</h5><ul>
+<li><p>和单资源银行家算法类似，多资源是多个资源，因此这里用两个矩阵，一个表示进程已分配各资源的矩阵，一个是进程还需要的资源数，还有3个向量分别为$E$、$P$、$A$分别表示各资源总数量、已分配数量和可使用资源数量，如下图</p>
+<p><img src="/images/multiple_resources_bank_al_ex.png" alt="img"></p>
+</li>
+<li><p>检查一个状态是否安全的算法执行步骤，和多资源死锁检测算法类似</p>
+<ol>
+<li>找到一个进程，其还需要的资源向量小于或等于可用资源向量$A$，如果没有这样一个进程，说明最终会发生死锁</li>
+<li>假设这个进程获得其所需要的所有资源，并完成其工作，因此其释放其已拥有的资源累加到向量$A$上，将该进程标记为终止</li>
+<li>重复执行上述两步，直到所有的进程都标记完成，那么初始状态是安全的；否则，初始状态是不安全的，最终会发生死锁</li>
+</ol>
+</li>
+<li><p><strong>小结</strong>：银行家算法虽然很有意义，但是缺乏使用价值，因为很少有进程在运行前就事先知道运行需要的资源，而且进程数量也不是固定的会一直变化</p>
+</li>
+</ul>
+<h4 id="死锁预防"><a href="#死锁预防" class="headerlink" title="死锁预防"></a>死锁预防</h4><p>通过上述的死锁避免方法学习，我们知道了死锁避免从本质上是不可行的。所以回到文章开始提到的四个死锁条件，可以从这四个条件入手，通过打破这些条件来预防死锁</p>
+<h5 id="破坏互斥条件"><a href="#破坏互斥条件" class="headerlink" title="破坏互斥条件"></a>破坏互斥条件</h5><ul>
+<li>定义：避免分配那些不是绝对必须的资源，尽量做到尽可能少得进程可以访问真正的资源</li>
+<li>一个例子：假脱机打印机技术，进程需要打印并不是直接控制物理打印机，只有打印机守护进程可以控制物理打印机，并且打印机守护进程不会申请其他资源，因此不会产生死锁</li>
+</ul>
+<h5 id="破坏持有并等待条件"><a href="#破坏持有并等待条件" class="headerlink" title="破坏持有并等待条件"></a>破坏持有并等待条件</h5><ul>
+<li>第一种方法：进程一次性获取了其所需要的所有资源在执行任务直到任务完成，如果有一个资源或多个不可用，那么进程什么资源也不会分配。该方法的问题是和银行家算法，在进程执行前很难知道进程需要的资源，并且还有一个问题资源得不到充分利用</li>
+<li>第二种方法：另一个方法是，进程每次申请一个资源时，先释放其持有的所有资源，然后再一次性申请它们</li>
+</ul>
+<h5 id="破坏不可抢占条件"><a href="#破坏不可抢占条件" class="headerlink" title="破坏不可抢占条件"></a>破坏不可抢占条件</h5><ul>
+<li>如前所述，某一些资源可以通过虚拟化技术来使其可以变成可抢占的，比如打印机的虚拟化技术假脱机</li>
+</ul>
+<h5 id="破坏环路等待条件"><a href="#破坏环路等待条件" class="headerlink" title="破坏环路等待条件"></a>破坏环路等待条件</h5><ul>
+<li>第一种方法：一个进程同一时刻只能持有一个资源，要申请另一个资源时必须释放其当前持有的资源。但是这种方法会导致某些复杂需要多个资源的任务不可接受，比如将一个磁盘上的大文件打印</li>
+<li>第二种方法：对所有资源统一编号，进程可以在任何时候提出资源申请，但是必须是按资源编号升序顺序申请。该方法还有一个优化，就是不强制要求升序，而只是要求不能申请比进程持有资源编号低的资源。这种方法的缺点是几乎找不出一种让任何进程都满足的排序编号</li>
+</ul>
+<h4 id="其他问题"><a href="#其他问题" class="headerlink" title="其他问题"></a>其他问题</h4><h5 id="两阶段锁"><a href="#两阶段锁" class="headerlink" title="两阶段锁"></a>两阶段锁</h5><p>数据库领域适用的一种加锁方式，在第一阶段，进程对某一记录加锁，如果第一阶段加锁成功，那就执行第二阶段更新操作，然后释放锁。如果进程发现需要加锁的记录已经加锁，释放它已经获得的锁重新开始第一阶段</p>
+<p>该算法并不能通用，只有在程序员确定在第一阶段随时都可以停下来，然后重启并且不产生错误，该算法才可用</p>
+<h5 id="活锁"><a href="#活锁" class="headerlink" title="活锁"></a>活锁</h5><ul>
+<li>一个可以造成活锁的例子，A,B进程在获得2,1资源时失败，同时释放已经持有的锁，并且等待相同的时间，然后会重复上述过程</li>
+<li>解决办法：在获取锁失败后随机等待一段时间，而不是所有进程等待固定的时间</li>
+</ul>
+<h5 id="饥饿"><a href="#饥饿" class="headerlink" title="饥饿"></a>饥饿</h5><ul>
+<li>某个进程因为资源访问策略限制，而迟迟得不到资源。比如，打印机的策略是先打印小文件，假设有一个大文件需要打印，每次都是优先打印小文件，那么大文件就得不到打印的机会</li>
+<li>解决办法：使用先到先服务的策略</li>
+</ul>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/OS/" rel="tag"># OS</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2020/07/18/操作系统-10-输入输出/" rel="next" title="操作系统-10-I/O-基本原理">
+                <i class="fa fa-chevron-left"></i> 操作系统-10-I/O-基本原理
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Overview
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">ikan</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">27</span>
+                  <span class="site-state-item-name">posts</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">7</span>
+                  <span class="site-state-item-name">categories</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">12</span>
+                  <span class="site-state-item-name">tags</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-4"><a class="nav-link" href="#引言"><span class="nav-number">1.</span> <span class="nav-text">引言</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#资源"><span class="nav-number">2.</span> <span class="nav-text">资源</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#资源定义"><span class="nav-number">2.1.</span> <span class="nav-text">资源定义</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#可抢占资源和不可抢占资源"><span class="nav-number">2.2.</span> <span class="nav-text">可抢占资源和不可抢占资源</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#死锁检测和恢复"><span class="nav-number">3.</span> <span class="nav-text">死锁检测和恢复</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#死锁的条件"><span class="nav-number">3.1.</span> <span class="nav-text">死锁的条件</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#死锁建模"><span class="nav-number">3.2.</span> <span class="nav-text">死锁建模</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#死锁检测"><span class="nav-number">3.3.</span> <span class="nav-text">死锁检测</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#死锁恢复"><span class="nav-number">3.4.</span> <span class="nav-text">死锁恢复</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#死锁避免"><span class="nav-number">4.</span> <span class="nav-text">死锁避免</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#资源轨迹图"><span class="nav-number">4.1.</span> <span class="nav-text">资源轨迹图</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#安全和不安全状态"><span class="nav-number">4.2.</span> <span class="nav-text">安全和不安全状态</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#单资源银行家算法"><span class="nav-number">4.3.</span> <span class="nav-text">单资源银行家算法</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#多资源银行家算法"><span class="nav-number">4.4.</span> <span class="nav-text">多资源银行家算法</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#死锁预防"><span class="nav-number">5.</span> <span class="nav-text">死锁预防</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#破坏互斥条件"><span class="nav-number">5.1.</span> <span class="nav-text">破坏互斥条件</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#破坏持有并等待条件"><span class="nav-number">5.2.</span> <span class="nav-text">破坏持有并等待条件</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#破坏不可抢占条件"><span class="nav-number">5.3.</span> <span class="nav-text">破坏不可抢占条件</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#破坏环路等待条件"><span class="nav-number">5.4.</span> <span class="nav-text">破坏环路等待条件</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#其他问题"><span class="nav-number">6.</span> <span class="nav-text">其他问题</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#两阶段锁"><span class="nav-number">6.1.</span> <span class="nav-text">两阶段锁</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#活锁"><span class="nav-number">6.2.</span> <span class="nav-text">活锁</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#饥饿"><span class="nav-number">6.3.</span> <span class="nav-text">饥饿</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">ikan</span>
+
+  
+</div>
+
+
+  <div class="powered-by">Powered by <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a></div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">Theme &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+  
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+        tex2jax: {
+          inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+          processEscapes: true,
+          skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+        }
+      });
+    </script>
+
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for (i=0; i < all.length; i += 1) {
+          all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+      });
+    </script>
+    <script type="text/javascript" src="//cdn.bootcss.com/mathjax/2.7.1/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+  
+
+
+  
+
+  
+
+</body>
+</html>
