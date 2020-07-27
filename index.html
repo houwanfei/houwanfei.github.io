@@ -249,6 +249,159 @@
   
   
   <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2020/07/27/一个外包系统的重构过程/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="ikan">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="IkanのBolg">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2020/07/27/一个外包系统的重构过程/" itemprop="url">一个外包系统的重构过程</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2020-07-27T19:56:28+08:00">
+                2020-07-27
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/编程经验/" itemprop="url" rel="index">
+                    <span itemprop="name">编程经验</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          <h4 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h4><p>2017年正直互联网金融崛起之时，由于那时候监管不规范，互联网金融公司如雨后春笋般崛起，我也是这时入职了一家互联网金融创业公司（一个大集团的全资子公司）。入职之前可能因为公司没有技术团队来开发一套完整的贷款系统，因此外包了系统给一个外包公司（这里就不说是哪家了），整个项目软件技术偏老，JDK当时还是用的1.7，外包系统可能大家都懂的，它们为了批量生产，基本都是有一个自有框架，然后在其框架上做开发。维护过外包系统的人可能都知道，那是一个非常痛苦的，就拿我接手的这个项目来说吧，我主要列几点。</p>
+<ul>
+<li>数据库表冗余严重：数据库的表就有200多张表，仔细看了一下，大部分的表都是其为了方便开发各类金融项目整合的一个很庞大的系统，我们的系统可能只用到其中很少的一部分。表中很多冗余预留字段，要让一个新人短期内接手开发，几乎是不可能</li>
+<li>前后端分层混乱：大量的jsp页面有sql语句，导致代码调试困难</li>
+<li>严重的事务问题：系统中由于开发人员水平参差不齐和为了追求进度导致很多业务逻辑没有理清，比如将调用第三方系统的代码放进了本地事务中，导致本地事务异常回滚时，第三方无法回滚。当时是因为这个出了一个线上事故，因为生成还款计划问题，导致本地事务回滚，引发了一次用户疯狂提现却不减额度</li>
+<li>维护困难：当时几乎每一个新人加入团队，每天下午培训一小时，起码要培训一个月才能上手开发，排查问题困难</li>
+</ul>
+<p>出于这些原因，核心团队立志要将这个庞然大物重构，由于当时流行微服务，因此决定采用微服务的方式拆分。因为大家这个时候经验都不丰富，技术团队几乎没有任何积累。做起来，真的困难重重。我们重构主要分为3个阶段，第一阶段，稳定系统；第二阶段，自动化发布；第三阶段，微服务化</p>
+          <!--noindex-->
+          <div class="post-button text-center">
+            <a class="btn" href="/2020/07/27/一个外包系统的重构过程/#more" rel="contents">
+              Read more &raquo;
+            </a>
+          </div>
+          <!--/noindex-->
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="http://yoursite.com/2020/07/23/操作系统-11-死锁/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1587,156 +1740,6 @@
 
 
     
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2020/06/07/操作系统笔记-6-内存管理基础/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="ikan">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="IkanのBolg">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2020/06/07/操作系统笔记-6-内存管理基础/" itemprop="url">操作系统笔记-6-内存管理基础</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">Posted on</span>
-              
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2020-06-07T12:32:49+08:00">
-                2020-06-07
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">In</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/OS学习笔记/" itemprop="url" rel="index">
-                    <span itemprop="name">OS学习笔记</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          <h4 id="引言"><a href="#引言" class="headerlink" title="引言"></a>引言</h4><p>花了一段时间才把之前的笔记整理了一部分，平时太忙也没啥时间。今天开始整理内存管理部分的，内存管理部分大致分为三部分笔记，第一部分就是本篇内存管理基础，第二部分是虚拟内存，第三部分高速缓存。</p>
-<p>一个程序在运行前，只是一个存储在磁盘上的可执行的二进制文件，包括可执行指令和数据。当程序运行时，这个二进制文件会被加载到内存中，指令和数据在执行时会被cpu从内存中加载到寄存器中，然后执行，可能会把执行结果再次存入内存中。数据以何种形式存在内存，如果为进程分配内存，进程退出如何回收，这个过程叫内存管理，接下来就详细介绍这个过程</p>
-<h4 id="早期无存储器抽象"><a href="#早期无存储器抽象" class="headerlink" title="早期无存储器抽象"></a>早期无存储器抽象</h4><h5 id="无存储器抽象内存访问"><a href="#无存储器抽象内存访问" class="headerlink" title="无存储器抽象内存访问"></a>无存储器抽象内存访问</h5><p>用户程序直接操作物理内存的地址，比如将位置为1000的物理内存中的内容复制到REGISTER1</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">MOV REGISTER1,1000</span><br></pre></td></tr></table></figure>
-<h5 id="物理内存模型"><a href="#物理内存模型" class="headerlink" title="物理内存模型"></a>物理内存模型</h5>
-          <!--noindex-->
-          <div class="post-button text-center">
-            <a class="btn" href="/2020/06/07/操作系统笔记-6-内存管理基础/#more" rel="contents">
-              Read more &raquo;
-            </a>
-          </div>
-          <!--/noindex-->
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
   </section>
 
   
@@ -1787,7 +1790,7 @@
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">27</span>
+                  <span class="site-state-item-count">28</span>
                   <span class="site-state-item-name">posts</span>
                 </a>
               </div>
@@ -1798,7 +1801,7 @@
               
               <div class="site-state-item site-state-categories">
                 <a href="/categories/index.html">
-                  <span class="site-state-item-count">7</span>
+                  <span class="site-state-item-count">8</span>
                   <span class="site-state-item-name">categories</span>
                 </a>
               </div>
@@ -1809,7 +1812,7 @@
               
               <div class="site-state-item site-state-tags">
                 <a href="/tags/index.html">
-                  <span class="site-state-item-count">12</span>
+                  <span class="site-state-item-count">13</span>
                   <span class="site-state-item-name">tags</span>
                 </a>
               </div>
