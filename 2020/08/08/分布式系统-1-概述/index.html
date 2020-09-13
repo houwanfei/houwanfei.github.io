@@ -1,0 +1,803 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="分布式系统," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="引言随着互联网的发展和业务的复杂度提升，越来越多的应用开始使用微服务架构，因此对于学习分布式基础知识非常有必要。因为我们平时做开发可以熟练的使用工具，但是有时候不知道其背后的原理会让人很不爽。 提到分布式系统，可能很多人就会觉得那是很多机器，当然这个没错，但是我们不应该以机器的数量来分辨是不是分布式系统，当然多机器肯定是分布式，但是单机就一定不是分布式系统吗？答案肯定是不一定，在NancyA.Ly">
+<meta name="keywords" content="分布式系统">
+<meta property="og:type" content="article">
+<meta property="og:title" content="分布式系统-1-概述">
+<meta property="og:url" content="http://yoursite.com/2020/08/08/分布式系统-1-概述/index.html">
+<meta property="og:site_name" content="IkanのBolg">
+<meta property="og:description" content="引言随着互联网的发展和业务的复杂度提升，越来越多的应用开始使用微服务架构，因此对于学习分布式基础知识非常有必要。因为我们平时做开发可以熟练的使用工具，但是有时候不知道其背后的原理会让人很不爽。 提到分布式系统，可能很多人就会觉得那是很多机器，当然这个没错，但是我们不应该以机器的数量来分辨是不是分布式系统，当然多机器肯定是分布式，但是单机就一定不是分布式系统吗？答案肯定是不一定，在NancyA.Ly">
+<meta property="og:locale" content="default">
+<meta property="og:image" content="http://yoursite.com/images/async_share_mem_model.png">
+<meta property="og:updated_time" content="2020-09-13T04:51:59.587Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="分布式系统-1-概述">
+<meta name="twitter:description" content="引言随着互联网的发展和业务的复杂度提升，越来越多的应用开始使用微服务架构，因此对于学习分布式基础知识非常有必要。因为我们平时做开发可以熟练的使用工具，但是有时候不知道其背后的原理会让人很不爽。 提到分布式系统，可能很多人就会觉得那是很多机器，当然这个没错，但是我们不应该以机器的数量来分辨是不是分布式系统，当然多机器肯定是分布式，但是单机就一定不是分布式系统吗？答案肯定是不一定，在NancyA.Ly">
+<meta name="twitter:image" content="http://yoursite.com/images/async_share_mem_model.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: 'Author'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2020/08/08/分布式系统-1-概述/"/>
+
+
+
+
+
+  <title>分布式系统-1-概述 | IkanのBolg</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="default">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">IkanのBolg</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">只想安安静静撸代码</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            Home
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            Tags
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            Categories
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            Archives
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2020/08/08/分布式系统-1-概述/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="ikan">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="IkanのBolg">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">分布式系统-1-概述</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2020-08-08T21:19:34+08:00">
+                2020-08-08
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/分布式系统/" itemprop="url" rel="index">
+                    <span itemprop="name">分布式系统</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h4 id="引言"><a href="#引言" class="headerlink" title="引言"></a>引言</h4><p>随着互联网的发展和业务的复杂度提升，越来越多的应用开始使用微服务架构，因此对于学习分布式基础知识非常有必要。因为我们平时做开发可以熟练的使用工具，但是有时候不知道其背后的原理会让人很不爽。</p>
+<p>提到分布式系统，可能很多人就会觉得那是很多机器，当然这个没错，但是我们不应该以机器的数量来分辨是不是分布式系统，当然多机器肯定是分布式，但是单机就一定不是分布式系统吗？答案肯定是不一定，在NancyA.Lynch的《分布式算法》一书中，都是用抽象为”进程”理解的，如果我们用机器来理解，假设公司分配的机器是8核16G，那你肯定不会只部署一个服务，肯定会部署多个服务，这些服务之间可能相互调用，那么它们就是一个分布式系统。</p>
+<a id="more"></a>
+<h4 id="分布式系统"><a href="#分布式系统" class="headerlink" title="分布式系统"></a>分布式系统</h4><h5 id="分布式系统特点"><a href="#分布式系统特点" class="headerlink" title="分布式系统特点"></a>分布式系统特点</h5><ul>
+<li>处理器数目未知<ul>
+<li>不确定网络拓扑</li>
+<li>独立输入</li>
+<li>多个程序同时运行，开始时间不一样，处理器速度不一样</li>
+<li>处理器的不确定性</li>
+<li>不确定消息传递需要的时间</li>
+<li>不确定消息顺序</li>
+<li>机器和通信可能故障</li>
+</ul>
+</li>
+</ul>
+<h5 id="分布式系统关键问题"><a href="#分布式系统关键问题" class="headerlink" title="分布式系统关键问题"></a>分布式系统关键问题</h5><ul>
+<li>IPC(进程间通信)：分布式是多进程系统，因此进程之间需要交换信息，进程可能在不同的硬件设备上，因此进程间通信可能需要网络通信，为了解决进程间通信的方便，诞生了很多RPC框架，RPC即远程过程调用，它简化了进程间通信的编程复杂性，提供了像调用本地方法（函数调用）一样调用远程方法，使开发者不需要纠结进程间通信的具体实现，常用的RPC框架<ul>
+<li>gRPC：它的Java实现的底层网络库是基于Netty开发而来</li>
+<li>Dubbo：阿里提供的RPC框架，大家应该很熟悉</li>
+<li>Feign：这个更常用，它是spring-cloud集成组件，但是有人可能觉得它不属于RPC框架原因是它的底层通信是基于HTTP协议实现的，但是RPC并没有说明其通信协议必须是TCP，因此我认为Feign是一个RPC框架</li>
+<li>……</li>
+</ul>
+</li>
+<li>时序模型：在单进程的时候，因为其在一台物理机上，因此它的时钟是单一的，进程接收的请求都是可排序的，因此只要为请求打上时间戳就知道请求的先后顺序。但是在分布式系统因为进程可能分布在不同的物理机上，而不同物理机上时间很难保持一致，哪怕是当时一致，之后也很难做到一致，这样在分布式环境中要标识两个不同进程的操作先后顺序就变得困难，不过在前人的研究下，也诞生了很多优秀的解决方案，其中包括著名的Lamport的逻辑时钟</li>
+<li>故障模型：越是复杂精妙的系统，越是容易出错。分布式系统中常见的故障的进程停止故障，Byzantine故障，通信故<ul>
+<li>进程停止故障：该类故障表现为服务不可用</li>
+<li>Byzantine故障：这类故障是一个棘手的故障类型，服务并没有下线，如果我们进程抽象为一个I/O自动机，自动机的状态根据输入值一定规则转换，然后生成输出。那么Byzantine故障表现为其状态可以自己任意转换，并且可以任意生成输出结果</li>
+<li>通信故障：表现为消息丢失和消息重复</li>
+</ul>
+</li>
+<li>一致性问题：这个问题是分布式系统中很重要的一个问题，相关一致性算法如Paxos，比Paxos更简单的raft等。包括分布式事务，后续会详细介绍</li>
+</ul>
+<h5 id="分布式系统模型分类"><a href="#分布式系统模型分类" class="headerlink" title="分布式系统模型分类"></a>分布式系统模型分类</h5><ul>
+<li><p>同步网络模型：同步网络模型特征(这里的同步和io的同步不是一个概念，从下边特征可以看出这样的网络是非常严格的，实际环境很少有这样的网络)，更直观的描述就是同步网络模型有轮的概念，进程间通信和状态转换都会在一轮中完成</p>
+<ul>
+<li>节点时钟漂移(时钟硬件并不是百分之百准确，可能因环境导致快了或慢了)有上限</li>
+<li>网络传输时间有上限</li>
+<li>所有节点计算速度一样</li>
+</ul>
+</li>
+<li><p>异步共享存储器模型：异步模型和同步模型的区别在于异步模型没有同步模型的轮的概念，进程间通信不能保证在固定时间范围内完成。异步共享存储器模型只的是，分布式进程通过共享内存变量来完成进程间通信，一个简单的示意图，蓝色方块代表共享变量</p>
+<p><img src="/images/async_share_mem_model.png" alt="img"></p>
+</li>
+<li><p>异步网络模型：和异步共享存储器模型不同的是异步网络模型进程间通信通过网络，和同步网络相比，异步网络没有同步轮的概念，消息可以在任意时间内到达，处理器可以以任意速度运行。异步网络模型的关键问题如下</p>
+<ul>
+<li>消息丢失</li>
+<li>消息重复（同步网络不存在该问题）</li>
+<li>依然有节点停止故障和Byzantine故障</li>
+</ul>
+</li>
+<li><p>部分同步模型：基于时序假设的模型，相比异步模型，对系统做出一些假设，比如假设处理器能够访问实际时间或者近似时间，或者假设消息发送在已知的上下限之间，因此，看起来部分同步模型比异步模型少了一些不确定性。但是，时序会引发更多其他的问题，因为在这种模型下算法的正确性取决于时序的假设</p>
+</li>
+</ul>
+<h4 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h4><p>想到什么写什么，很多地方写的很简略，只是想描述一下分布式系统大概有哪些关键性问题，后续文章会慢慢详细介绍各个问题。</p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/分布式系统/" rel="tag"># 分布式系统</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2020/07/27/一个外包系统的重构过程/" rel="next" title="一个外包系统的重构过程">
+                <i class="fa fa-chevron-left"></i> 一个外包系统的重构过程
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2020/08/10/分布式系统-2-同步网络Leader选举算法/" rel="prev" title="分布式系统-2-同步网络Leader选举算法">
+                分布式系统-2-同步网络Leader选举算法 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Overview
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">ikan</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">30</span>
+                  <span class="site-state-item-name">posts</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">9</span>
+                  <span class="site-state-item-name">categories</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">14</span>
+                  <span class="site-state-item-name">tags</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-4"><a class="nav-link" href="#引言"><span class="nav-number">1.</span> <span class="nav-text">引言</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#分布式系统"><span class="nav-number">2.</span> <span class="nav-text">分布式系统</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#分布式系统特点"><span class="nav-number">2.1.</span> <span class="nav-text">分布式系统特点</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#分布式系统关键问题"><span class="nav-number">2.2.</span> <span class="nav-text">分布式系统关键问题</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#分布式系统模型分类"><span class="nav-number">2.3.</span> <span class="nav-text">分布式系统模型分类</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#小结"><span class="nav-number">3.</span> <span class="nav-text">小结</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">ikan</span>
+
+  
+</div>
+
+
+  <div class="powered-by">Powered by <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a></div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">Theme &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+  
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+        tex2jax: {
+          inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+          processEscapes: true,
+          skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+        }
+      });
+    </script>
+
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for (i=0; i < all.length; i += 1) {
+          all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+      });
+    </script>
+    <script type="text/javascript" src="//cdn.bootcss.com/mathjax/2.7.1/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+  
+
+
+  
+
+  
+
+</body>
+</html>
