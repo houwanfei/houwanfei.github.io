@@ -249,6 +249,160 @@
   
   
   <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2020/09/10/分布式系统-2-同步网络Leader选举算法/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="ikan">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="IkanのBolg">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2020/09/10/分布式系统-2-同步网络Leader选举算法/" itemprop="url">分布式系统-2-同步网络Leader选举算法</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2020-09-10T22:09:27+08:00">
+                2020-09-10
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/分布式系统/" itemprop="url" rel="index">
+                    <span itemprop="name">分布式系统</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          <h4 id="引言"><a href="#引言" class="headerlink" title="引言"></a>引言</h4><p>在前一篇文章概述中，提到了分布式系统模型大致分类为同步网络模型、异步共享存储器模型、异步网络模型和部分同步模型。今天开始，将慢慢介绍同步网络模型的一些算法，因为同步网络模型有一些严格的环境假设，所以同步网络模型算法比较简单，但是同步网络模型是一个理想化模型，现实生活中这种模型是非常少的，但是学习它们也有助于我们理解后边的异步模型算法和部分同步模型，在接下来的几篇文章中，将分别介绍分布式领域中比较热门的话题包括Leader选举、一致性（包括著名的Byzantine故障下的一致性）、最小生成树和最短路径等问题</p>
+<p>先从Leader选举开始</p>
+<h4 id="概念准备"><a href="#概念准备" class="headerlink" title="概念准备"></a>概念准备</h4><h5 id="网络表示"><a href="#网络表示" class="headerlink" title="网络表示"></a>网络表示</h5><ul>
+<li>网络图定义：有向图$G = (V, E)$，$distance(i,j)$表示i到j的最短路径长度如果存在的话，否则$distance(i,j)=\infty$<ul>
+<li>$out-nbrs_i$代表图中的边从i指向这些节点</li>
+<li>$in-nbrs_i$代表图中的边从这些节点指向i</li>
+</ul>
+</li>
+</ul>
+          <!--noindex-->
+          <div class="post-button text-center">
+            <a class="btn" href="/2020/09/10/分布式系统-2-同步网络Leader选举算法/#more" rel="contents">
+              Read more &raquo;
+            </a>
+          </div>
+          <!--/noindex-->
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="http://yoursite.com/2020/09/08/分布式系统-1-概述/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1592,153 +1746,6 @@
 
 
     
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2020/06/13/操作系统笔记-8-高速缓存/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="ikan">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="IkanのBolg">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2020/06/13/操作系统笔记-8-高速缓存/" itemprop="url">操作系统笔记-8-高速缓存</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">Posted on</span>
-              
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2020-06-13T19:49:22+08:00">
-                2020-06-13
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">In</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/OS学习笔记/" itemprop="url" rel="index">
-                    <span itemprop="name">OS学习笔记</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          <h4 id="引言"><a href="#引言" class="headerlink" title="引言"></a>引言</h4><p>上一篇学习了虚拟内存，虚拟内存解决了多道程序并发运行的内存分配和解决小内存运行大程序的问题。这一篇将讲解高速缓存，来解决内存的低速和cpu高速不匹配的问题，计算机的很多的问题，其实都可以中间加一层解决，因此计算机才变得复杂，想象一下如果主存的速度可以匹配cpu的速度那么高速缓存就不需要了，再进一步，假设硬盘的速度可以匹配cpu，我想主存也可以不需要了。但是现有的技术还达不到这个目标，所以这一部分还是得学习一下高速缓存，看看高速缓存是如何解决cpu快速访问指令和数据的问题。</p>
-<h4 id="基本概念"><a href="#基本概念" class="headerlink" title="基本概念"></a>基本概念</h4><h5 id="CPU、缓存、内存架构"><a href="#CPU、缓存、内存架构" class="headerlink" title="CPU、缓存、内存架构"></a>CPU、缓存、内存架构</h5><p>现代cpu一般都是多核的，高速缓存通常分了三级，L1分为指令缓存和数据缓存并且是cpu核心独有；L2也是cpu核心独有；L3则是多核心共享，其示意图如下</p>
-          <!--noindex-->
-          <div class="post-button text-center">
-            <a class="btn" href="/2020/06/13/操作系统笔记-8-高速缓存/#more" rel="contents">
-              Read more &raquo;
-            </a>
-          </div>
-          <!--/noindex-->
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
   </section>
 
   
@@ -1789,7 +1796,7 @@
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">29</span>
+                  <span class="site-state-item-count">30</span>
                   <span class="site-state-item-name">posts</span>
                 </a>
               </div>
