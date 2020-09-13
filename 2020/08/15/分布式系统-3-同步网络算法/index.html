@@ -1,0 +1,993 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="分布式系统," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="引言上一篇文章讲了同步网络中的leader选举算法。考虑一个问题，当网络中有消息需要广播时，如果在网络中以最快的速度完成广播？或者如何计算图的直径？接下来就会一步一步解决这些问题 将在这篇文章中讲述分布式同步网络中广度优先搜索、最短路径和最小生成数算法。 广度优先搜索利用广度优先搜索来构造方便用于广播通信的树，BFS树最小化最大通信时间 SynchBFS算法 前提假设  假设进程有uid 不知道网">
+<meta name="keywords" content="分布式系统">
+<meta property="og:type" content="article">
+<meta property="og:title" content="分布式系统-3-同步网络算法">
+<meta property="og:url" content="http://yoursite.com/2020/08/15/分布式系统-3-同步网络算法/index.html">
+<meta property="og:site_name" content="IkanのBolg">
+<meta property="og:description" content="引言上一篇文章讲了同步网络中的leader选举算法。考虑一个问题，当网络中有消息需要广播时，如果在网络中以最快的速度完成广播？或者如何计算图的直径？接下来就会一步一步解决这些问题 将在这篇文章中讲述分布式同步网络中广度优先搜索、最短路径和最小生成数算法。 广度优先搜索利用广度优先搜索来构造方便用于广播通信的树，BFS树最小化最大通信时间 SynchBFS算法 前提假设  假设进程有uid 不知道网">
+<meta property="og:locale" content="default">
+<meta property="og:image" content="http://yoursite.com/images/synchBFS_ex1.png">
+<meta property="og:image" content="http://yoursite.com/images/synchBFS_ex2.png">
+<meta property="og:image" content="http://yoursite.com/images/synchBFS_ex3.png">
+<meta property="og:image" content="http://yoursite.com/images/synchBFS_ex4.png">
+<meta property="og:image" content="http://yoursite.com/images/bellman_ex1.png">
+<meta property="og:image" content="http://yoursite.com/images/bellman_ex2.png">
+<meta property="og:image" content="http://yoursite.com/images/bellman_ex3.png">
+<meta property="og:image" content="http://yoursite.com/images/bellman_ex4.png">
+<meta property="og:image" content="http://yoursite.com/images/MWOE_ex.png">
+<meta property="og:image" content="http://yoursite.com/images/synchghs_ex1.png">
+<meta property="og:image" content="http://yoursite.com/images/synchghs_ex2.png">
+<meta property="og:image" content="http://yoursite.com/images/synchghs_ex2.png">
+<meta property="og:image" content="http://yoursite.com/images/lubymis_ex1.png">
+<meta property="og:image" content="http://yoursite.com/images/lubymis_ex2.png">
+<meta property="og:image" content="http://yoursite.com/images/lubymis_ex3.png">
+<meta property="og:updated_time" content="2020-09-13T13:58:53.682Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="分布式系统-3-同步网络算法">
+<meta name="twitter:description" content="引言上一篇文章讲了同步网络中的leader选举算法。考虑一个问题，当网络中有消息需要广播时，如果在网络中以最快的速度完成广播？或者如何计算图的直径？接下来就会一步一步解决这些问题 将在这篇文章中讲述分布式同步网络中广度优先搜索、最短路径和最小生成数算法。 广度优先搜索利用广度优先搜索来构造方便用于广播通信的树，BFS树最小化最大通信时间 SynchBFS算法 前提假设  假设进程有uid 不知道网">
+<meta name="twitter:image" content="http://yoursite.com/images/synchBFS_ex1.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: 'Author'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2020/08/15/分布式系统-3-同步网络算法/"/>
+
+
+
+
+
+  <title>分布式系统-3-同步网络算法 | IkanのBolg</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="default">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">IkanのBolg</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">只想安安静静撸代码</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            Home
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            Tags
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            Categories
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            Archives
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2020/08/15/分布式系统-3-同步网络算法/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="ikan">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="IkanのBolg">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">分布式系统-3-同步网络算法</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2020-08-15T20:53:26+08:00">
+                2020-08-15
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/分布式系统/" itemprop="url" rel="index">
+                    <span itemprop="name">分布式系统</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h4 id="引言"><a href="#引言" class="headerlink" title="引言"></a>引言</h4><p>上一篇文章讲了同步网络中的leader选举算法。考虑一个问题，当网络中有消息需要广播时，如果在网络中以最快的速度完成广播？或者如何计算图的直径？接下来就会一步一步解决这些问题</p>
+<p>将在这篇文章中讲述分布式同步网络中广度优先搜索、最短路径和最小生成数算法。</p>
+<h4 id="广度优先搜索"><a href="#广度优先搜索" class="headerlink" title="广度优先搜索"></a>广度优先搜索</h4><p>利用广度优先搜索来构造方便用于广播通信的树，BFS树最小化最大通信时间</p>
+<h5 id="SynchBFS算法"><a href="#SynchBFS算法" class="headerlink" title="SynchBFS算法"></a>SynchBFS算法</h5><ul>
+<li><p>前提假设</p>
+<ol>
+<li>假设进程有uid</li>
+<li>不知道网络大小和直径</li>
+<li>给定初始root $i_0$</li>
+</ol>
+</li>
+</ul>
+<a id="more"></a>
+<ul>
+<li><p>进程维护状态</p>
+<ol>
+<li>$parent$：记录进程的父节点是谁</li>
+<li>$marked$：记录是否被标记</li>
+</ol>
+</li>
+<li><p>算法流程</p>
+<ul>
+<li>选择一个节点作为初始节点，定为$i_0$，设置为已标记，$i_0$发送一条search消息到节点$i$的$out-nbrs$</li>
+<li>对于任意一个节点，如果节点还未被标记，并且收到search消息，则它将自己标记，并且将发送search消息的节点设置为它的parent，然后发送search消息到它的$out-nbrs$</li>
+</ul>
+</li>
+<li><p>算法图解</p>
+<ul>
+<li><p>初始化选择4(可以随意选择)为root节点$i_0$</p>
+<p><img src="/images/synchBFS_ex1.png" alt="img"></p>
+</li>
+<li><p>第一轮search消息，4只有一个$out-nbrs$，所以只有一条消息，5被标记，其parent节点为4，红色箭头代表search消息</p>
+<p><img src="/images/synchBFS_ex2.png" alt="img"></p>
+</li>
+<li><p>第二轮search消息,5有两个$out-nbrs$</p>
+<p><img src="/images/synchBFS_ex3.png" alt="img"></p>
+</li>
+<li><p>第三轮，因为是分布式系统，所以进程2和进程6是同时进行的</p>
+<p><img src="/images/synchBFS_ex4.png" alt="img"></p>
+</li>
+</ul>
+</li>
+<li><p>复杂度分析</p>
+<ul>
+<li>时间复杂度：最多为daim轮，为图的直径，实际上可能更小，是$i_0$到它最远的节点</li>
+<li>通信复杂度：通信复杂度：图的边数，$|E|$</li>
+</ul>
+</li>
+<li><p>如何确定child节点：双向网络中非常容易，child发送一条消息给parent。在单向网络中，需要间接节点将消息传递给它的parent节点，因此可以用SynchBFS算法实现这个过程，如果每一轮中一条链路只能发送一条消息，那这些消息可以合并成一条消息</p>
+<ul>
+<li>复杂度分析<ul>
+<li>双向通信网络<ol>
+<li>时间复杂度：$O(diam)$</li>
+<li>通信复杂度：$O(|E|)$，因为child可以直接发送消息给parent，因此总消息数为$2\cdot|E|$</li>
+</ol>
+</li>
+<li>单向通信网络<ol>
+<li>时间复杂度：$O(diam)$，因为额外的消息可以并行发送</li>
+<li>通信复杂度：$O(diam\cdot|E|)$，因为需要发送额外消息，因此每一轮中每条边都可能会发送消息，总共有$diam$轮，所以总消息最多为$diam\cdot|E|$</li>
+</ol>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>SynchBFS算法终止</p>
+<ul>
+<li>核心思想：当消息传递到叶子节点时，叶子节点标记自己后，发送消息让parent知道其已经完成，当parent收到所有其子节点的确认完成消息后，parent发送消息给它的parent，循环这个过程直到确认消息到达root节点$i_0$</li>
+<li>复杂度分析<ul>
+<li>双向通信网络<ol>
+<li>时间复杂度：$O(diam)$，因为叶子节点返回确认完成消息是并行执行并且可以直接发送给parent，因此，时间最多为$2\cdot diam$</li>
+<li>通信复杂度：$O(|E|)$</li>
+</ol>
+</li>
+<li>单向通信网络<ol>
+<li>时间复杂度：$O(diam^2)$，因为在发送确认消息时，每一级parent都是执行一次SynchBFS算法，每一层级的节点不能并行执行，因为不能确定，该级的parent是否收到了所有child的确认消息，因child是通过间接的节点传递消息，因此可能绕了一个diam的路径，最多有diam个层级，因此时间复杂度为$O(diam^2)$</li>
+<li>通信复杂度：$O(diam^2\cdot|E|)$，和确认child节点类似，虽然每个层级的节点确认完成消息不能并行执行，但是不同节点的确认可以并行执行，因此每一轮最多有|E|消息，每一层级的确认消息最多需要$diam$轮，因此每一层级的确认需要消息最多为$diam\cdot|E|$，最多需要$diam$轮才能完成到$root$的确认，因此通信复杂度为$O(diam^2\cdot|E|)$</li>
+</ol>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>算法应用</p>
+<ul>
+<li>广播：一条消息的广播可以建立在BFS tree上，利用SynchBFS构造的一颗每一个非叶子节点都包含其子节点的BFS树，因此广播一条消息只需从root一直向前传播，时间复杂度为$O(diam)$，通信复杂度为$O(n)$</li>
+<li>全局计算：比如网络中所有节点求和，利用BFS tree从叶子节点开始，发送一个值给parent节点，非叶子节点等到汇集了所有子节点的输入，sum后发送给它的parent节点，直到root节点。如果在双向网络中，时间复杂度为$O(diam)$，通信复杂度为$O(n)$</li>
+<li>leader选举：所有节点初始并行发送消息进行选举，利用最大uid构造树，在双向网络中，时间复杂度为$O(diam)$，通信复杂度为$O(diam\cdot|E|)$</li>
+<li>计算图的直径(FloodMax需要用到)：所有节点并行发送消息执行SynchBFS算法，每个进程利用$max-dist_i$来构建树，得每个节点得到一个最大值，然后在第二轮中，整个网络利用SynchBFS求出最大值。如果是双向网络，时间复杂度$O(n)$，通信复杂度$O(diam\cdot|E|)$</li>
+</ul>
+</li>
+</ul>
+<h4 id="最短路径"><a href="#最短路径" class="headerlink" title="最短路径"></a>最短路径</h4><p>SynchBFS解决了未带权边的搜索，但是实际环境中，有很多场景并不是这样简单的，通常节点间通信都是有开销的，这个开销我们可以抽象为权重，比如通信的延迟，或者通信的带宽等，接下来将介绍带权网络的算法</p>
+<h5 id="BellmanFord算法"><a href="#BellmanFord算法" class="headerlink" title="BellmanFord算法"></a>BellmanFord算法</h5><ul>
+<li><p>前提假设</p>
+<ol>
+<li>有向网络</li>
+<li>有向边关联了一个权重</li>
+<li>每个节点知道连接边的权重</li>
+<li>每个节点知道网络的大小</li>
+</ol>
+</li>
+<li><p>进程维护状态</p>
+<ol>
+<li>$dist$：从$i_0$到该节点的最短距离，$i_0$初始化为0， 其他初始化为$\infin$</li>
+<li>$parent$：最短路径的父节点，初始化为$undefine$</li>
+<li>$round$：轮数，当$round$为n-1时结束</li>
+</ol>
+</li>
+<li><p>算法描述</p>
+<ul>
+<li><p>消息生成算法</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> round &lt;= n-<span class="number">1</span> then</span><br><span class="line">	send (dist, uid) to out-nbrs</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>进程状态转换算法，每一轮收到消息M的$(dist,uid)$,收到M集合U</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> round &lt;= n-<span class="number">1</span> then </span><br><span class="line">min := min(U.dist)</span><br><span class="line"><span class="keyword">if</span> min+weight &lt; dist then </span><br><span class="line">	dist := min.dist+weight</span><br><span class="line">	parent := min.uid </span><br><span class="line">round := round+<span class="number">1</span>;</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+</li>
+<li><p>算法图解</p>
+<ul>
+<li><p>初始状态</p>
+<p><img src="/images/bellman_ex1.png" alt="img"></p>
+</li>
+<li><p>第一轮，红色的线表示最短路径</p>
+<p><img src="/images/bellman_ex2.png" alt="img"></p>
+</li>
+<li><p>第二轮</p>
+<p><img src="/images/bellman_ex3.png" alt="img"></p>
+</li>
+<li><p>第三轮，可以看到节点1，最短路径已经有更小的值，其父节点也换成了2，直到$n-1$也就是round=5时，算法结束</p>
+<p><img src="/images/bellman_ex4.png" alt="img"></p>
+</li>
+</ul>
+</li>
+<li><p>复杂度分析</p>
+<ul>
+<li>时间复杂度为$n-1$</li>
+<li>通信复杂度$(n-1)\cdot|E|$</li>
+</ul>
+</li>
+</ul>
+<h4 id="最小生成树"><a href="#最小生成树" class="headerlink" title="最小生成树"></a>最小生成树</h4><h5 id="SynchGHS算法"><a href="#SynchGHS算法" class="headerlink" title="SynchGHS算法"></a>SynchGHS算法</h5><ul>
+<li><p>前提假设</p>
+<ol>
+<li>带权无向图</li>
+<li>节点有$uid$</li>
+<li>图大小已知</li>
+</ol>
+</li>
+<li><p>进程维护状态</p>
+<ol>
+<li>leader：记录component(一个子树结构)的leader的$uid$，</li>
+<li>k：level，每个level至少有$2^k$个节点</li>
+</ol>
+</li>
+<li><p>MWOE(最小权重出边)：指连接两个component的最小权重的边，一个简单的图说明，橙色和蓝色分别是两个不同的component，两条红色的边都是两个component的连接边，权重11的边就是要找的MWOE</p>
+<p><img src="/images/MWOE_ex.png" alt="img"></p>
+</li>
+<li><p>算法原理</p>
+<ul>
+<li><p>初始时，所有单个节点是一个component，每个节点的leader即是自己，每个component找出最小权重的出边MWOE，当一个component有多个节点时，会采用广播让各个节点找到MWOE，然后发送测试消息，看另一端的节点是否属于同一component，然后汇集MWOE到leader，leader得到整个component的MWOE。比如1只有一个边12，而3和2正好有同一条最小边0，所有这些操作都是并行执行的。</p>
+<p><img src="/images/synchghs_ex1.png" alt="img"></p>
+</li>
+<li><p>合并，leader通知component的MWOE的节点进行连接操作，节点将边加入树并通知端点节点进行同样的操作，然后节点uid大的端点节点利用树广播leader信息，宣布自己是leader，当有多个component合并成一个时，因为多个节点会广播leader信息，因此最终，整个component都会得到最大uid的leader信息，新component拥有了新的标识.（这里我的理解是可以直接使用当前component的Leader，但是书中描述的是用MWOE的端点uid大的作为新的leader）</p>
+<p><img src="/images/synchghs_ex2.png" alt="img"></p>
+</li>
+<li><p>算法终止，当所有的节点都联成一个图后，leader通知各节点寻找MWOE时，将没有MWOE了，因此leader通知各节点算法结束</p>
+<p><img src="/images/synchghs_ex2.png" alt="img"></p>
+</li>
+</ul>
+</li>
+<li><p>复杂度分析</p>
+<ul>
+<li>时间复杂度：因为每一级合并至少有两个component合并，因此最多需要$\log(n)$级可以完成MST构建，每一级需要的时间为$O(n)$，因此时间复杂度为$O(n\cdot\log(n))$</li>
+<li>通信复杂度：每一级，leader需要发送消息通知树的各个节点寻找MWOE，图中共有n个节点，找到之后还要汇集结果，因此消息数为$2\cdot n$，因此通信复杂度为$O(n)$，各个节点探测MWOE时，可能每条边都要探测，因此还需要额外的$|E|$通信消息，因此整体的通信复杂度为$O((n + |E|)\log(n))$</li>
+</ul>
+</li>
+<li><p>优化：在测试边时，如果是一条内部边也就是端点都是同一component，那么就标记为”rejected”，当探测时，如果一条边是rejected，那就不需要发送探测消息，因此探测通信总共只需要执行$|E|$次，因此通信复杂度为$O(n\log(n) + |E|)$</p>
+</li>
+</ul>
+<h4 id="最大独立集-MIS"><a href="#最大独立集-MIS" class="headerlink" title="最大独立集(MIS)"></a>最大独立集(MIS)</h4><ul>
+<li>定义：假设有无向图$G=(V,E)$,其中$I \subseteq V$是图的独立集，当且仅当$i,j \in I (i,j) \notin E$，通俗的讲就是最大独立集中的任意两个节点之间没有边相连，因此MIS不是唯一的。$I$是最大独立集当任意$I^<code>$包含$I$且$I^</code>$不是独立集</li>
+<li>前提假设<ol>
+<li>知道图的大小$n$</li>
+<li>不假设节点有$uid$</li>
+</ol>
+</li>
+<li>算法核心思想：每次选择独立集$I^<code>$，然后将$I^</code>$执行操作$I := I\bigcup I^<code>$，然后从图$G$中删除$I^</code>$的邻居，直到$G$为空，因此问题的关键是求$I^`$</li>
+</ul>
+<h5 id="LubyMIS算法"><a href="#LubyMIS算法" class="headerlink" title="LubyMIS算法"></a>LubyMIS算法</h5><p>利用随机化算法求$I^{\prime}$</p>
+<ul>
+<li><p>算法思想：每个节点$i$随机选择一个随机数$val_i$(范围$1 \le val_i \le 4^n$)，然后相邻节点之间发送消息$val_i$的最大为$winner$，$winner$会通知它的相邻节点为$loser$。$loser$会被从图$G$中移除</p>
+</li>
+<li><p>进程维护状态</p>
+<ol>
+<li>$round$：取值{1,2,3}，初始值1</li>
+<li>$val$：取值$\{1 \le val \le 4^n\}$，初始任意值</li>
+<li>$awake$：boolean值，初始值true</li>
+<li>$rem-nbrs$：剩余没有选择的邻接节点，初始化为图的所有邻接节点</li>
+<li>$status$：$\{unknown, winner, loser\}$，初始值$unknown$</li>
+</ol>
+</li>
+<li><p>算法描述</p>
+<ul>
+<li><p>随机数生成</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> awake and round = <span class="number">1</span> then val := random</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>消息生成算法</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> awake then</span><br><span class="line"><span class="keyword">case</span></span><br><span class="line">	round = <span class="number">1</span>:</span><br><span class="line">		send val to all nodes in rem-nbrs</span><br><span class="line">	round = <span class="number">2</span>:</span><br><span class="line">		<span class="keyword">if</span> status = winner then</span><br><span class="line">			send winner to all nodes in rem-nbrs</span><br><span class="line">	round = <span class="number">3</span>:</span><br><span class="line">		<span class="keyword">if</span> status = loser then</span><br><span class="line">			send winner to all nodes in rem-nbrs</span><br><span class="line">endcase</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>状态转换算法</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> awake then</span><br><span class="line"><span class="keyword">case</span></span><br><span class="line">	round = <span class="number">1</span>:</span><br><span class="line">		<span class="keyword">if</span> val &gt; v in all incoming values v then status := winner</span><br><span class="line">	round = <span class="number">2</span>:</span><br><span class="line">		<span class="keyword">if</span> a winner message arrives then status := loser</span><br><span class="line">	round = <span class="number">3</span>:</span><br><span class="line">		<span class="keyword">if</span> status in &#123;winner,loser&#125; then awake:=<span class="keyword">false</span></span><br><span class="line">			rem-nbrs := rem-nbrs - &#123;j: a loser message from j&#125;</span><br><span class="line">endcase</span><br><span class="line">round := (round+<span class="number">1</span>) mod <span class="number">3</span></span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+</li>
+<li><p>算法图解</p>
+<ul>
+<li>初始状态，注意LubyMIS算法并不需要$uid$，图中的字母编号仅仅是为了方便图的说明，不是$uid$，初始时所有节点$awake$都是true，状态都是$unknown$，$val$任意值，统一初始化为0</li>
+</ul>
+<p><img src="/images/lubymis_ex1.png" alt="img"></p>
+<ul>
+<li><p>第一阶段结果示意图，每个阶段有三轮，这里只展示结果，橙色节点代表$winner$节点，蓝色节点代表$loser$节点，注意观察，不管蓝色节点还是橙色节点$awake$都是false，也就是它们已经结束不会再参与算法运行，可以看到已经只有a、k节点会进入下一阶段</p>
+<p><img src="/images/lubymis_ex2.png" alt="img"></p>
+</li>
+<li><p>第二阶段结果示意图，经过第二轮，重新生成随机数，所有节点$awake$都是false，全部节点都已经运行结束，因此该图的最大独立集为$(a,c,e,h,k)$</p>
+<p><img src="/images/lubymis_ex3.png" alt="img"></p>
+</li>
+</ul>
+</li>
+<li><p>随机化算法作用：主要作用是打破对称性，是一个非常常用的小技巧，比如在解决活锁，在raft协议选举失败时为了避免所有节点同时发起选举，失败后都会随机等待一段时间后发起选举</p>
+</li>
+</ul>
+<h4 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h4><p>本文主要讲了分布式同步网络中的BFS、最短路径、MST问题，接下来的文章将简单介绍分布式同步网络另一个关键性问题，一致性问题</p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/分布式系统/" rel="tag"># 分布式系统</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2020/08/10/分布式系统-2-同步网络Leader选举算法/" rel="next" title="分布式系统-2-同步网络Leader选举算法">
+                <i class="fa fa-chevron-left"></i> 分布式系统-2-同步网络Leader选举算法
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Overview
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">ikan</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">31</span>
+                  <span class="site-state-item-name">posts</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">9</span>
+                  <span class="site-state-item-name">categories</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">14</span>
+                  <span class="site-state-item-name">tags</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-4"><a class="nav-link" href="#引言"><span class="nav-number">1.</span> <span class="nav-text">引言</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#广度优先搜索"><span class="nav-number">2.</span> <span class="nav-text">广度优先搜索</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#SynchBFS算法"><span class="nav-number">2.1.</span> <span class="nav-text">SynchBFS算法</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#最短路径"><span class="nav-number">3.</span> <span class="nav-text">最短路径</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#BellmanFord算法"><span class="nav-number">3.1.</span> <span class="nav-text">BellmanFord算法</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#最小生成树"><span class="nav-number">4.</span> <span class="nav-text">最小生成树</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#SynchGHS算法"><span class="nav-number">4.1.</span> <span class="nav-text">SynchGHS算法</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#最大独立集-MIS"><span class="nav-number">5.</span> <span class="nav-text">最大独立集(MIS)</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#LubyMIS算法"><span class="nav-number">5.1.</span> <span class="nav-text">LubyMIS算法</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#总结"><span class="nav-number">6.</span> <span class="nav-text">总结</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">ikan</span>
+
+  
+</div>
+
+
+  <div class="powered-by">Powered by <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a></div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">Theme &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+  
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+        tex2jax: {
+          inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+          processEscapes: true,
+          skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+        }
+      });
+    </script>
+
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for (i=0; i < all.length; i += 1) {
+          all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+      });
+    </script>
+    <script type="text/javascript" src="//cdn.bootcss.com/mathjax/2.7.1/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+  
+
+
+  
+
+  
+
+</body>
+</html>
