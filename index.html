@@ -249,6 +249,157 @@
   
   
   <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2020/08/19/分布式系统-4-同步网络一致性算法/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="ikan">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="IkanのBolg">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2020/08/19/分布式系统-4-同步网络一致性算法/" itemprop="url">分布式系统-4-同步网络一致性算法</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2020-08-19T22:04:52+08:00">
+                2020-08-19
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/分布式系统/" itemprop="url" rel="index">
+                    <span itemprop="name">分布式系统</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          <h4 id="引言"><a href="#引言" class="headerlink" title="引言"></a>引言</h4><p>上一篇文章讲了分布式同步网络算法中的BFS、最短路径、MST和MIS算法，这一篇文章将会将分布式系统中一个非常重要的问题-一致性。在单节点的环境中，一致性问题是比较容易解决的，像单节点的数据库，因为只有一个节点，也就不存在数据不一致的说法。</p>
+<p>因为机器总会有概率出故障，如果仅仅是单节点应用，一旦机器发生故障，那么服务将不可用。为了提供高可用的应用，多节点部署应用成为一种解决方案，但是多节点部署应用也引发了一些问题，比如节点故障依然存在；并且因为多节点，导致节点间需要通信，因此系统存在通信故障，如果机器不是在自己机房内，可能要有Byzantine故障，这些问题都可能导致数据一致性问题。比如，在分布式数据库事务中，假设两个进程a，b需要通信来达成是一致（提交或者回滚），因为通信故障，a收到b的提交请求，但是b没有收到a的请求，此时a可能会提交，而b可能回滚，那么就出现数据不一致。</p>
+<p>接下来的文章的结构是，第一部分是介绍在分布式同步网络中，如何在通信故障下解决一致性问题；第二部分介绍，如何在节点停止故障下解决一致性问题；第三部分介绍，如何在节点出现Byzantine故障下解决一致性问题。</p>
+<h4 id="通信故障下一致性"><a href="#通信故障下一致性" class="headerlink" title="通信故障下一致性"></a>通信故障下一致性</h4><h5 id="协同攻击问题"><a href="#协同攻击问题" class="headerlink" title="协同攻击问题"></a>协同攻击问题</h5><ul>
+<li>定义：几个将军协同攻击问题，所有将军通过信使互相传递消息，经过图的直径轮后，消息会传递给各个将军，最后决议是否发起攻击，但是如果有消息丢失，那么将军无法达成一致。在计算机中，比如分布式数据库事务</li>
+</ul>
+          <!--noindex-->
+          <div class="post-button text-center">
+            <a class="btn" href="/2020/08/19/分布式系统-4-同步网络一致性算法/#more" rel="contents">
+              Read more &raquo;
+            </a>
+          </div>
+          <!--/noindex-->
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="http://yoursite.com/2020/08/15/分布式系统-3-同步网络算法/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1605,156 +1756,6 @@
 
 
     
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2020/06/20/操作系统笔记-9-文件系统/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="ikan">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="IkanのBolg">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2020/06/20/操作系统笔记-9-文件系统/" itemprop="url">操作系统笔记-9-文件系统</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">Posted on</span>
-              
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2020-06-20T08:23:47+08:00">
-                2020-06-20
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">In</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/OS学习笔记/" itemprop="url" rel="index">
-                    <span itemprop="name">OS学习笔记</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          <h4 id="引言"><a href="#引言" class="headerlink" title="引言"></a>引言</h4><p>之前已经学习过数据在内存中是如何表示，如何存储，但是这些存储在PC断电后数据便消失。因此我们需要一个可以持久化存储并且容量远远大于内存的结构，这一篇我们将学习，文件是如何被组织和操作的，这是一个操作系统重要的部分-<strong>文件系统</strong>。文章的结构主要分为文件和目录的概念、文件系统的实现、文件系统的管理和优化、最后是例子。</p>
-<h4 id="文件和目录基本概念"><a href="#文件和目录基本概念" class="headerlink" title="文件和目录基本概念"></a>文件和目录基本概念</h4><h5 id="文件"><a href="#文件" class="headerlink" title="文件"></a>文件</h5><ul>
-<li><p>文件定义：文件是一种抽象的概念，它提供了一种方法可以将信息存储到硬盘并且随后读取回来。</p>
-</li>
-<li><p>文件命名：文件命名规则是通常分为两部分，小数点后的叫文件扩展名（不是必须的），小数点前的叫文件名，某些操作系统有字符数限制（学完文件的组织结构就知道为什么了），某些系统区分大小写。</p>
-          <!--noindex-->
-          <div class="post-button text-center">
-            <a class="btn" href="/2020/06/20/操作系统笔记-9-文件系统/#more" rel="contents">
-              Read more &raquo;
-            </a>
-          </div>
-          <!--/noindex-->
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
   </section>
 
   
@@ -1805,7 +1806,7 @@
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">31</span>
+                  <span class="site-state-item-count">32</span>
                   <span class="site-state-item-name">posts</span>
                 </a>
               </div>
