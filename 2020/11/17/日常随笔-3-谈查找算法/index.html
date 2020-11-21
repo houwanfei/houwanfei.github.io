@@ -1,0 +1,881 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="随笔," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="引言计算机处理数据无外乎是两种方式，一种是查询，第二种是修改。本文主要讨论的是查询这一操作，在查询数据时，我们最容易想到的方式那就是顺序查找，就遍历一遍呗，直到找到匹配的数据，那么时间复杂度是$O(n)$，当数据规模不大时，这么查找也没啥问题，但是一旦数据规模较大时，那么查询的时间就会变得很慢。这时候就有一些高效算法出来了，比如hash、内存中二分查找、存储引擎中的B+Tree，本文就详细介绍一下">
+<meta name="keywords" content="随笔">
+<meta property="og:type" content="article">
+<meta property="og:title" content="日常随笔-3-谈查找算法">
+<meta property="og:url" content="http://yoursite.com/2020/11/17/日常随笔-3-谈查找算法/index.html">
+<meta property="og:site_name" content="IkanのBolg">
+<meta property="og:description" content="引言计算机处理数据无外乎是两种方式，一种是查询，第二种是修改。本文主要讨论的是查询这一操作，在查询数据时，我们最容易想到的方式那就是顺序查找，就遍历一遍呗，直到找到匹配的数据，那么时间复杂度是$O(n)$，当数据规模不大时，这么查找也没啥问题，但是一旦数据规模较大时，那么查询的时间就会变得很慢。这时候就有一些高效算法出来了，比如hash、内存中二分查找、存储引擎中的B+Tree，本文就详细介绍一下">
+<meta property="og:locale" content="default">
+<meta property="og:image" content="http://yoursite.com/images/hashmap.png">
+<meta property="og:image" content="http://yoursite.com/images/binary_search.png">
+<meta property="og:image" content="http://yoursite.com/images/skiplist.png">
+<meta property="og:image" content="http://yoursite.com/images/B+tree.png">
+<meta property="og:image" content="http://yoursite.com/images/qrcode.jpg">
+<meta property="og:updated_time" content="2020-11-21T13:38:14.750Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="日常随笔-3-谈查找算法">
+<meta name="twitter:description" content="引言计算机处理数据无外乎是两种方式，一种是查询，第二种是修改。本文主要讨论的是查询这一操作，在查询数据时，我们最容易想到的方式那就是顺序查找，就遍历一遍呗，直到找到匹配的数据，那么时间复杂度是$O(n)$，当数据规模不大时，这么查找也没啥问题，但是一旦数据规模较大时，那么查询的时间就会变得很慢。这时候就有一些高效算法出来了，比如hash、内存中二分查找、存储引擎中的B+Tree，本文就详细介绍一下">
+<meta name="twitter:image" content="http://yoursite.com/images/hashmap.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: 'Author'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2020/11/17/日常随笔-3-谈查找算法/"/>
+
+
+
+
+
+  <title>日常随笔-3-谈查找算法 | IkanのBolg</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="default">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">IkanのBolg</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">只想安安静静撸代码</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            Home
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            Tags
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            Categories
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            Archives
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2020/11/17/日常随笔-3-谈查找算法/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="ikan">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="IkanのBolg">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">日常随笔-3-谈查找算法</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2020-11-17T22:37:58+08:00">
+                2020-11-17
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/随笔/" itemprop="url" rel="index">
+                    <span itemprop="name">随笔</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h4 id="引言"><a href="#引言" class="headerlink" title="引言"></a>引言</h4><p>计算机处理数据无外乎是两种方式，一种是查询，第二种是修改。本文主要讨论的是查询这一操作，在查询数据时，我们最容易想到的方式那就是顺序查找，就遍历一遍呗，直到找到匹配的数据，那么时间复杂度是$O(n)$，当数据规模不大时，这么查找也没啥问题，但是一旦数据规模较大时，那么查询的时间就会变得很慢。这时候就有一些高效算法出来了，比如hash、内存中二分查找、存储引擎中的B+Tree，本文就详细介绍一下这些算法</p>
+<a id="more"></a>
+<h4 id="查找算法"><a href="#查找算法" class="headerlink" title="查找算法"></a>查找算法</h4><h5 id="Hash表"><a href="#Hash表" class="headerlink" title="Hash表"></a>Hash表</h5><ul>
+<li><p>定义：hash表又叫散列表，通过一个hash函数把任意长度的输入转换为相同长度的输出，通常输出为数值类型，然后通过输出数值做一些操作映射到对应的数组中。查询的时候就是查询的值通过hash函数转换为输出的数值，然后通过这个值找到在数组中对应的下标，从而达到快速查找的目的</p>
+</li>
+<li><p>hash冲突</p>
+<p>从上边可以看到hash表的核心就是hash函数的选择，如果hash函数选择的不好，会导致大量的hash冲突，简单举个例子，如果让你来设计一个hash函数你会怎么设计呢？你可能会设计</p>
+<ul>
+<li>输入是个数值，那就直接输出该数值即可</li>
+<li>输入是个字符串，那么我们可以累加字符的值，将和作为输出，比如abc，它们的hashcode为294，细心的你可能已经发现这个算法很容易发生冲突，比如acb、bac、bca的hashcode都是294，为什么会这样呢？是因为我们的hash算法只考虑了字符的数量，而没有考虑字符的位置信息，如果加入位置信息就可以更好的散列，减少冲突。当然本文的目的不是讲解hash函数算法，这里只是想介绍一下hash表的使用过程。</li>
+</ul>
+<p>即使hash函数选择的再好，也不能消除冲突，因为hash表建立在数组之上，是利用了hashcode的操作映射到对应的hash槽中也就是数组元素通过数组的下标随机访问来实现快速查询，因为数组不可能无限大，冲突无法避免。</p>
+<ul>
+<li><p>解决hash冲突</p>
+<ul>
+<li><p>拉链法，这种方法被广泛使用，它的原理是发生hash冲突时，采用链表来存储冲突的元素，如下图</p>
+<p><img src="/images/hashmap.png" alt="img"></p>
+</li>
+<li><p>开放地址法，采用一个数组来存储，当发生冲突时，探测其他位置，比如线性探测，当发生hash冲突时探测后一个位置是否可以用</p>
+<script type="math/tex; mode=display">hash(key) = (hash_1(key) + i) \%n</script></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>特点：适合用于精确查询，不适合范围查询</p>
+</li>
+<li><p>应用</p>
+<ul>
+<li>key-value键值对存储和查询，适用于缓存，提升查询速度</li>
+<li>Mysql中的hash索引</li>
+<li>Java中的hashmap</li>
+<li>算法设计时，需要用到在$O(1)$时间复杂度内查询，比如DP的备忘录，two sum</li>
+</ul>
+</li>
+</ul>
+<h5 id="二分查找"><a href="#二分查找" class="headerlink" title="二分查找"></a>二分查找</h5><ul>
+<li><p>原理：二分查找针对的数据是有序的数据，假设数据是升序的，每次用中间值和目标值对比，如果和目标值相同，那么返回；如果中间值小于目标值，那么丢弃左区间，查询右区间；如果中间值大于目标值，那么丢弃右区间，查询左区间</p>
+</li>
+<li><p>查找时间复杂度：$O(\log_2n)$，推导过程</p>
+<ol>
+<li><p>从原理中了解到每次查找都排除一半，因此第一次</p>
+<script type="math/tex; mode=display">residue = \frac{n}{2^1}</script></li>
+<li><p>第二次</p>
+<script type="math/tex; mode=display">residue = \frac{n}{2^2}</script></li>
+<li><p>当最后剩余数据为1个时，那么就停止了</p>
+<script type="math/tex; mode=display">residue = \frac{n}{2^m}</script><p>当residue=1，那么$\frac{n}{2^m}=1$，那么$m=\log_2n$，所以查询时间复杂度为$O(\log_2n)$</p>
+</li>
+</ol>
+</li>
+<li><p>特点：适用于有序的数组查询</p>
+</li>
+<li><p>应用</p>
+<ul>
+<li>有序数组查询目标值</li>
+</ul>
+</li>
+</ul>
+<h5 id="二叉查找树"><a href="#二叉查找树" class="headerlink" title="二叉查找树"></a>二叉查找树</h5><ul>
+<li><p>原理：最简单和最容易想到的是顺序查找，其次想到的是有序的数据可以用二分查找，有些数据是有序，但是它需要频繁的插入和删除，这个时候数组就不合适。我们知道链表可以高效的插入和删除，但是链表不支持二分查找，因此诞生了二分查找树，结构如下图</p>
+<p><img src="/images/binary_search.png" alt="img"></p>
+</li>
+<li><p>查找时间复杂度：$O(\log_2n)$，和二分查找一样，但是插入的顺序可能导致树结构退化成链表，可以用平衡二分查找树来避免，比如红黑树</p>
+</li>
+<li><p>特点：适用于有序的数据查询，并且插入和删除频繁，一般用于内存中做查找</p>
+</li>
+<li><p>应用</p>
+<ul>
+<li>Linux线程调度器</li>
+<li>epoll内核维护监听的句柄</li>
+<li>Java的hashmap中当节点一个桶的结果数超过8时会转换成红黑树结构</li>
+</ul>
+</li>
+</ul>
+<h5 id="SkipList"><a href="#SkipList" class="headerlink" title="SkipList"></a>SkipList</h5><ul>
+<li><p>原理：虽然红黑树是一种平衡树，在查找性能是比较高，但是删除和插入节点时因为要考虑的情况比较多，实现还是不简单，skiplist可以提供近似的$O(log_2n)$的查找时间复杂度，并且高效的支持范围查询，并且实现比较简单，接下来我们看一下skiplist的结构，当插入一个节点时，我们是以概率的方式来决定是否需要向上延伸，假设概率为p</p>
+<p><img src="/images/skiplist.png" alt="img"></p>
+</li>
+<li><p>最大高度推导，我们知道当该层节点数最多为1时肯定是最上层</p>
+<ol>
+<li>一个节点在l层有节点的概率为$p^{l-1}$</li>
+<li>在l的节点数期望为$n*p^{l-1}$</li>
+<li>所以l层为最上层的条件需要满足$n*p^{l-1} = 1$，那么$n=(\frac{1}{p})^{l-1}$，$l=\log_{(\frac{1}{p})}n+1 = \log_{(\frac{1}{p})}n$</li>
+</ol>
+</li>
+<li><p>查找时间复杂度推导，可以采用逆向思考的方式来，从目标值出发，要经过多长路径可以到达最长层，假设用C(l)代表从0层爬到l层的经过路径的期望，在任意一个节点，有p的概率向上移动，有1-p的概率向左移动</p>
+<ol>
+<li><p>已知$C(0)=0$</p>
+</li>
+<li><p>根据上边的描述，那么到达l层有两种可能，从下层或者同层右边</p>
+<script type="math/tex; mode=display">C(l) = p(1+C(l-1)) + (1-p)(1+C(l)) = C(l–1) + 1/p</script><p>可以看到是一个等差数列，所以</p>
+<script type="math/tex; mode=display">C(l) = \frac{l}{p}</script><p>将上边求得的l带入式子，则查找时间复杂度为$\frac{\log_{(\frac{1}{p})}n}{p}$，将p=1/2带入式中化简为$O(logn)$</p>
+</li>
+</ol>
+</li>
+<li><p>特点</p>
+<ul>
+<li>基于概率模型</li>
+<li>实现比红黑树简单的多，并且提供了和红黑树相似的查找时间复杂度</li>
+<li>可以提供高效的范围查询，只需要找到开始节点然后遍历就可以完成</li>
+</ul>
+</li>
+<li><p>应用</p>
+<ul>
+<li>redis中使用了skiplist来实现zset</li>
+<li>java中使用了skiplist实现并发hashmap</li>
+</ul>
+</li>
+</ul>
+<h5 id="B-Tree"><a href="#B-Tree" class="headerlink" title="B+Tree"></a>B+Tree</h5><ul>
+<li><p>原理：B+Tree也是一个树型的查找数据结构，和二叉查找树类似，但是B+Tree是多叉树，一个节点内有多个key，我们称为度，其结构如下</p>
+<p><img src="/images/B+tree.png" alt="img"></p>
+</li>
+<li><p>查找时间复杂度：先放结论，$O(log_2n)$，接下来是推导</p>
+<ol>
+<li><p>假设有n个key，每个节点可以存放m个可以，那么我们很容易推导到树的高度为$log_mn$</p>
+</li>
+<li><p>每个节点内的查询复杂度是什么呢，我们知道节点内的key是有序的，因此可以用二分查找，所以节点内查询时间复杂度为$log_2m$</p>
+</li>
+<li><p>因此B+Tree查找时间复杂度是$高度<em>每层查找复杂度$，因此$log_2m</em>log_mn$，化简</p>
+<script type="math/tex; mode=display">log_2m*log_mn = log_2m*\frac{log_2n}{log_2m} = log_2n</script></li>
+</ol>
+</li>
+<li><p>特点：因为其一个节点存储多个key是多叉树，因此具有相同数量key的B+Tree比二叉查找树的高度低得多，这个有什么作用呢？其实有很大的用处，当数据需要持久化存储时，那么必须存在磁盘上，我们知道访问磁盘是很慢的，我们在查找数据的过程中必须要减少磁盘的io次数，而二叉查找树因为高度较高，因此需要更多的磁盘io，所以不适合用来在磁盘上构建查找的数据结构，B+Tree就比较适合</p>
+</li>
+<li><p>应用</p>
+<ul>
+<li>各类数据库的索引，比如MySQL，默认B+tree的节点空间为16kb，64位系统指针是8byte，如果我们假设关键字key为long类型占用8个字节，那么我们可以估算一个节点可以存放的key大约为1024个，那么假设B+tree高度为3，那么可以存储的key为大约为10亿</li>
+</ul>
+</li>
+</ul>
+<h4 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h4><p>本文大概讲了一些用于查找的算法，因为是想到什么写什么，肯定还有很多是没有想到的，欢迎大家补充。大家也可以关注我的公众号，一起学习</p>
+<p><img src="/images/qrcode.jpg" alt="img"></p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/随笔/" rel="tag"># 随笔</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2020/11/13/日常随笔-2-谈缓存/" rel="next" title="日常随笔-2-谈缓存">
+                <i class="fa fa-chevron-left"></i> 日常随笔-2-谈缓存
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Overview
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">ikan</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">34</span>
+                  <span class="site-state-item-name">posts</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">11</span>
+                  <span class="site-state-item-name">categories</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">16</span>
+                  <span class="site-state-item-name">tags</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-4"><a class="nav-link" href="#引言"><span class="nav-number">1.</span> <span class="nav-text">引言</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#查找算法"><span class="nav-number">2.</span> <span class="nav-text">查找算法</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#Hash表"><span class="nav-number">2.1.</span> <span class="nav-text">Hash表</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#二分查找"><span class="nav-number">2.2.</span> <span class="nav-text">二分查找</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#二叉查找树"><span class="nav-number">2.3.</span> <span class="nav-text">二叉查找树</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#SkipList"><span class="nav-number">2.4.</span> <span class="nav-text">SkipList</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#B-Tree"><span class="nav-number">2.5.</span> <span class="nav-text">B+Tree</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#总结"><span class="nav-number">3.</span> <span class="nav-text">总结</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">ikan</span>
+
+  
+</div>
+
+
+  <div class="powered-by">Powered by <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a></div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">Theme &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+  
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+        tex2jax: {
+          inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+          processEscapes: true,
+          skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+        }
+      });
+    </script>
+
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for (i=0; i < all.length; i += 1) {
+          all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+      });
+    </script>
+    <script type="text/javascript" src="//cdn.bootcss.com/mathjax/2.7.1/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+  
+
+
+  
+
+  
+
+</body>
+</html>
